@@ -36,7 +36,11 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/config_app.h.cmake ${CMAKE_BINARY
 
 add_subdirectory(src)
 
-set(SOURCE_FILES src/WTEdu.cpp src/editor.h src/editor.cpp)
+
+file(GLOB SOURCE_FILES
+    src/*.cpp
+    src/*.h
+)
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(
     ${CMAKE_PROJECT_NAME}

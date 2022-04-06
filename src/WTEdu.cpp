@@ -14,8 +14,7 @@
 #include <SDL_opengl.h>
 #endif
 
-#include <zep.h>
-#include "editor.h"
+#include "window.cpp"
 
 // Main code
 int main(int, char**)
@@ -99,6 +98,8 @@ int main(int, char**)
     bool z_init = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    Window my_window;
+
     // Main loop
     bool done = false;
     while (!done)
@@ -123,21 +124,9 @@ int main(int, char**)
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        if (!z_init)
-        {
-            // Called once the fonts/device is guaranteed setup
-            zep_init(Zep::NVec2f(1.0f, 1.0f));
-            zep_load(Zep::ZepPath("..") / "src" / "WTEdu.cpp");
-            std::cerr << (Zep::ZepPath("..") / "src" / "WTEdu.cpp").c_str() << std::endl;
-            z_init = true;
-        }
-
-        // Required for CTRL+P and flashing cursor.
-        zep_update();
-
-        // Just show it
-        static Zep::NVec2i size = Zep::NVec2i(640, 480);
-        zep_show(size);
+        my_window.init();
+        my_window.update();
+        my_window.show(nullptr);
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
@@ -186,7 +175,7 @@ int main(int, char**)
     }
 
     // Cleanup
-    zep_destroy();
+    my_window.destroy();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
