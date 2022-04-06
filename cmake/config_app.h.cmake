@@ -2,5 +2,3 @@
 #cmakedefine APPLICATION_VERSION "${APPLICATION_VERSION}"
 #cmakedefine APP_ROOT "${APP_ROOT}"
 #cmakedefine ZEP_SINGLE_HEADER "${ZEP_SINGLE_HEADER}"
-
-

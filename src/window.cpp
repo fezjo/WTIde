@@ -18,6 +18,8 @@ class Window {
             return;
         initialized = true;
         flags = ImGuiWindowFlags_NoDecoration |
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoBringToFrontOnFocus |
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoResize |
             ImGuiWindowFlags_NoSavedSettings;
@@ -26,7 +28,7 @@ class Window {
         zep_init(Zep::NVec2f(1.0f, 1.0f));
         zep_load(Zep::ZepPath("..") / "src" / "WTEdu.cpp");
     }
-    
+
     void update() {
         zep_update();
     }
@@ -38,10 +40,13 @@ class Window {
         ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
         ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
 
-        if (ImGui::Begin("Example: Fullscreen window", p_open, flags)) {
-            static Zep::NVec2i size = Zep::NVec2i(640, 480);
-            zep_show(size);
+        if (!ImGui::Begin("Main", p_open, flags)) {
+            ImGui::End();
+            return;
         }
+
+        static Zep::NVec2i size = Zep::NVec2i(640, 480);
+        zep_show(size);
         ImGui::End();
 
     }

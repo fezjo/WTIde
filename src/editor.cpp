@@ -9,7 +9,7 @@
 #include <filesystem>
 #include "config_app.h"
 #ifdef ZEP_CONSOLE
-#include <zep\imgui\console_imgui.h>
+#include <zep/imgui/console_imgui.h>
 #endif
 namespace fs = std::filesystem;
 
@@ -81,7 +81,8 @@ std::shared_ptr<ZepWrapper> spZep;
 void zep_init(const Zep::NVec2f& pixelScale)
 {
 #ifdef ZEP_CONSOLE
-    spZep = std::make_shared<ImGui::ZepConsole>(Zep::ZepPath(APP_ROOT));
+    Zep::ZepPath path(APP_ROOT);
+    spZep = std::make_shared<ImGui::ZepConsole>(path);
 #else
     // Initialize the editor and watch for changes
     spZep = std::make_shared<ZepWrapper>(APP_ROOT, Zep::NVec2f(pixelScale.x, pixelScale.y), [](std::shared_ptr<ZepMessage> spMessage) -> void {
