@@ -1,4 +1,5 @@
 #include "filetree.h"
+#include "tinydir.h"
 
 FileTree::FileTree() {
     pluginType = PT_FileTree;

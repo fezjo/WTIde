@@ -10,53 +10,30 @@ project(WTEdu LANGUAGES C CXX VERSION 0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} -g)
+set(TARGET_NAME ${CMAKE_PROJECT_NAME})
 
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 
-set(IMGUI_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui)
-file(GLOB IMGUI_SOURCES
-    ${IMGUI_PATH}/*.cpp
-    ${IMGUI_PATH}/backends/imgui_impl_sdl.cpp
-    ${IMGUI_PATH}/backends/imgui_impl_opengl3.cpp
-)
-add_library("ImGui" STATIC ${IMGUI_SOURCES})
-target_link_libraries(
-    ImGui
-    PRIVATE
-        SDL2::SDL2
-        OpenGL::OpenGL
-)
-target_include_directories("ImGui" PUBLIC ${IMGUI_PATH} ${IMGUI_PATH}/backends)
+add_executable(${TARGET_NAME} "")
 
-add_definitions(-DZEP_FEATURE_CPP_FILE_SYSTEM)
-add_subdirectory(lib/zep/src)
-set(APP_ROOT ${CMAKE_CURRENT_LIST_DIR})
-configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/config_app.h.cmake ${CMAKE_BINARY_DIR}/config_app.h)
+add_subdirectory(lib)
 
 add_subdirectory(src)
 
-
-file(GLOB SOURCE_FILES
-    src/*.cpp
-    src/*.h
-    src/**/*.cpp
-    src/**/*.h
-)
-message(${SOURCE_FILES})
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(
-    ${CMAKE_PROJECT_NAME}
+    ${TARGET_NAME}
     PRIVATE
         ${CMAKE_BINARY_DIR}
         lib/zep/include
 )
 target_link_libraries(
-    ${CMAKE_PROJECT_NAME}
+    ${TARGET_NAME}
     PRIVATE
         SDL2::SDL2
         OpenGL::OpenGL
         ImGui
         Zep::Zep
+        tinydir
         stdc++fs
 )
