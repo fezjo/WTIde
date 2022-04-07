@@ -1,7 +1,7 @@
 #include <imgui.h>
 #include <zep.h>
 #include "utils.h"
-#include "editor.h"
+#include "plugins/editor.h"
 
 class Window {
     bool initialized = false;

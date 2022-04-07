@@ -135,12 +135,12 @@ void ZepWrapper::show(const Zep::NVec2i& displaySize)
         zepEditor.HandleInput();
     }
 
-    // TODO: A Better solution for this; I think the audio graph is creating a new window and stealing focus
-    static int focus_count = 0;
-    if (focus_count++ < 2)
-    {
-        ImGui::SetWindowFocus();
-    }
+    // // TODO: A Better solution for this; I think the audio graph is creating a new window and stealing focus
+    // static int focus_count = 0;
+    // if (focus_count++ < 2)
+    // {
+    //     ImGui::SetWindowFocus();
+    // }
     ImGui::End();
 }
 

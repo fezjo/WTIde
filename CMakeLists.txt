@@ -40,7 +40,10 @@ add_subdirectory(src)
 file(GLOB SOURCE_FILES
     src/*.cpp
     src/*.h
+    src/**/*.cpp
+    src/**/*.h
 )
+message(${SOURCE_FILES})
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(
     ${CMAKE_PROJECT_NAME}

@@ -3,7 +3,7 @@
 #include <functional>
 #include <filesystem>
 #include <zep.h>
-#include "utils.h"
+#include "../utils.h"
 
 namespace fs = std::filesystem;
 
