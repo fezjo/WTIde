@@ -92,6 +92,9 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
+	auto fontPath = fs::path("..") / "resources/fonts" / "Roboto Mono Medium Nerd Font Complete Mono.ttf";
+    io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16);
+
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
