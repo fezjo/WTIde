@@ -14,6 +14,7 @@
 #include <SDL_opengl.h>
 #endif
 
+#include "utils.h"
 #include "app.cpp"
 
 // Main code
@@ -92,7 +93,7 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
-	auto fontPath = fs::path("..") / "resources/fonts" / "Roboto Mono Medium Nerd Font Complete Mono.ttf";
+	auto fontPath = fs::path("..") / "resources/fonts" / "Roboto Mono Nerd Font Complete Mono.ttf";
     io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16);
 
     // Our state

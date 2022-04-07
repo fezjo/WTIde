@@ -4,7 +4,6 @@
 
 #include "editor.h"
 #include "config_app.h"
-namespace fs = std::filesystem;
 
 using namespace Zep;
 
@@ -38,11 +37,10 @@ ZepWrapper::ZepWrapper(
     const fs::path& root_path,
     const Zep::NVec2f& pixelScale,
     std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB,
-    uint _id
+    imid_t _id
 ) :
     zepEditor(Zep::ZepPath(root_path.string()), pixelScale),
-    Callback(fnCommandCB),
-    id(_id)
+    Callback(fnCommandCB)
 {
     zepEditor.RegisterCallback(this);
 }
@@ -101,10 +99,10 @@ void ZepWrapper::load(const Zep::ZepPath& file)
     auto pBuffer = GetEditor().InitWithFileOrDir(file);
 }
 
-void ZepWrapper::show(const Zep::NVec2i& displaySize)
+void ZepWrapper::show()
 {
     bool show = true;
-    ImGui::SetNextWindowSize(ImVec2(displaySize.x, displaySize.y), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
         ("Zep##" + std::to_string(getId())).c_str(),
         &show,
@@ -143,5 +141,3 @@ void ZepWrapper::show(const Zep::NVec2i& displaySize)
     // }
     ImGui::End();
 }
-
-uint ZepWrapper::getId() { return id; }

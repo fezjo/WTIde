@@ -25,11 +25,16 @@ class Window {
             ImGuiWindowFlags_NoSavedSettings;
 
         // Called once the fonts/device is guaranteed setup
-        zepWrappers.push_back(ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f)));
-        zepWrappers.back()->load(Zep::ZepPath("..") / "src" / "WTEdu.cpp");
-        zepWrappers.push_back(ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f)));
-        zepWrappers.back()->load(Zep::ZepPath("..") / "src" / "editor.cpp");
-        zepWrappers.back()->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
+        ImVec2 size = ImVec2(640, 480);
+        for(int i = 0; i < 2; ++i) {
+            ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
+            zw->displaySize = size;
+            zepWrappers.push_back(zw);
+        }
+
+        zepWrappers[0]->load(Zep::ZepPath("..") / "src" / "WTEdu.cpp");
+        zepWrappers[1]->load(Zep::ZepPath("..") / "src" / "editor.cpp");
+        zepWrappers[1]->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
     }
 
     void update() {
@@ -49,9 +54,8 @@ class Window {
             return;
         }
 
-        static Zep::NVec2i size = Zep::NVec2i(640, 480);
         for(auto zw: zepWrappers)
-            zw->show(size);
+            zw->show();
         ImGui::End();
 
     }
