@@ -5,7 +5,7 @@
 #include "../utils.h"
 #include "plugin.h"
 
-class ZepWrapper : public IPlugin, Zep::IZepComponent {
+class ZepWrapper : public IPlugin, public Zep::IZepComponent {
     Zep::ZepEditor_ImGui zepEditor;
     std::function<void(std::shared_ptr<Zep::ZepMessage>)> Callback;
 

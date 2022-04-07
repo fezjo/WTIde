@@ -1,16 +1,19 @@
 #include <imgui.h>
 #include <zep.h>
 #include "utils.h"
+#include "plugins/plugin.h"
 #include "plugins/editor.h"
+#include "plugins/filetree.h"
 
 class Window {
     bool initialized = false;
     ImGuiWindowFlags flags;
     std::vector<ZepWrapper*> zepWrappers;
+    FileTree ft;
+    std::vector<IPlugin*> plugins; 
 
     public:
     Window& get() {
-        
     }
 
     void init() {
@@ -30,16 +33,22 @@ class Window {
             ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
             zw->displaySize = size;
             zepWrappers.push_back(zw);
+            plugins.push_back(zw);
         }
 
         zepWrappers[0]->load(Zep::ZepPath("..") / "src" / "WTEdu.cpp");
         zepWrappers[1]->load(Zep::ZepPath("..") / "src" / "editor.cpp");
         zepWrappers[1]->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
+
+        ft = FileTree();
+        ft.displaySize = ImVec2(120, 640);
+        ft.setPath(fs::path("."));
+        plugins.push_back(&ft);
     }
 
     void update() {
-        for(auto zw: zepWrappers)
-            zw->update();
+        for(auto p: plugins)
+            p->update();
     }
 
     void show(bool *p_open) {
@@ -54,8 +63,8 @@ class Window {
             return;
         }
 
-        for(auto zw: zepWrappers)
-            zw->show();
+        for(auto p: plugins)
+            p->show();
         ImGui::End();
 
     }
@@ -66,5 +75,7 @@ class Window {
             free(zw);
         }
         zepWrappers.clear();
+        ft.destroy();
+        plugins.clear();
     }
 };

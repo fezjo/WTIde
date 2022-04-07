@@ -1,14 +1,15 @@
 #pragma once
 
+#include <imgui.h>
 #include "../utils.h"
 
 enum PluginType {
-    Editor,
-    FileTree,
-    Terminal,
-    Debugger,
-    Output,
-    Search
+    PT_Editor,
+    PT_FileTree,
+    PT_Terminal,
+    PT_Debugger,
+    PT_Output,
+    PT_Search
 };
 
 class IPlugin {

@@ -43,6 +43,7 @@ ZepWrapper::ZepWrapper(
     Callback(fnCommandCB)
 {
     zepEditor.RegisterCallback(this);
+    pluginType = PT_Editor;
 }
 
 Zep::ZepEditor& ZepWrapper::GetEditor() const

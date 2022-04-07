@@ -3,15 +3,15 @@
 #include "../utils.h"
 #include "plugin.h"
 
-class FileTree: IPlugin {
+class FileTree: public IPlugin {
 public:
     FileTree();
     void update() override;
     void show() override;
     void destroy() override;
-    
+
     fs::path getPath();
-    fs::path setPath();
+    fs::path setPath(fs::path path);
 private:
-    fs::path path;
+    fs::path cwd;
 };
