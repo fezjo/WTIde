@@ -1,4 +1,3 @@
-
 #if ZEP_SINGLE_HEADER == 1
 #define ZEP_SINGLE_HEADER_BUILD
 #endif
@@ -90,8 +89,6 @@ void ZepWrapper::update()
 {
     if(id == 0) {
     GetEditor().RefreshRequired();
-    std::cerr << &zepEditor << std::endl;
-
     }
 }
 
@@ -131,9 +128,9 @@ void ZepWrapper::show(const Zep::NVec2i& displaySize)
     max.y = min.y + max.y;
 
     zepEditor.SetDisplayRegion(Zep::NVec2f(min.x, min.y), Zep::NVec2f(max.x, max.y));
+    zepEditor.isFocused = ImGui::IsWindowFocused();
     zepEditor.Display();
-    bool zep_focused = ImGui::IsWindowFocused();
-    if (zep_focused)
+    if (zepEditor.isFocused)
     {
         zepEditor.HandleInput();
     }
