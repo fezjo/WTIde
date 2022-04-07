@@ -1,12 +1,12 @@
-
-#include "imgui.h"
-
+#include <imgui.h>
 #include <zep.h>
+#include "utils.h"
 #include "editor.h"
 
 class Window {
     bool initialized = false;
     ImGuiWindowFlags flags;
+    std::vector<ZepWrapper*> zepWrappers;
 
     public:
     Window& get() {
@@ -25,12 +25,16 @@ class Window {
             ImGuiWindowFlags_NoSavedSettings;
 
         // Called once the fonts/device is guaranteed setup
-        zep_init(Zep::NVec2f(1.0f, 1.0f));
-        zep_load(Zep::ZepPath("..") / "src" / "WTEdu.cpp");
+        zepWrappers.push_back(ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f)));
+        zepWrappers.back()->load(Zep::ZepPath("..") / "src" / "WTEdu.cpp");
+        zepWrappers.push_back(ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f)));
+        zepWrappers.back()->load(Zep::ZepPath("..") / "src" / "editor.cpp");
+        zepWrappers.back()->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
     }
 
     void update() {
-        zep_update();
+        for(auto zw: zepWrappers)
+            zw->update();
     }
 
     void show(bool *p_open) {
@@ -46,12 +50,17 @@ class Window {
         }
 
         static Zep::NVec2i size = Zep::NVec2i(640, 480);
-        zep_show(size);
+        for(auto zw: zepWrappers)
+            zw->show(size);
         ImGui::End();
 
     }
 
     void destroy() {
-        zep_destroy();
+        for(auto zw: zepWrappers) {
+            zw->destroy();
+            free(zw);
+        }
+        zepWrappers.clear();
     }
 };
