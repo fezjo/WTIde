@@ -14,7 +14,7 @@
 #include <SDL_opengl.h>
 #endif
 
-#include "window.cpp"
+#include "app.cpp"
 
 // Main code
 int main(int, char**)
