@@ -8,7 +8,7 @@ void FileTree::update() {
 
 }
 
-void updateSelection(std::string s, std::unordered_set<std::string> &selection) {
+void updateSelection(fs::path s, std::set<fs::path> &selection) {
     if (s.empty())
         return;
     std::cerr << s << std::endl;
@@ -34,7 +34,7 @@ void FileTree::showTree(
     fs::path path,
     ImGuiTreeNodeFlags base_flags,
     uint &node_i,
-    std::unordered_set<std::string> &selection
+    std::set<fs::path> &selection
 )
 {
     std::set<std::pair<bool, std::string>> entries;
@@ -44,7 +44,7 @@ void FileTree::showTree(
     ImGuiTreeNodeFlags node_flags = base_flags;
     if (selection.count(path))
         node_flags |= ImGuiTreeNodeFlags_Selected;
-    std::string node_clicked = "";
+    fs::path node_clicked;
 
     if (!node_i)
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
@@ -95,10 +95,38 @@ void FileTree::show() {
 
     if (ImGui::BeginMenuBar())
     {
-        ImGui::MenuItem(u8"ﱐ");
-        ImGui::MenuItem(u8"");
-        ImGui::MenuItem(u8"");
-        ImGui::MenuItem(u8"");
+        ImGui::BeginDisabled(selection.size() > 1);
+        {
+            fs::path target_path = selection.empty() ? cwd : *selection.begin();
+            if (ImGui::MenuItem(u8"ﱐ"))
+            {
+                std::cerr << "want to create file on " << target_path << std::endl;
+            }
+            if (ImGui::MenuItem(u8""))
+            {
+                std::cerr << "want to create directory on " << target_path << std::endl;
+                if (!fs::is_directory(target_path))
+                    target_path = target_path.parent_path();
+                fs::create_directory(target_path / "testdir");
+            }
+        }
+        ImGui::EndDisabled();
+        ImGui::BeginDisabled(selection.empty());
+        {
+            if (ImGui::MenuItem(u8""))
+            {
+                for (auto &p: selection) {
+                    std::cerr << "want to remove file " << p << std::endl;
+                    fs::remove_all(p);
+                }
+                selection.clear();
+            }
+        }
+        ImGui::EndDisabled();
+        if (ImGui::MenuItem(u8""))
+        {
+            std::cerr << "refresh " << std::endl;
+        }
         ImGui::EndMenuBar();
     }
     // auto min = ImGui::GetCursorScreenPos();

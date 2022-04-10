@@ -18,10 +18,10 @@ protected:
         fs::path path,
         ImGuiTreeNodeFlags base_flags,
         uint &node_i,
-        std::unordered_set<std::string> &selection
+        std::set<fs::path> &selection
     );
 
 private:
     fs::path cwd;
-    std::unordered_set<std::string> selection;
+    std::set<fs::path> selection;
 };
