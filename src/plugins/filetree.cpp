@@ -1,5 +1,4 @@
 #include "filetree.h"
-#include "tinydir.cpp"
 
 FileTree::FileTree() {
     pluginType = PT_FileTree;
@@ -18,7 +17,10 @@ void FileTree::showTree(
     std::unordered_set<std::string> &selection
 )
 {
-    auto td = TinyDir(path);
+    std::set<std::pair<bool, fs::path>> entries;
+    for(auto &e: fs::directory_iterator(fs::path(path)))
+        entries.insert({!e.is_directory(), e.path()});
+
     if (!node_i)
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     if (ImGui::TreeNodeEx((void*)(intptr_t)node_i, root_flags, "%s", name.c_str()))
@@ -26,23 +28,23 @@ void FileTree::showTree(
         std::string node_clicked = "";
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
             node_clicked = path;
-        for(auto f: td.listDir())
+        for(auto& [is_file, f]: entries)
         {
-            if (f.name[0] == '.' && (!f.name[1] || (f.name[1] == '.' && !f.name[2])))
-                continue;
+            std::string f_path = f.string();
+            std::string f_name = f.filename();
             node_i++;
             ImGuiTreeNodeFlags node_flags = base_flags;
-            if (selection.count(f.path))
+            if (selection.count(f_path))
                 node_flags |= ImGuiTreeNodeFlags_Selected;
-            if (f.is_dir)
-                FileTree::showTree(f.name, f.path, node_flags, base_flags, node_i, selection);
+            if (!is_file)
+                FileTree::showTree(f_name, f_path, node_flags, base_flags, node_i, selection);
             else
             {
                 node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-                ImGui::TreeNodeEx((void*)(intptr_t)node_i, node_flags, "%s", f.name);
+                ImGui::TreeNodeEx((void*)(intptr_t)node_i, node_flags, "%s", f_name.c_str());
             }
             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                node_clicked = f.path;
+                node_clicked = f_path;
         }
         if (!node_clicked.empty())
         {
