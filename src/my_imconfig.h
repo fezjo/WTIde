@@ -14,8 +14,8 @@
 
 #pragma once
 
-#define IMGUI_USER_CONFIG "my_imconfig.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_USE_WCHAR32
 
 //---- Define assertion handler. Defaults to calling assert().
 // If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.

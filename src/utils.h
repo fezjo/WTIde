@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdint>
 #include <filesystem>
+#include <unordered_set>
 
 namespace fs = std::filesystem;
 

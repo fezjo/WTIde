@@ -94,7 +94,8 @@ int main(int, char**)
     //IM_ASSERT(font != NULL);
 
 	auto fontPath = fs::path("..") / "resources/fonts" / "Roboto Mono Nerd Font Complete Mono.ttf";
-    io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16);
+    ImWchar glyph_ranges[] = { 1, 0x10FFFF, 0 };
+    io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16.0, NULL, glyph_ranges);
 
     // Our state
     bool show_demo_window = true;

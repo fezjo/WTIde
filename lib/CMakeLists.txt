@@ -19,6 +19,5 @@ set(APP_ROOT ${CMAKE_SOURCE_DIR})
 configure_file(${CMAKE_SOURCE_DIR}/cmake/config_app.h.cmake ${CMAKE_SOURCE_DIR}/config_app.h)
 
 set(TINYDIR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/tinydir)
-add_library(tinydir STATIC ${TINYDIR_PATH}/tinydir.h)
-target_include_directories("ImGui" PUBLIC ${TINYDIR_PATH})
-set_target_properties(tinydir PROPERTIES LINKER_LANGUAGE C)
+add_library(tinydir STATIC ${TINYDIR_PATH}/tinydir.h ${TINYDIR_PATH}/tinydir.cpp)
+target_include_directories(tinydir PUBLIC ${TINYDIR_PATH})
