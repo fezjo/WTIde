@@ -8,64 +8,76 @@ void FileTree::update() {
 
 }
 
+void updateSelection(std::string s, std::unordered_set<std::string> &selection) {
+    if (s.empty())
+        return;
+    std::cerr << s << std::endl;
+    if (ImGui::GetIO().KeyCtrl) // CTRL+click to toggle
+    {
+        if (selection.count(s))
+            selection.erase(s);
+        else
+            selection.insert(s);
+    }
+    else                        // Click to single-select
+    {
+        selection.clear();
+        selection.insert(s);
+    }
+}
+
+bool wasNodeSelected() {
+    return ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen();
+}
+
 void FileTree::showTree(
-    std::string name,
-    std::string path,
-    ImGuiTreeNodeFlags root_flags,
+    fs::path path,
     ImGuiTreeNodeFlags base_flags,
     uint &node_i,
     std::unordered_set<std::string> &selection
 )
 {
-    std::set<std::pair<bool, fs::path>> entries;
-    for(auto &e: fs::directory_iterator(fs::path(path)))
-        entries.insert({!e.is_directory(), e.path()});
+    std::set<std::pair<bool, std::string>> entries;
+    for(auto &e: fs::directory_iterator(path))
+        entries.insert({!e.is_directory(), e.path().filename()});
+
+    ImGuiTreeNodeFlags node_flags = base_flags;
+    if (selection.count(path))
+        node_flags |= ImGuiTreeNodeFlags_Selected;
+    std::string node_clicked = "";
 
     if (!node_i)
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNodeEx((void*)(intptr_t)node_i, root_flags, "%s", name.c_str()))
+    bool rootOpen = ImGui::TreeNodeEx((void*)(intptr_t)node_i, node_flags, "%s", path.filename().c_str());
+    if (wasNodeSelected())
+        node_clicked = path;
+    if (rootOpen)
     {
-        std::string node_clicked = "";
-        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-            node_clicked = path;
-        for(auto& [is_file, f]: entries)
+        for(auto& [is_file, name]: entries)
         {
-            std::string f_path = f.string();
-            std::string f_name = f.filename();
             node_i++;
-            ImGuiTreeNodeFlags node_flags = base_flags;
-            if (selection.count(f_path))
-                node_flags |= ImGuiTreeNodeFlags_Selected;
-            if (!is_file)
-                FileTree::showTree(f_name, f_path, node_flags, base_flags, node_i, selection);
-            else
+            fs::path f_path = path / name;
+            node_flags = base_flags;
+            if (is_file)
             {
                 node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-                ImGui::TreeNodeEx((void*)(intptr_t)node_i, node_flags, "%s", f_name.c_str());
+                if (selection.count(f_path))
+                    node_flags |= ImGuiTreeNodeFlags_Selected;
+                ImGui::TreeNodeEx((void*)(intptr_t)node_i, node_flags, "%s", name.c_str());
+                if (wasNodeSelected())
+                    node_clicked = f_path;
             }
-            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                node_clicked = f_path;
-        }
-        if (!node_clicked.empty())
-        {
-            std::cerr << node_clicked << std::endl;
-            // Update selection state
-            // (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
-            if (ImGui::GetIO().KeyCtrl) // CTRL+click to toggle
+            else
             {
-                if (selection.count(node_clicked))
-                    selection.erase(node_clicked);
-                else
-                    selection.insert(node_clicked);
-            }
-            else                        // Click to single-select
-            {
-                selection.clear();
-                selection.insert(node_clicked);
+                FileTree::showTree(f_path, base_flags, node_i, selection);
             }
         }
         ImGui::TreePop();
     }
+
+    // Update selection state
+    // (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
+    updateSelection(node_clicked, selection);
 }
 
 void FileTree::show() {
@@ -101,11 +113,9 @@ void FileTree::show() {
     // max.x = min.x + max.x;
     // max.y = min.y + max.y;
     
-    ImGuiTreeNodeFlags base_flags = 
-        ImGuiTreeNodeFlags_SpanAvailWidth;
     uint node_i = 0;
-    FileTree::showTree(cwd, cwd, base_flags, base_flags, node_i, selection);
-
+    FileTree::showTree(cwd, ImGuiTreeNodeFlags_SpanAvailWidth, node_i, selection);
+    
     ImGui::End();
 }
 

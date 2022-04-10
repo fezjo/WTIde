@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <tuple>
 #include <set>
 #include <unordered_set>

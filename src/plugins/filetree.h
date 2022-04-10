@@ -15,9 +15,7 @@ public:
 
 protected:
     static void showTree(
-        std::string name,
-        std::string path,
-        ImGuiTreeNodeFlags root_flags,
+        fs::path path,
         ImGuiTreeNodeFlags base_flags,
         uint &node_i,
         std::unordered_set<std::string> &selection
