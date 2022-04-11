@@ -16,7 +16,8 @@ struct FileTreeNode {
 
 class FileTree: public IPlugin {
 public:
-    FileTree();
+    FileTree() = default;
+    FileTree(std::function<void(fs::path)> _open_callback);
     void update() override;
     void show() override;
     void destroy() override;
@@ -25,11 +26,10 @@ public:
     fs::path setPath(fs::path path);
 
 protected:
-    static void showTree(
+    void showTree(
         FileTreeNode &node,
         ImGuiTreeNodeFlags base_flags,
-        uint &node_i,
-        std::set<fs::path> &selection
+        uint &node_i
     );
     
 private:
@@ -39,6 +39,8 @@ private:
 private:
     std::set<fs::path> selection;
     FileTreeNode root;
+
+    std::function<void(fs::path)> open_callback;
 
     fs::path target_path;
     int popup_type;

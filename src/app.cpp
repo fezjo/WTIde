@@ -13,6 +13,8 @@ class Window {
     std::vector<IPlugin*> plugins; 
 
     public:
+    Window() = default;
+
     Window& get() {
     }
 
@@ -28,19 +30,11 @@ class Window {
             ImGuiWindowFlags_NoSavedSettings;
 
         // Called once the fonts/device is guaranteed setup
-        ImVec2 size = ImVec2(640, 480);
-        for(int i = 0; i < 2; ++i) {
-            ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
-            zw->displaySize = size;
-            zepWrappers.push_back(zw);
-            plugins.push_back(zw);
-        }
-
-        zepWrappers[0]->load(Zep::ZepPath("..") / "src" / "WTEdu.cpp");
-        zepWrappers[1]->load(Zep::ZepPath("..") / "src" / "editor.cpp");
+        openEditor(fs::path("..") / "src" / "WTEdu.cpp");
+        openEditor(fs::path("..") / "src" / "editor.cpp");
         zepWrappers[1]->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
 
-        ft = FileTree();
+        ft = FileTree(std::bind(&Window::openEditor, this, std::placeholders::_1));
         ft.displaySize = ImVec2(120, 640);
         ft.setPath(fs::path("."));
         plugins.push_back(&ft);
@@ -77,5 +71,25 @@ class Window {
         zepWrappers.clear();
         ft.destroy();
         plugins.clear();
+    }
+
+    // static void openEditor(Window &w, fs::path path) {
+    //     ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
+    //     zw->displaySize = ImVec2(640, 480);
+    //     zw->load(Zep::ZepPath(path));
+    //     w.zepWrappers.push_back(zw);
+    //     w.plugins.push_back(zw);
+    // }
+
+    // void openEditor(fs::path path) {
+    //     Window::openEditor(*this, path);
+    // }
+
+    void openEditor(fs::path path) {
+        ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
+        zw->displaySize = ImVec2(640, 480);
+        zw->load(Zep::ZepPath(path));
+        zepWrappers.push_back(zw);
+        plugins.push_back(zw);
     }
 };

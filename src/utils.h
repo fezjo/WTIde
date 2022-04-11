@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <optional>
+#include <functional>
 #include <tuple>
 #include <set>
 #include <unordered_set>

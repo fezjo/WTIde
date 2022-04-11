@@ -22,9 +22,10 @@ void FileTreeNode::refresh() {
     children.clear();
 }
 
-FileTree::FileTree():
-     popup_type(0),
-     popup_string({})
+FileTree::FileTree(std::function<void(fs::path)> _open_callback):
+    open_callback(_open_callback), 
+    popup_type(0),
+    popup_string({})
 {
     pluginType = PT_FileTree;
 }
@@ -57,8 +58,7 @@ bool wasNodeSelected() {
 void FileTree::showTree(
     FileTreeNode &node,
     ImGuiTreeNodeFlags base_flags,
-    uint &node_i,
-    std::set<fs::path> &selection
+    uint &node_i
 )
 {
     ImGuiTreeNodeFlags node_flags = base_flags;
@@ -84,7 +84,7 @@ void FileTree::showTree(
             node_flags = base_flags;
             if (fs::is_directory(c_node.path))
             {
-                FileTree::showTree(c_node, base_flags, node_i, selection);
+                FileTree::showTree(c_node, base_flags, node_i);
             }
             else
             {
@@ -92,8 +92,15 @@ void FileTree::showTree(
                 if (selection.count(c_node.path))
                     node_flags |= ImGuiTreeNodeFlags_Selected;
                 ImGui::TreeNodeEx((void*)(intptr_t)node_i, node_flags, "%s", c_node.path.filename().c_str());
-                if (wasNodeSelected())
-                    node_clicked = c_node.path;
+                if (wasNodeSelected()) {
+                    if (ImGui::IsMouseDoubleClicked(0))
+                    {
+                        open_callback(c_node.path);
+                        selection.clear();
+                    }
+                    else
+                        node_clicked = c_node.path;
+                }
             }
         }
         ImGui::TreePop();
@@ -237,7 +244,7 @@ void FileTree::show() {
     // max.y = min.y + max.y;
     
     uint node_i = 0;
-    FileTree::showTree(root, ImGuiTreeNodeFlags_SpanAvailWidth, node_i, selection);
+    FileTree::showTree(root, ImGuiTreeNodeFlags_SpanAvailWidth, node_i);
     
     ImGui::End();
 }
