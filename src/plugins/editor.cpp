@@ -34,12 +34,14 @@ private:
 };
 
 ZepWrapper::ZepWrapper(
-    const fs::path& root_path,
+    const fs::path& _file_path,
     const Zep::NVec2f& pixelScale,
     std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB,
     imid_t _id
 ) :
-    zepEditor(Zep::ZepPath(root_path.string()), pixelScale),
+    file_path(_file_path),
+    title(_file_path.filename()),
+    zepEditor(Zep::ZepPath(_file_path), pixelScale),
     Callback(fnCommandCB)
 {
     zepEditor.RegisterCallback(this);
@@ -63,11 +65,11 @@ void ZepWrapper::HandleInput()
     zepEditor.HandleInput();
 }
 
-ZepWrapper* ZepWrapper::init(const Zep::NVec2f& pixelScale)
+ZepWrapper* ZepWrapper::init(const Zep::NVec2f& pixelScale, std::string file)
 {
     static uint editor_id = 0;
     ZepWrapper *zw = new ZepWrapper(
-        APP_ROOT,
+        file.empty() ? APP_ROOT : file,
         Zep::NVec2f(pixelScale.x, pixelScale.y),
         [](std::shared_ptr<ZepMessage> spMessage) -> void {},
         editor_id++
@@ -104,7 +106,7 @@ void ZepWrapper::show()
 {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
-        ("Zep##" + std::to_string(getId())).c_str(),
+        (title + "##" + std::to_string(getId())).c_str(),
         &alive,
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar
     ))
