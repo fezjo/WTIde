@@ -3,6 +3,17 @@
 #include "../utils.h"
 #include "plugin.h"
 
+struct FileTreeNode {
+    bool initialized;
+    fs::path path;
+    std::vector<FileTreeNode> children;
+
+    FileTreeNode() = default;
+    FileTreeNode(fs::path);
+    std::vector<FileTreeNode>& listDir();
+    void refresh();
+};
+
 class FileTree: public IPlugin {
 public:
     FileTree();
@@ -15,13 +26,22 @@ public:
 
 protected:
     static void showTree(
-        fs::path path,
+        FileTreeNode &node,
         ImGuiTreeNodeFlags base_flags,
         uint &node_i,
         std::set<fs::path> &selection
     );
+    
+private:
+    bool showCreatePopup(bool new_popup); // returns whether popup_string is valid
+    bool createFile();      // returns whther creation of thing was succesful
 
 private:
-    fs::path cwd;
     std::set<fs::path> selection;
+    FileTreeNode root;
+
+    fs::path target_path;
+    int popup_type;
+    std::array<char, 64> popup_string;
+    ImVec4 popup_color;
 };
