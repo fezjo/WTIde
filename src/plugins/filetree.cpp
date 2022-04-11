@@ -157,11 +157,10 @@ bool FileTree::createFile() {
 }
 
 void FileTree::show() {
-    bool show = true;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
         ("FileTree##" + std::to_string(getId())).c_str(),
-        &show,
+        nullptr,
         ImGuiWindowFlags_MenuBar
     ))
     {

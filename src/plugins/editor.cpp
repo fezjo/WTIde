@@ -102,11 +102,10 @@ void ZepWrapper::load(const Zep::ZepPath& file)
 
 void ZepWrapper::show()
 {
-    bool show = true;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
         ("Zep##" + std::to_string(getId())).c_str(),
-        &show,
+        &alive,
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar
     ))
     {

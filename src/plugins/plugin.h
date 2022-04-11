@@ -28,6 +28,7 @@ protected:
     }
 
 public:
+    bool alive = true;
     ImVec2 displaySize;
 
 protected:

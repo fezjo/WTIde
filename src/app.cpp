@@ -9,7 +9,7 @@ class Window {
     bool initialized = false;
     ImGuiWindowFlags flags;
     std::vector<ZepWrapper*> zepWrappers;
-    FileTree ft;
+    FileTree *ft;
     std::vector<IPlugin*> plugins; 
 
     public:
@@ -34,10 +34,10 @@ class Window {
         openEditor(fs::path("..") / "src" / "editor.cpp");
         zepWrappers[1]->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
 
-        ft = FileTree(std::bind(&Window::openEditor, this, std::placeholders::_1));
-        ft.displaySize = ImVec2(120, 640);
-        ft.setPath(fs::path("."));
-        plugins.push_back(&ft);
+        ft = new FileTree(std::bind(&Window::openEditor, this, std::placeholders::_1));
+        ft->displaySize = ImVec2(120, 640);
+        ft->setPath(fs::path("."));
+        plugins.push_back(ft);
     }
 
     void update() {
@@ -57,20 +57,26 @@ class Window {
             return;
         }
 
-        for(auto p: plugins)
+        for(auto p: plugins) {
             p->show();
+            if (!p->alive)
+                destroy_plugin(p);
+        }
         ImGui::End();
 
     }
 
+    void destroy_plugin(IPlugin *plugin) {
+        if (plugin->getPluginType() == PT_Editor)
+            zepWrappers.erase(find(zepWrappers.begin(), zepWrappers.end(), plugin));
+        plugins.erase(find(plugins.begin(), plugins.end(), plugin));
+        plugin->destroy();
+        free(plugin);
+    }
+
     void destroy() {
-        for(auto zw: zepWrappers) {
-            zw->destroy();
-            free(zw);
-        }
-        zepWrappers.clear();
-        ft.destroy();
-        plugins.clear();
+        for (auto it = plugins.rbegin(); it != plugins.rend(); ++it)
+            destroy_plugin(*it);
     }
 
     // static void openEditor(Window &w, fs::path path) {
