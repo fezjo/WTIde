@@ -35,6 +35,7 @@ protected:
 private:
     bool showCreatePopup(bool new_popup); // returns whether popup_string is valid
     bool createFile();      // returns whther creation of thing was succesful
+    void openAllSelected();
 
 private:
     std::set<fs::path> selection;

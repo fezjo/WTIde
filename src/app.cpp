@@ -12,7 +12,7 @@ class Window {
     FileTree *ft;
     std::vector<IPlugin*> plugins; 
 
-    public:
+public:
     Window() = default;
 
     Window& get() {
@@ -78,18 +78,6 @@ class Window {
         for (auto it = plugins.rbegin(); it != plugins.rend(); ++it)
             destroy_plugin(*it);
     }
-
-    // static void openEditor(Window &w, fs::path path) {
-    //     ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
-    //     zw->displaySize = ImVec2(640, 480);
-    //     zw->load(Zep::ZepPath(path));
-    //     w.zepWrappers.push_back(zw);
-    //     w.plugins.push_back(zw);
-    // }
-
-    // void openEditor(fs::path path) {
-    //     Window::openEditor(*this, path);
-    // }
 
     void openEditor(fs::path path) {
         ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f), path);

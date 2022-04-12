@@ -55,6 +55,11 @@ bool wasNodeSelected() {
     return ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen();
 }
 
+void FileTree::openAllSelected() {
+    for(auto p: selection)
+        open_callback(p);
+}
+
 void FileTree::showTree(
     FileTreeNode &node,
     ImGuiTreeNodeFlags base_flags,
@@ -95,8 +100,9 @@ void FileTree::showTree(
                 if (wasNodeSelected()) {
                     if (ImGui::IsMouseDoubleClicked(0))
                     {
-                        open_callback(c_node.path);
                         selection.clear();
+                        selection.insert(c_node.path);
+                        openAllSelected();
                     }
                     else
                         node_clicked = c_node.path;
