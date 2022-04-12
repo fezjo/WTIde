@@ -1,3 +1,5 @@
+add_definitions(-Wall -Wextra) # todo
+
 file(GLOB_RECURSE SOURCE_FILES
     src *.cpp
 )

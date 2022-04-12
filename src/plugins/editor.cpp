@@ -58,6 +58,50 @@ void ZepWrapper::Notify(std::shared_ptr<Zep::ZepMessage> message)
     Callback(message);
 
     return;
+
+    // if (message->messageId == Msg::GetClipBoard)
+    // {
+    //     clip::get_text(message->str);
+    //     message->handled = true;
+    // }
+    // else if (message->messageId == Msg::SetClipBoard)
+    // {
+    //     clip::set_text(message->str);
+    //     message->handled = true;
+    // }
+    // else if (message->messageId == Msg::RequestQuit)
+    // {
+    //     quit = true;
+    // }
+    // else if (message->messageId == Msg::ToolTip)
+    // {
+    //     auto spTipMsg = std::static_pointer_cast<ToolTipMessage>(message);
+    //     if (spTipMsg->location.Valid() && spTipMsg->pBuffer)
+    //     {
+    //         auto pSyntax = spTipMsg->pBuffer->GetSyntax();
+    //         if (pSyntax)
+    //         {
+    //             if (pSyntax->GetSyntaxAt(spTipMsg->location).foreground == ThemeColor::Identifier)
+    //             {
+    //                 auto spMarker = std::make_shared<RangeMarker>(*spTipMsg->pBuffer);
+    //                 spMarker->SetDescription("This is an identifier");
+    //                 spMarker->SetHighlightColor(ThemeColor::Identifier);
+    //                 spMarker->SetTextColor(ThemeColor::Text);
+    //                 spTipMsg->spMarker = spMarker;
+    //                 spTipMsg->handled = true;
+    //             }
+    //             else if (pSyntax->GetSyntaxAt(spTipMsg->location).foreground == ThemeColor::Keyword)
+    //             {
+    //                 auto spMarker = std::make_shared<RangeMarker>(*spTipMsg->pBuffer);
+    //                 spMarker->SetDescription("This is a keyword");
+    //                 spMarker->SetHighlightColor(ThemeColor::Keyword);
+    //                 spMarker->SetTextColor(ThemeColor::Text);
+    //                 spTipMsg->spMarker = spMarker;
+    //                 spTipMsg->handled = true;
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 void ZepWrapper::HandleInput()
@@ -88,9 +132,7 @@ ZepWrapper* ZepWrapper::init(const Zep::NVec2f& pixelScale, std::string file)
 
 void ZepWrapper::update()
 {
-    if(id == 0) {
     GetEditor().RefreshRequired();
-    }
 }
 
 void ZepWrapper::destroy()

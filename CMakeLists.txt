@@ -10,8 +10,12 @@ project(WTEdu LANGUAGES C CXX VERSION 0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} -g) # TODO -g warnings, o2
+
 add_definitions(-g)
 add_definitions(-DIMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/my_imconfig.h")
+add_definitions(-DZEP_USE_SDL)
+add_definitions(-DZEP_FEATURE_CPP_FILE_SYSTEM)
+
 set(TARGET_NAME ${CMAKE_PROJECT_NAME})
 
 find_package(OpenGL REQUIRED)

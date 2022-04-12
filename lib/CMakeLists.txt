@@ -13,7 +13,6 @@ target_link_libraries(
 )
 target_include_directories("ImGui" PUBLIC ${IMGUI_PATH} ${IMGUI_PATH}/backends)
 
-add_definitions(-DZEP_FEATURE_CPP_FILE_SYSTEM)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zep/src)
 set(APP_ROOT ${CMAKE_SOURCE_DIR})
 configure_file(${CMAKE_SOURCE_DIR}/cmake/config_app.h.cmake ${CMAKE_SOURCE_DIR}/config_app.h)
