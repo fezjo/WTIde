@@ -43,3 +43,5 @@ target_link_libraries(
         tinydir
         stdc++fs
 )
+
+configure_file(zep.cfg zep.cfg COPYONLY)

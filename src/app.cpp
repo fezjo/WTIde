@@ -114,7 +114,7 @@ public:
     }
 
     void openEditor(fs::path path) {
-        ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f), path);
+        ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
         zw->displaySize = ImVec2(640, 480);
         zw->load(Zep::ZepPath(path));
         zepWrappers.push_back(zw);

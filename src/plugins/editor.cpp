@@ -34,14 +34,12 @@ private:
 };
 
 ZepWrapper::ZepWrapper(
-    const fs::path& _file_path,
+    const fs::path& rootPath,
     const Zep::NVec2f& pixelScale,
     std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB,
     imid_t _id
 ) :
-    file_path(_file_path),
-    title(_file_path.filename()),
-    zepEditor(Zep::ZepPath(_file_path), pixelScale),
+    zepEditor(Zep::ZepPath(rootPath), pixelScale),
     Callback(fnCommandCB)
 {
     zepEditor.RegisterCallback(this);
@@ -109,11 +107,11 @@ void ZepWrapper::HandleInput()
     zepEditor.HandleInput();
 }
 
-ZepWrapper* ZepWrapper::init(const Zep::NVec2f& pixelScale, std::string file)
+ZepWrapper* ZepWrapper::init(const Zep::NVec2f& pixelScale, std::string rootPath)
 {
     static uint editor_id = 0;
     ZepWrapper *zw = new ZepWrapper(
-        file.empty() ? APP_ROOT : file,
+        rootPath.empty() ? APP_ROOT : rootPath,
         Zep::NVec2f(pixelScale.x, pixelScale.y),
         [](std::shared_ptr<ZepMessage> spMessage) -> void {},
         editor_id++
@@ -141,6 +139,7 @@ void ZepWrapper::destroy()
 
 void ZepWrapper::load(const Zep::ZepPath& file)
 {
+    title = file.filename();
     auto pBuffer = GetEditor().InitWithFileOrDir(file);
 }
 
