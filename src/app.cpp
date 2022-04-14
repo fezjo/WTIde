@@ -101,7 +101,7 @@ public:
     }
 
     void destroy_plugin(IPlugin *plugin) {
-        if (plugin->getPluginType() == PT_Editor)
+        if (plugin->getPluginType() == PluginType::Editor)
             zepWrappers.erase(find(zepWrappers.begin(), zepWrappers.end(), plugin));
         plugins.erase(find(plugins.begin(), plugins.end(), plugin));
         plugin->destroy();

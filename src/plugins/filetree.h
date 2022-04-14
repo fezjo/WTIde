@@ -14,6 +14,13 @@ struct FileTreeNode {
     void refresh();
 };
 
+enum class PopupType {
+    None = 0,
+    NewFile,
+    NewDirectory,
+    Rename
+};
+
 class FileTree: public IPlugin {
 public:
     FileTree() = default;
@@ -44,7 +51,7 @@ private:
     std::function<void(fs::path)> open_callback;
 
     fs::path target_path;
-    int popup_type;
+    PopupType popup_type;
     std::array<char, 64> popup_string;
     ImVec4 popup_color;
 };

@@ -24,10 +24,10 @@ void FileTreeNode::refresh() {
 
 FileTree::FileTree(std::function<void(fs::path)> _open_callback):
     open_callback(_open_callback), 
-    popup_type(0),
+    popup_type(PopupType::None),
     popup_string({})
 {
-    pluginType = PT_FileTree;
+    pluginType = PluginType::FileTree;
 }
 
 void FileTree::update() {
@@ -151,13 +151,13 @@ bool FileTree::createFile() {
     fs::path create_path = target_path / popup_string.data();
     if (fs::exists(create_path))
         return false;
-    if (popup_type == 1)
+    if (popup_type == PopupType::NewFile)
     {
         std::fstream creation(create_path, std::fstream::out);
         creation.close();
         return creation.good();
     }
-    else if (popup_type == 2)
+    else if (popup_type == PopupType::NewDirectory)
         return fs::create_directory(create_path);
     assert(!"Invalid popup type");
 }
@@ -180,16 +180,16 @@ void FileTree::show() {
 
         ImGui::BeginDisabled(selection.size() > 1);
         {
-            int prev_popup_type = popup_type;
+            PopupType prev_popup_type = popup_type;
             if (ImGui::MenuItem(u8"ﱐ"))
             {
                 ImGui::OpenPopup("filetree_create_popup");
-                popup_type = 1;
+                popup_type = PopupType::NewFile;
             }
             if (ImGui::MenuItem(u8""))
             {
                 ImGui::OpenPopup("filetree_create_popup");
-                popup_type = 2;
+                popup_type = PopupType::NewDirectory;
             }
 
             bool new_popup = popup_type != prev_popup_type;
@@ -200,11 +200,11 @@ void FileTree::show() {
                     target_path = target_path.parent_path();
                 popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
             }
-            if (popup_type && showCreatePopup(new_popup))
+            if (popup_type != PopupType::None && showCreatePopup(new_popup))
             {
                 if (!popup_string[0] || createFile())
                 {
-                    popup_type = 0;
+                    popup_type = PopupType::None;
                     popup_string[0] = 0;
                     popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
                     changed_files = true;

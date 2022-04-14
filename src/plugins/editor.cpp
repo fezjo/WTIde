@@ -55,7 +55,7 @@ ZepWrapper::ZepWrapper(
             })
         }
     );
-    pluginType = PT_Editor;
+    pluginType = PluginType::Editor;
 }
 
 Zep::ZepEditor& ZepWrapper::GetEditor() const

@@ -3,13 +3,14 @@
 #include <imgui.h>
 #include "../utils.h"
 
-enum PluginType {
-    PT_Editor,
-    PT_FileTree,
-    PT_Terminal,
-    PT_Debugger,
-    PT_Output,
-    PT_Search
+enum class PluginType {
+    Unknown = 0,
+    Editor,
+    FileTree,
+    Terminal,
+    Debugger,
+    Output,
+    Search
 };
 
 class IPlugin {
