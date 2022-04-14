@@ -11,6 +11,10 @@ class ZepWrapper : public IPlugin, public Zep::IZepComponent {
     std::function<void(std::shared_ptr<Zep::ZepMessage>)> Callback;
 
 public:
+    timepoint lastFocusedTime;
+    int dockId;
+
+public:
     ZepWrapper(
         const fs::path& rootPath,
         const Zep::NVec2f& pixelScale,

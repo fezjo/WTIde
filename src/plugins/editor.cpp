@@ -42,7 +42,8 @@ ZepWrapper::ZepWrapper(
     imid_t _id
 ) :
     zepEditor(Zep::ZepPath(rootPath), pixelScale),
-    Callback(fnCommandCB)
+    Callback(fnCommandCB),
+    dockId(0)
 {
     zepEditor.RegisterCallback(this);
     zepEditor.RegisterSyntaxFactory(
@@ -155,15 +156,20 @@ void ZepWrapper::load(const Zep::ZepPath& file)
 void ZepWrapper::show()
 {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
+    auto windowClass = ImGuiWindowClass();
+    windowClass.DockingAlwaysTabBar = true;
+    ImGui::SetNextWindowClass(&windowClass);
     if (!ImGui::Begin(
         (title + "##" + std::to_string(getId())).c_str(),
         &alive,
-        ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_MenuBar
+        ImGuiWindowFlags_NoScrollbar
     ))
     {
         ImGui::End();
         return;
     }
+    dockId = ImGui::GetWindowDockID();
+
 
     auto min = ImGui::GetCursorScreenPos();
     auto max = ImGui::GetContentRegionAvail();
@@ -182,6 +188,7 @@ void ZepWrapper::show()
     zepEditor.Display();
     if (zepEditor.isFocused)
     {
+        lastFocusedTime = get_time();
         zepEditor.HandleInput();
     }
 

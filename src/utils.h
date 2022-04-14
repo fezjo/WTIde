@@ -14,9 +14,13 @@
 #include <map>
 #include <unordered_map>
 #include <list>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
 using imid_t = uint64_t;
 
 extern std::hash<std::string> hash_string;
+
+using timepoint = std::chrono::time_point<std::chrono::steady_clock>;
+timepoint get_time();

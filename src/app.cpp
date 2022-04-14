@@ -34,11 +34,11 @@ public:
             ImGuiWindowFlags_NoSavedSettings;
 
         // Called once the fonts/device is guaranteed setup
-        openEditor(fs::path("..") / "src" / "WTEdu.cpp");
-        openEditor(fs::path("..") / "src" / "editor.cpp");
+        openEditor(fs::path("..") / "src" / "WTEdu.cpp", false);
+        openEditor(fs::path("nonexistent.cpp"), false);
         zepWrappers[1]->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
 
-        ft = new FileTree(std::bind(&App::openEditor, this, std::placeholders::_1));
+        ft = new FileTree(std::bind(&App::openEditor, this, std::placeholders::_1, true));
         ft->displaySize = ImVec2(120, 640);
         ft->setPath(fs::path("."));
         plugins.push_back(ft);
@@ -113,11 +113,24 @@ public:
             destroy_plugin(*it);
     }
 
-    void openEditor(fs::path path) {
+    void openEditor(fs::path path, bool mimickLastFocused=true) {
         ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
         zw->displaySize = ImVec2(640, 480);
         zw->load(Zep::ZepPath(path));
         zepWrappers.push_back(zw);
         plugins.push_back(zw);
+
+        if (mimickLastFocused && !zepWrappers.empty())
+        {
+            std::pair<timepoint, ZepWrapper*> latest = {zepWrappers[0]->lastFocusedTime, nullptr};
+            for (ZepWrapper *zwi: zepWrappers)
+            {
+                if (zwi->lastFocusedTime >= latest.first)
+                    latest = {zwi->lastFocusedTime, zwi};
+            }
+            std::cerr << latest.second->dockId << std::endl;
+            ImGui::SetNextWindowDockID(latest.second->dockId);
+            zw->show();
+        }
     }
 };
