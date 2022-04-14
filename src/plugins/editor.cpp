@@ -2,9 +2,10 @@
 #define ZEP_SINGLE_HEADER_BUILD
 #endif
 
-#include "editor.h"
-#include "config_app.h"
 #include <clip.h>
+#include "editor.h"
+#include "wt_syntax.h"
+#include "config_app.h"
 
 using namespace Zep;
 
@@ -44,6 +45,15 @@ ZepWrapper::ZepWrapper(
     Callback(fnCommandCB)
 {
     zepEditor.RegisterCallback(this);
+    zepEditor.RegisterSyntaxFactory(
+        { ".wt" },
+        SyntaxProvider{
+            "wt", 
+            Zep::tSyntaxFactory([](ZepBuffer* pBuffer) {
+                return std::make_shared<ZepSyntax>(*pBuffer, wt_keywords, wt_identifiers);
+            })
+        }
+    );
     pluginType = PT_Editor;
 }
 
