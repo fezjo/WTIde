@@ -17,6 +17,24 @@
 #include "utils.h"
 #include "app.cpp"
 
+Uint32 minimum_refresh_rate_callback(Uint32 interval, void *param)
+{
+    SDL_Event event;
+    SDL_UserEvent userevent;
+
+    userevent.type = SDL_USEREVENT;
+    // userevent.code = 0;
+    // userevent.data1 = NULL;
+    // userevent.data2 = NULL;
+
+    event.type = SDL_USEREVENT;
+    event.user = userevent;
+
+    SDL_PushEvent(&event);
+    // return interval causes callback to be called again at the same interval
+    return(interval);
+}
+
 // Main code
 int main(int, char**)
 {
@@ -63,6 +81,8 @@ int main(int, char**)
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
+    SDL_TimerID my_timer_id = SDL_AddTimer(1000 / 10, minimum_refresh_rate_callback, NULL);
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -102,9 +122,11 @@ int main(int, char**)
     app.show_demo_window = true;
 
     // Main loop
-    bool done = false;
-    while (!done)
+    bool alive = true;
+    while (alive)
     {
+        SDL_WaitEvent(NULL);
+
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -115,10 +137,11 @@ int main(int, char**)
         {
             ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT)
-                done = true;
+                alive = false;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
-                done = true;
+                alive = false;
         }
+
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
