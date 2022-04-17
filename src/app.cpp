@@ -42,6 +42,7 @@ public:
     }
 
     void update() {
+        handleInput();
         for(auto p: plugins)
             p->update();
     }
@@ -94,7 +95,14 @@ public:
         }
         ImGui::PopStyleColor();
         ImGui::End();
+    }
 
+    void handleInput() {
+        auto& io = ImGui::GetIO();
+        if (io.KeyMods == ImGuiKeyModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_N))
+        {
+            openEditor();
+        }
     }
 
     void destroy_plugin(IPlugin *plugin) {
@@ -110,10 +118,11 @@ public:
             destroy_plugin(*it);
     }
 
-    void openEditor(fs::path path, bool mimickLastFocused=true) {
+    void openEditor(fs::path path="", bool mimickLastFocused=true) {
         ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
         zw->displaySize = ImVec2(640, 480);
-        zw->load(Zep::ZepPath(path));
+        if (!path.empty())
+            zw->load(Zep::ZepPath(path));
         zepWrappers.push_back(zw);
         plugins.push_back(zw);
 
