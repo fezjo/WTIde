@@ -149,7 +149,6 @@ void ZepWrapper::destroy()
 
 void ZepWrapper::load(const Zep::ZepPath& file)
 {
-    title = file.filename();
     auto pBuffer = GetEditor().InitWithFileOrDir(file);
 }
 
@@ -159,10 +158,13 @@ void ZepWrapper::show()
     auto windowClass = ImGuiWindowClass();
     windowClass.DockingAlwaysTabBar = true;
     ImGui::SetNextWindowClass(&windowClass);
+    title = zepEditor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer().GetFilePath().filename();
+    if (title.empty())
+        title = "Untitled";
     if (!ImGui::Begin(
-        (title + "##" + std::to_string(getId())).c_str(),
+        (title + "###" + std::to_string(getId())).c_str(),
         &alive,
-        ImGuiWindowFlags_NoScrollbar
+        ImGuiWindowFlags_NoScrollbar // TODO | ImGuiWindowFlags_NoSavedSettings
     ))
     {
         ImGui::End();
