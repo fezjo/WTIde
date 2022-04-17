@@ -108,6 +108,13 @@ void FileTree::showTree(
                         node_clicked = c_node.path;
                 }
             }
+            if (ImGui::BeginPopupContextItem()) // <-- use last item id as popup id
+            {
+                ImGui::Text("This a popup for \"%s\"!", c_node.path.filename().c_str());
+                if (ImGui::Button("Close"))
+                    ImGui::CloseCurrentPopup();
+                ImGui::EndPopup();
+            }
         }
         ImGui::TreePop();
     }
@@ -190,6 +197,11 @@ void FileTree::show() {
             {
                 ImGui::OpenPopup("filetree_create_popup");
                 popup_type = PopupType::NewDirectory;
+            }
+            if (ImGui::MenuItem(u8"Rename"))
+            {
+                ImGui::OpenPopup("filetree_create_popup");
+                popup_type = PopupType::Rename;
             }
 
             bool new_popup = popup_type != prev_popup_type;

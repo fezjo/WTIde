@@ -19,9 +19,6 @@ protected:
 public:
     App() = default;
 
-    App& get() {
-    }
-
     void init() {
         if (initialized)
             return;
@@ -128,7 +125,6 @@ public:
                 if (zwi->lastFocusedTime >= latest.first)
                     latest = {zwi->lastFocusedTime, zwi};
             }
-            std::cerr << latest.second->dockId << std::endl;
             ImGui::SetNextWindowDockID(latest.second->dockId);
             zw->show();
         }

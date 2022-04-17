@@ -24,9 +24,10 @@ public:
     virtual Zep::ZepEditor& GetEditor() const override;
     virtual void Notify(std::shared_ptr<Zep::ZepMessage> message) override;
     virtual void HandleInput();
-    static ZepWrapper* init(const Zep::NVec2f& pixelScale, std::string rootPath="");
     void load(const Zep::ZepPath& file);
+
+    static ZepWrapper* init(const Zep::NVec2f& pixelScale, std::string rootPath="");
     void update() override;
-    void destroy() override;
     void show() override;
+    void destroy() override;
 };
