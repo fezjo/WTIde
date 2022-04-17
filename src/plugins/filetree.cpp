@@ -158,15 +158,35 @@ bool FileTree::createFile() {
     fs::path create_path = target_path / popup_string.data();
     if (fs::exists(create_path))
         return false;
-    if (popup_type == PopupType::NewFile)
+    std::fstream creation(create_path, std::fstream::out);
+    creation.close();
+    return creation.good();
+}
+
+bool FileTree::createDirectory() {
+    if (!popup_string[0])
+        return false;
+    fs::path create_path = target_path / popup_string.data();
+    if (fs::exists(create_path))
+        return false;
+    return fs::create_directory(create_path);
+}
+
+bool FileTree::renameFile() {
+    if (!popup_string[0])
+        return false;
+    fs::path create_path = target_path.parent_path() / popup_string.data();
+    if (fs::exists(create_path))
+        return false;
+    try
     {
-        std::fstream creation(create_path, std::fstream::out);
-        creation.close();
-        return creation.good();
+        fs::rename(target_path, create_path);
     }
-    else if (popup_type == PopupType::NewDirectory)
-        return fs::create_directory(create_path);
-    assert(!"Invalid popup type");
+    catch (fs::filesystem_error)
+    {
+        return false;
+    }
+    return true;
 }
 
 void FileTree::show() {
@@ -198,23 +218,54 @@ void FileTree::show() {
                 ImGui::OpenPopup("filetree_create_popup");
                 popup_type = PopupType::NewDirectory;
             }
-            if (ImGui::MenuItem(u8"Rename"))
+            ImGui::BeginDisabled(selection.size() != 1);
             {
-                ImGui::OpenPopup("filetree_create_popup");
-                popup_type = PopupType::Rename;
+                if (ImGui::MenuItem(u8"Rename"))
+                {
+                    ImGui::OpenPopup("filetree_create_popup");
+                    popup_type = PopupType::Rename;
+                }
             }
+            ImGui::EndDisabled();
 
             bool new_popup = popup_type != prev_popup_type;
             if (new_popup)
             {
-                target_path = selection.empty() ? root.path : *selection.begin();
-                if (!fs::is_directory(target_path))
-                    target_path = target_path.parent_path();
+                if (popup_type == PopupType::Rename)
+                {
+                    target_path = *selection.begin();
+                }
+                else
+                {
+                    target_path = selection.empty() ? root.path : *selection.begin();
+                    if (!fs::is_directory(target_path))
+                        target_path = target_path.parent_path();
+                }
                 popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
             }
             if (popup_type != PopupType::None && showCreatePopup(new_popup))
             {
-                if (!popup_string[0] || createFile())
+                bool ok = true;
+                if (popup_string[0]) // if not cancelled
+                {
+                    switch(popup_type)
+                    {
+                        case PopupType::NewFile:
+                            ok = createFile();
+                            break;
+                        case PopupType::NewDirectory:
+                            ok = createDirectory();
+                            break;
+                        case PopupType::Rename:
+                            ok = renameFile();
+                            if (ok)
+                                selection.clear();
+                            break;
+                        default:
+                            assert(!"Invalid popup type");
+                    }
+                }
+                if (ok)
                 {
                     popup_type = PopupType::None;
                     popup_string[0] = 0;

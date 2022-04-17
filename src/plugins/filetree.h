@@ -41,7 +41,9 @@ protected:
     
 private:
     bool showCreatePopup(bool new_popup); // returns whether popup_string is valid
-    bool createFile();      // returns whther creation of thing was succesful
+    bool createFile();
+    bool createDirectory();
+    bool renameFile();
     void openAllSelected();
 
 private:
