@@ -60,6 +60,55 @@ void FileTree::openAllSelected() {
         open_callback(p);
 }
 
+bool FileTree::showFileMenu() {
+    if (ImGui::BeginPopupContextItem())
+    {
+        if (ImGui::Selectable("Rename"))
+        {
+            popup_type = PopupType::Rename;
+            target_path = menu_node;
+            popup_location = menu_node;
+            ImVec2 pos = ImGui::GetWindowPos();
+            ImGui::EndPopup();
+            ImGui::OpenPopup("filetree_name_action_popup");
+            ImGui::SetNextWindowPos(pos);
+            return true;
+        }
+
+        if (ImGui::Selectable("Nothing"));
+        ImGui::EndPopup();
+        return true;
+    }
+    return false;
+}
+
+void FileTree::handleItem(bool is_dir, fs::path path) {
+    if (is_dir)
+    {
+        if (wasNodeSelected())
+            node_selected = path;
+    }
+    else
+    {
+        if (wasNodeSelected()) {
+            if (ImGui::IsMouseDoubleClicked(0))
+            {
+                selection.clear();
+                selection.insert(path);
+                openAllSelected();
+            }
+            else
+                node_selected = path;
+        }
+    }
+    if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+        menu_node = path;
+    }
+    showFileMenu();
+    if (path == popup_location)
+        handlePopupActions();
+}
+
 void FileTree::showTree(
     FileTreeNode &node,
     ImGuiTreeNodeFlags base_flags,
@@ -69,7 +118,6 @@ void FileTree::showTree(
     ImGuiTreeNodeFlags node_flags = base_flags;
     if (selection.count(node.path))
         node_flags |= ImGuiTreeNodeFlags_Selected;
-    fs::path node_clicked;
 
     if (!node_i)
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
@@ -79,8 +127,7 @@ void FileTree::showTree(
         "%s",
         node.path.filename().c_str()
     );
-    if (wasNodeSelected())
-        node_clicked = node.path;
+    handleItem(true, node.path);
     if (rootOpen)
     {
         for(auto &c_node: node.listDir())
@@ -97,36 +144,17 @@ void FileTree::showTree(
                 if (selection.count(c_node.path))
                     node_flags |= ImGuiTreeNodeFlags_Selected;
                 ImGui::TreeNodeEx((void*)(intptr_t)node_i, node_flags, "%s", c_node.path.filename().c_str());
-                if (wasNodeSelected()) {
-                    if (ImGui::IsMouseDoubleClicked(0))
-                    {
-                        selection.clear();
-                        selection.insert(c_node.path);
-                        openAllSelected();
-                    }
-                    else
-                        node_clicked = c_node.path;
-                }
-            }
-            if (ImGui::BeginPopupContextItem()) // <-- use last item id as popup id
-            {
-                ImGui::Text("This a popup for \"%s\"!", c_node.path.filename().c_str());
-                if (ImGui::Button("Close"))
-                    ImGui::CloseCurrentPopup();
-                ImGui::EndPopup();
+                handleItem(false, c_node.path);
+                
             }
         }
         ImGui::TreePop();
     }
-
-    // Update selection state
-    // (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
-    updateSelection(node_clicked, selection);
 }
 
-bool FileTree::showCreatePopup(bool new_popup) {
+bool FileTree::showFileNameActionPopup() {
     bool res = false;
-    if (ImGui::BeginPopup("filetree_create_popup"))
+    if (ImGui::BeginPopup("filetree_name_action_popup"))
     {
         ImGui::PushStyleColor(ImGuiCol_FrameBg, popup_color);
         ImGui::SetKeyboardFocusHere(0);
@@ -142,7 +170,7 @@ bool FileTree::showCreatePopup(bool new_popup) {
         ImGui::PopStyleColor();
         if (ImGui::IsItemEdited())
             popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
-        ImGui::EndMenu();
+        ImGui::EndPopup();
     }
     else
     {
@@ -150,6 +178,61 @@ bool FileTree::showCreatePopup(bool new_popup) {
         res = true;
     }
     return res;
+}
+
+void FileTree::handlePopupActions() {
+    if (popup_type == PopupType::None)
+        return;
+    if (target_path.empty())
+    {
+        if (popup_type == PopupType::Rename)
+        {
+            target_path = *selection.begin();
+        }
+        else
+        {
+            target_path = selection.empty() ? root.path : *selection.begin();
+            if (!fs::is_directory(target_path))
+                target_path = target_path.parent_path();
+        }
+        popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
+    }
+    if (showFileNameActionPopup())
+    {
+        bool ok = true;
+        if (popup_string[0]) // if not cancelled
+        {
+            switch(popup_type)
+            {
+                case PopupType::NewFile:
+                    ok = createFile();
+                    break;
+                case PopupType::NewDirectory:
+                    ok = createDirectory();
+                    break;
+                case PopupType::Rename:
+                    ok = renameFile();
+                    if (ok)
+                        selection.clear();
+                    break;
+                default:
+                    assert(!"Invalid popup type");
+            }
+        }
+        if (ok)
+        {
+            target_path.clear();
+            popup_type = PopupType::None;
+            popup_location = "";
+            popup_string[0] = 0;
+            popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
+            files_changed = true;
+        }
+        else
+        {
+            popup_color = ImVec4(1.0, 0.25, 0.25, 1.0);
+        }
+    }
 }
 
 bool FileTree::createFile() {
@@ -189,6 +272,12 @@ bool FileTree::renameFile() {
     return true;
 }
 
+void FileTree::refresh() {
+    if (files_changed)
+        root.refresh();
+    files_changed = false;
+}
+
 void FileTree::show() {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
@@ -203,82 +292,33 @@ void FileTree::show() {
 
     if (ImGui::BeginMenuBar())
     {
-        bool changed_files = false;
-
         ImGui::BeginDisabled(selection.size() > 1);
         {
-            PopupType prev_popup_type = popup_type;
             if (ImGui::MenuItem(u8"ﱐ"))
             {
-                ImGui::OpenPopup("filetree_create_popup");
+                ImGui::OpenPopup("filetree_name_action_popup");
                 popup_type = PopupType::NewFile;
             }
             if (ImGui::MenuItem(u8""))
             {
-                ImGui::OpenPopup("filetree_create_popup");
+                ImGui::OpenPopup("filetree_name_action_popup");
                 popup_type = PopupType::NewDirectory;
             }
             ImGui::BeginDisabled(selection.size() != 1);
             {
                 if (ImGui::MenuItem(u8"Rename"))
                 {
-                    ImGui::OpenPopup("filetree_create_popup");
+                    ImGui::OpenPopup("filetree_name_action_popup");
                     popup_type = PopupType::Rename;
                 }
             }
             ImGui::EndDisabled();
-
-            bool new_popup = popup_type != prev_popup_type;
-            if (new_popup)
-            {
-                if (popup_type == PopupType::Rename)
-                {
-                    target_path = *selection.begin();
-                }
-                else
-                {
-                    target_path = selection.empty() ? root.path : *selection.begin();
-                    if (!fs::is_directory(target_path))
-                        target_path = target_path.parent_path();
-                }
-                popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
-            }
-            if (popup_type != PopupType::None && showCreatePopup(new_popup))
-            {
-                bool ok = true;
-                if (popup_string[0]) // if not cancelled
-                {
-                    switch(popup_type)
-                    {
-                        case PopupType::NewFile:
-                            ok = createFile();
-                            break;
-                        case PopupType::NewDirectory:
-                            ok = createDirectory();
-                            break;
-                        case PopupType::Rename:
-                            ok = renameFile();
-                            if (ok)
-                                selection.clear();
-                            break;
-                        default:
-                            assert(!"Invalid popup type");
-                    }
-                }
-                if (ok)
-                {
-                    popup_type = PopupType::None;
-                    popup_string[0] = 0;
-                    popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
-                    changed_files = true;
-                }
-                else
-                {
-                    popup_color = ImVec4(1.0, 0.25, 0.25, 1.0);
-                }
-            }
         }
         ImGui::EndDisabled();
+
+        if ("" == popup_location)
+            handlePopupActions();
+
         ImGui::BeginDisabled(selection.empty());
         {
             if (ImGui::MenuItem(u8""))
@@ -286,33 +326,27 @@ void FileTree::show() {
                 for (auto &p: selection)
                     fs::remove_all(p);
                 selection.clear();
-                changed_files = true;
+                files_changed = true;
             }
         }
         ImGui::EndDisabled();
         if (ImGui::MenuItem(u8""))
         {
-            changed_files = true;
+            files_changed = true;
         }
         ImGui::EndMenuBar();
-        
-        if (changed_files)
-            root.refresh();
-    }
-    // auto min = ImGui::GetCursorScreenPos();
-    // auto max = ImGui::GetContentRegionAvail();
-    // if (max.x <= 0)
-    //     max.x = 1;
-    // if (max.y <= 0)
-    //     max.y = 1;
-    // ImGui::InvisibleButton("FileTreeContainer", max);
 
-    // // Fill the window
-    // max.x = min.x + max.x;
-    // max.y = min.y + max.y;
-    
+    }
+
     uint node_i = 0;
     FileTree::showTree(root, ImGuiTreeNodeFlags_SpanAvailWidth, node_i);
+
+    refresh();
+
+    // Update selection state
+    // (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
+    updateSelection(node_selected, selection);
+    node_selected = "";
     
     ImGui::End();
 }
