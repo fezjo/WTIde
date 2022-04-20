@@ -17,8 +17,9 @@ protected:
     ImGuiWindowFlags flags;
     std::vector<EditorPlugin*> editor_plugins;
     FileTreePlugin *filetree_plugin;
+    InputPlugin *input_plugin;
+    OutputPlugin *output_plugin;
     std::vector<IPlugin*> plugins;
-    
 
 public:
     App() = default;
@@ -46,14 +47,26 @@ public:
 
         TextPlugin *op = new TextPlugin();
         op->displaySize = ImVec2(300, 300);
-        op->title = "text plugin";
+        op->title = "testing text plugin";
         plugins.push_back(op);
+
+        input_plugin = new InputPlugin();
+        input_plugin->displaySize = ImVec2(300, 300);
+        input_plugin->title = "Input";
+        plugins.push_back(input_plugin);
+        
+        output_plugin = new OutputPlugin();
+        output_plugin->displaySize = ImVec2(300, 300);
+        output_plugin->title = "Output";
+        plugins.push_back(output_plugin);
     }
 
     void update() {
         handleInput();
         for(auto p: plugins)
             p->update();
+        output_plugin->clear();
+        output_plugin->write(input_plugin->read());
     }
 
     void show(bool *p_open) {
