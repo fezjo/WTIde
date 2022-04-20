@@ -31,6 +31,7 @@ protected:
 public:
     bool alive = true;
     ImVec2 displaySize;
+    std::string title;
 
 protected:
     imid_t id;

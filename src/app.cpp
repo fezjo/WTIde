@@ -4,6 +4,9 @@
 #include "plugins/plugin.h"
 #include "plugins/editor.h"
 #include "plugins/filetree.h"
+#include "plugins/text_plugin.h"
+#include "plugins/input.h"
+#include "plugins/output.h"
 
 class App {
 public:
@@ -39,6 +42,11 @@ public:
         ft->displaySize = ImVec2(120, 640);
         ft->setPath(fs::path("."));
         plugins.push_back(ft);
+
+        TextPlugin *op = new TextPlugin();
+        op->displaySize = ImVec2(300, 300);
+        op->title = "text plugin";
+        plugins.push_back(op);
     }
 
     void update() {

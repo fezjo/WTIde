@@ -6,7 +6,6 @@
 #include "plugin.h"
 
 class ZepWrapper : public IPlugin, public Zep::IZepComponent {
-    std::string title;
     Zep::ZepEditor_ImGui zepEditor;
     std::function<void(std::shared_ptr<Zep::ZepMessage>)> Callback;
 

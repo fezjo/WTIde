@@ -28,6 +28,7 @@ FileTree::FileTree(std::function<void(fs::path)> _open_callback):
     popup_string({})
 {
     pluginType = PluginType::FileTree;
+    title = "FileTree";
 }
 
 void FileTree::update() {
@@ -281,7 +282,7 @@ void FileTree::refresh() {
 void FileTree::show() {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
-        ("FileTree##" + std::to_string(getId())).c_str(),
+        (title + "###" + std::to_string(getId())).c_str(),
         nullptr,
         ImGuiWindowFlags_MenuBar
     ))
