@@ -21,10 +21,10 @@ enum class PopupType {
     Rename
 };
 
-class FileTree: public IPlugin {
+class FileTreePlugin: public IPlugin {
 public:
-    FileTree() = default;
-    FileTree(std::function<void(fs::path)> _open_callback);
+    FileTreePlugin() = default;
+    FileTreePlugin(std::function<void(fs::path)> _open_callback);
     void update() override;
     void show() override;
     void destroy() override;

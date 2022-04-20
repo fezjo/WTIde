@@ -52,10 +52,7 @@ void TextPlugin::destroy() {
 
 }
 
-
 bool TextPlugin::clear() {
-    if (readonly)
-        return false;
     data.clear();
     return true;
 }
@@ -65,12 +62,10 @@ std::string TextPlugin::read(size_t start, size_t size) {
 }
 
 bool TextPlugin::write(const std::string &_data, size_t start) {
-    if (readonly)
-        return false;
     start = std::min(start, data.size());
     size_t new_size = std::max(data.size(), start + _data.size());
     data.resize(new_size);
-    _data.copy(data.data(), start, _data.size());
+    _data.copy(data.data(), _data.size(), start);
     return true;
 }
 

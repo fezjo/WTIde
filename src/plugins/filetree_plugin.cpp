@@ -1,4 +1,4 @@
-#include "filetree.h"
+#include "filetree_plugin.h"
 
 
 FileTreeNode::FileTreeNode(fs::path path): path(path), initialized(false) {}
@@ -22,7 +22,7 @@ void FileTreeNode::refresh() {
     children.clear();
 }
 
-FileTree::FileTree(std::function<void(fs::path)> _open_callback):
+FileTreePlugin::FileTreePlugin(std::function<void(fs::path)> _open_callback):
     open_callback(_open_callback), 
     popup_type(PopupType::None),
     popup_string({})
@@ -31,7 +31,7 @@ FileTree::FileTree(std::function<void(fs::path)> _open_callback):
     title = "FileTree";
 }
 
-void FileTree::update() {
+void FileTreePlugin::update() {
 
 }
 
@@ -56,12 +56,12 @@ bool wasNodeSelected() {
     return ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen();
 }
 
-void FileTree::openAllSelected() {
+void FileTreePlugin::openAllSelected() {
     for(auto p: selection)
         open_callback(p);
 }
 
-bool FileTree::showFileMenu() {
+bool FileTreePlugin::showFileMenu() {
     if (ImGui::BeginPopupContextItem())
     {
         if (ImGui::Selectable("Rename"))
@@ -83,7 +83,7 @@ bool FileTree::showFileMenu() {
     return false;
 }
 
-void FileTree::handleItem(bool is_dir, fs::path path) {
+void FileTreePlugin::handleItem(bool is_dir, fs::path path) {
     if (is_dir)
     {
         if (wasNodeSelected())
@@ -110,7 +110,7 @@ void FileTree::handleItem(bool is_dir, fs::path path) {
         handlePopupActions();
 }
 
-void FileTree::showTree(
+void FileTreePlugin::showTree(
     FileTreeNode &node,
     ImGuiTreeNodeFlags base_flags,
     uint &node_i
@@ -137,7 +137,7 @@ void FileTree::showTree(
             node_flags = base_flags;
             if (fs::is_directory(c_node.path))
             {
-                FileTree::showTree(c_node, base_flags, node_i);
+                FileTreePlugin::showTree(c_node, base_flags, node_i);
             }
             else
             {
@@ -153,7 +153,7 @@ void FileTree::showTree(
     }
 }
 
-bool FileTree::showFileNameActionPopup() {
+bool FileTreePlugin::showFileNameActionPopup() {
     bool res = false;
     if (ImGui::BeginPopup("filetree_name_action_popup"))
     {
@@ -181,7 +181,7 @@ bool FileTree::showFileNameActionPopup() {
     return res;
 }
 
-void FileTree::handlePopupActions() {
+void FileTreePlugin::handlePopupActions() {
     if (popup_type == PopupType::None)
         return;
     if (target_path.empty())
@@ -236,7 +236,7 @@ void FileTree::handlePopupActions() {
     }
 }
 
-bool FileTree::createFile() {
+bool FileTreePlugin::createFile() {
     if (!popup_string[0])
         return false;
     fs::path create_path = target_path / popup_string.data();
@@ -247,7 +247,7 @@ bool FileTree::createFile() {
     return creation.good();
 }
 
-bool FileTree::createDirectory() {
+bool FileTreePlugin::createDirectory() {
     if (!popup_string[0])
         return false;
     fs::path create_path = target_path / popup_string.data();
@@ -256,7 +256,7 @@ bool FileTree::createDirectory() {
     return fs::create_directory(create_path);
 }
 
-bool FileTree::renameFile() {
+bool FileTreePlugin::renameFile() {
     if (!popup_string[0])
         return false;
     fs::path create_path = target_path.parent_path() / popup_string.data();
@@ -273,13 +273,13 @@ bool FileTree::renameFile() {
     return true;
 }
 
-void FileTree::refresh() {
+void FileTreePlugin::refresh() {
     if (files_changed)
         root.refresh();
     files_changed = false;
 }
 
-void FileTree::show() {
+void FileTreePlugin::show() {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
         (title + "###" + std::to_string(getId())).c_str(),
@@ -340,7 +340,7 @@ void FileTree::show() {
     }
 
     uint node_i = 0;
-    FileTree::showTree(root, ImGuiTreeNodeFlags_SpanAvailWidth, node_i);
+    FileTreePlugin::showTree(root, ImGuiTreeNodeFlags_SpanAvailWidth, node_i);
 
     refresh();
 
@@ -352,14 +352,14 @@ void FileTree::show() {
     ImGui::End();
 }
 
-void FileTree::destroy() {
+void FileTreePlugin::destroy() {
 }
 
-fs::path FileTree::getPath() {
+fs::path FileTreePlugin::getPath() {
     return root.path;
 }
 
-fs::path FileTree::setPath(fs::path path) {
+fs::path FileTreePlugin::setPath(fs::path path) {
     root.path = path;
     root.refresh();
     return getPath();

@@ -3,7 +3,7 @@
 #endif
 
 #include <clip.h>
-#include "editor.h"
+#include "editor_plugin.h"
 #include "wt_syntax.h"
 #include "config_app.h"
 
@@ -35,7 +35,7 @@ private:
     cmdFunc m_func;
 };
 
-ZepWrapper::ZepWrapper(
+EditorPlugin::EditorPlugin(
     const fs::path& rootPath,
     const Zep::NVec2f& pixelScale,
     std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB,
@@ -58,12 +58,12 @@ ZepWrapper::ZepWrapper(
     pluginType = PluginType::Editor;
 }
 
-Zep::ZepEditor& ZepWrapper::GetEditor() const
+Zep::ZepEditor& EditorPlugin::GetEditor() const
 {
     return (Zep::ZepEditor&)zepEditor;
 }
 
-void ZepWrapper::Notify(std::shared_ptr<Zep::ZepMessage> message)
+void EditorPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message)
 {
     if (message->messageId == Msg::GetClipBoard)
     {
@@ -112,22 +112,22 @@ void ZepWrapper::Notify(std::shared_ptr<Zep::ZepMessage> message)
         Callback(message);
 }
 
-void ZepWrapper::HandleInput()
+void EditorPlugin::HandleInput()
 {
     zepEditor.HandleInput();
 }
 
-ZepWrapper* ZepWrapper::init(const Zep::NVec2f& pixelScale, std::string rootPath)
+EditorPlugin* EditorPlugin::init(const Zep::NVec2f& pixelScale, std::string rootPath)
 {
     static uint editor_id = 0;
-    ZepWrapper *zw = new ZepWrapper(
+    EditorPlugin *ep = new EditorPlugin(
         rootPath.empty() ? APP_ROOT : rootPath,
         Zep::NVec2f(pixelScale.x, pixelScale.y),
         [](std::shared_ptr<ZepMessage> spMessage) -> void {},
         editor_id++
     );
 
-    auto& display = zw->GetEditor().GetDisplay();
+    auto& display = ep->GetEditor().GetDisplay();
     auto pImFont = ImGui::GetIO().Fonts[0].Fonts[0];
     auto pixelHeight = pImFont->FontSize;
     display.SetFont(ZepTextType::UI, std::make_shared<ZepFont_ImGui>(display, pImFont, int(pixelHeight)));
@@ -135,24 +135,24 @@ ZepWrapper* ZepWrapper::init(const Zep::NVec2f& pixelScale, std::string rootPath
     display.SetFont(ZepTextType::Heading1, std::make_shared<ZepFont_ImGui>(display, pImFont, int(pixelHeight * 1.5)));
     display.SetFont(ZepTextType::Heading2, std::make_shared<ZepFont_ImGui>(display, pImFont, int(pixelHeight * 1.25)));
     display.SetFont(ZepTextType::Heading3, std::make_shared<ZepFont_ImGui>(display, pImFont, int(pixelHeight * 1.125)));
-    return zw;
+    return ep;
 }
 
-void ZepWrapper::update()
+void EditorPlugin::update()
 {
     GetEditor().RefreshRequired();
 }
 
-void ZepWrapper::destroy()
+void EditorPlugin::destroy()
 {
 }
 
-void ZepWrapper::load(const Zep::ZepPath& file)
+void EditorPlugin::load(const Zep::ZepPath& file)
 {
     auto pBuffer = GetEditor().InitWithFileOrDir(file);
 }
 
-void ZepWrapper::show()
+void EditorPlugin::show()
 {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     auto windowClass = ImGuiWindowClass();
@@ -164,7 +164,7 @@ void ZepWrapper::show()
     if (!ImGui::Begin(
         (title + "###" + std::to_string(getId())).c_str(),
         &alive,
-        ImGuiWindowFlags_NoScrollbar // TODO | ImGuiWindowFlags_NoSavedSettings
+        ImGuiWindowFlags_None // TODO | ImGuiWindowFlags_NoSavedSettings
     ))
     {
         ImGui::End();

@@ -2,11 +2,11 @@
 #include <zep.h>
 #include "utils.h"
 #include "plugins/plugin.h"
-#include "plugins/editor.h"
-#include "plugins/filetree.h"
+#include "plugins/editor_plugin.h"
+#include "plugins/filetree_plugin.h"
 #include "plugins/text_plugin.h"
-#include "plugins/input.h"
-#include "plugins/output.h"
+#include "plugins/input_plugin.h"
+#include "plugins/output_plugin.h"
 
 class App {
 public:
@@ -15,9 +15,10 @@ public:
 protected:
     bool initialized = false;
     ImGuiWindowFlags flags;
-    std::vector<ZepWrapper*> zepWrappers;
-    FileTree *ft;
-    std::vector<IPlugin*> plugins; 
+    std::vector<EditorPlugin*> editor_plugins;
+    FileTreePlugin *filetree_plugin;
+    std::vector<IPlugin*> plugins;
+    
 
 public:
     App() = default;
@@ -36,12 +37,12 @@ public:
         // Called once the fonts/device is guaranteed setup
         openEditor(fs::path("..") / "src" / "WTEdu.cpp", false);
         openEditor(fs::path("nonexistent.cpp"), false);
-        zepWrappers[1]->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
+        editor_plugins[1]->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
 
-        ft = new FileTree(std::bind(&App::openEditor, this, std::placeholders::_1, true));
-        ft->displaySize = ImVec2(120, 640);
-        ft->setPath(fs::path("."));
-        plugins.push_back(ft);
+        filetree_plugin = new FileTreePlugin(std::bind(&App::openEditor, this, std::placeholders::_1, true));
+        filetree_plugin->displaySize = ImVec2(120, 640);
+        filetree_plugin->setPath(fs::path("."));
+        plugins.push_back(filetree_plugin);
 
         TextPlugin *op = new TextPlugin();
         op->displaySize = ImVec2(300, 300);
@@ -122,7 +123,7 @@ public:
 
     void destroy_plugin(IPlugin *plugin) {
         if (plugin->getPluginType() == PluginType::Editor)
-            zepWrappers.erase(find(zepWrappers.begin(), zepWrappers.end(), plugin));
+            editor_plugins.erase(find(editor_plugins.begin(), editor_plugins.end(), plugin));
         plugins.erase(find(plugins.begin(), plugins.end(), plugin));
         plugin->destroy();
         free(plugin);
@@ -134,23 +135,23 @@ public:
     }
 
     void openEditor(fs::path path="", bool mimickLastFocused=true) {
-        ZepWrapper *zw = ZepWrapper::init(Zep::NVec2f(1.0f, 1.0f));
-        zw->displaySize = ImVec2(640, 480);
+        EditorPlugin *ep = EditorPlugin::init(Zep::NVec2f(1.0f, 1.0f));
+        ep->displaySize = ImVec2(640, 480);
         if (!path.empty())
-            zw->load(Zep::ZepPath(path));
-        zepWrappers.push_back(zw);
-        plugins.push_back(zw);
+            ep->load(Zep::ZepPath(path));
+        editor_plugins.push_back(ep);
+        plugins.push_back(ep);
 
-        if (mimickLastFocused && !zepWrappers.empty())
+        if (mimickLastFocused && !editor_plugins.empty())
         {
-            std::pair<timepoint, ZepWrapper*> latest = {zepWrappers[0]->lastFocusedTime, nullptr};
-            for (ZepWrapper *zwi: zepWrappers)
+            std::pair<timepoint, EditorPlugin*> latest = {editor_plugins[0]->lastFocusedTime, nullptr};
+            for (EditorPlugin *epi: editor_plugins)
             {
-                if (zwi->lastFocusedTime >= latest.first)
-                    latest = {zwi->lastFocusedTime, zwi};
+                if (epi->lastFocusedTime >= latest.first)
+                    latest = {epi->lastFocusedTime, epi};
             }
             ImGui::SetNextWindowDockID(latest.second->dockId);
-            zw->show();
+            ep->show();
         }
     }
 };
