@@ -7,6 +7,7 @@
 #include "plugins/text_plugin.h"
 #include "plugins/input_plugin.h"
 #include "plugins/output_plugin.h"
+#include "plugins/debugger_control_plugin.h"
 
 class App {
 public:
@@ -19,6 +20,7 @@ protected:
     FileTreePlugin *filetree_plugin;
     InputPlugin *input_plugin;
     OutputPlugin *output_plugin;
+    DebuggerControlPlugin *debugger_control_plugin;
     std::vector<IPlugin*> plugins;
 
 public:
@@ -37,8 +39,8 @@ public:
 
         // Called once the fonts/device is guaranteed setup
         openEditor(fs::path("..") / "src" / "WTEdu.cpp", false);
+        editor_plugins[0]->GetEditor().SetGlobalMode(Zep::ZepMode_Vim::StaticName());
         openEditor(fs::path("nonexistent.cpp"), false);
-        editor_plugins[1]->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
 
         filetree_plugin = new FileTreePlugin(std::bind(&App::openEditor, this, std::placeholders::_1, true));
         filetree_plugin->displaySize = ImVec2(120, 640);
@@ -59,6 +61,11 @@ public:
         output_plugin->displaySize = ImVec2(300, 300);
         output_plugin->title = "Output";
         plugins.push_back(output_plugin);
+        
+        debugger_control_plugin = new DebuggerControlPlugin();
+        debugger_control_plugin->displaySize = ImVec2(250, 100);
+        debugger_control_plugin->title = "Debug Control";
+        plugins.push_back(debugger_control_plugin);
     }
 
     void update() {
@@ -150,6 +157,7 @@ public:
     void openEditor(fs::path path="", bool mimickLastFocused=true) {
         EditorPlugin *ep = EditorPlugin::init(Zep::NVec2f(1.0f, 1.0f));
         ep->displaySize = ImVec2(640, 480);
+        ep->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
         if (!path.empty())
             ep->load(Zep::ZepPath(path));
         editor_plugins.push_back(ep);
