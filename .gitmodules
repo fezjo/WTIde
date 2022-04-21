@@ -13,3 +13,6 @@
 [submodule "lib/clip"]
 	path = lib/clip
 	url = https://github.com/dacap/clip.git
+[submodule "lib/wtstar"]
+	path = lib/wtstar
+	url = https://github.com/pocestny/wtstar.git

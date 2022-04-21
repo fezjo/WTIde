@@ -40,8 +40,8 @@ target_link_libraries(
         OpenGL::OpenGL
         ImGui
         Zep::Zep
+        WTStar
         clip
-        tinydir
         stdc++fs
 )
 
