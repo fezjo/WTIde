@@ -3,6 +3,7 @@
 void DebuggerControlPlugin::update() {
 
 }
+
 void DebuggerControlPlugin::show() {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
@@ -16,11 +17,12 @@ void DebuggerControlPlugin::show() {
     }
 
     if (ImGui::Button("Set source"))
-        debugger.setSource(source_fn);
+        setSource(source_fn);
     ImGui::SameLine();
     ImGui::InputText("##source_fn", &source_fn);
 
     if (ImGui::Button("Run")) {
+        callbacks["set_input"](0);
         debugger.runExecution();
     }
     ImGui::SameLine();
@@ -87,6 +89,16 @@ void DebuggerControlPlugin::show() {
     }
     ImGui::End();
 }
+
 void DebuggerControlPlugin::destroy() {
 
+}
+
+void DebuggerControlPlugin::setSource(const std::string &source) {
+    source_fn = source;
+    debugger.setSource(source);
+}
+
+void DebuggerControlPlugin::setInput(const std::string &input) {
+    debugger.setInput(input);
 }

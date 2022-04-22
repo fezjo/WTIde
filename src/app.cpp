@@ -59,6 +59,7 @@ public:
         input_plugin = new InputPlugin();
         input_plugin->displaySize = ImVec2(300, 300);
         input_plugin->title = "Input";
+        input_plugin->write("5\n[1 2 3 4 5]\n"); // TODO testing
         plugins.push_back(input_plugin);
         
         output_plugin = new OutputPlugin();
@@ -69,6 +70,10 @@ public:
         debugger_control_plugin = new DebuggerControlPlugin();
         debugger_control_plugin->displaySize = ImVec2(250, 100);
         debugger_control_plugin->title = "Debug Control";
+        debugger_control_plugin->setCallback("set_input", [&](CallbackData data) {
+            debugger_control_plugin->setInput(input_plugin->read());
+            return true;
+        });
         plugins.push_back(debugger_control_plugin);
     }
 

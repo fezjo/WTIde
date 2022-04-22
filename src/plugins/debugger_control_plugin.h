@@ -11,6 +11,9 @@ public:
     virtual void show() override;
     virtual void destroy() override;
 
+    void setSource(const std::string &source);
+    void setInput(const std::string &input);
+
     // void runExecution();
     // void continueExecution();
     // void stopExecution();
@@ -27,5 +30,5 @@ public:
     
 protected:
     Debugger debugger;
-    std::string source_fn = "test.wt";
+    std::string source_fn = "test.wt"; // TODO testing
 };
