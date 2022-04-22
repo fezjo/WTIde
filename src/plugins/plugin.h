@@ -14,11 +14,16 @@ enum class PluginType {
     Search
 };
 
+using CallbackData = std::variant<bool, int, std::string>;
+using CallbackFunction = std::function<CallbackData(CallbackData)>;
+
 class IPlugin {
 public:
     virtual void update() = 0;
     virtual void show() = 0;
     virtual void destroy() = 0;
+    virtual void setCallback(const std::string &name, CallbackFunction callback) { callbacks[name] = callback;}
+    virtual void unsetCallback(const std::string &name) { callbacks.erase(name); }
 
     imid_t getId() { return id; }
     PluginType getPluginType() { return pluginType; }
@@ -37,4 +42,5 @@ public:
 protected:
     imid_t id;
     PluginType pluginType;
+    std::unordered_map<std::string, CallbackFunction> callbacks;
 };

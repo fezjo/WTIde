@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <list>
 #include <chrono>
+#include <variant>
 
 namespace fs = std::filesystem;
 

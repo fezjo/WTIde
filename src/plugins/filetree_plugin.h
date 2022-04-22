@@ -23,8 +23,7 @@ enum class PopupType {
 
 class FileTreePlugin: public IPlugin {
 public:
-    FileTreePlugin() = default;
-    FileTreePlugin(std::function<void(fs::path)> _open_callback);
+    FileTreePlugin();
     void update() override;
     void show() override;
     void destroy() override;
@@ -57,8 +56,6 @@ private:
     std::set<fs::path> selection;
     FileTreeNode root;
     bool files_changed;
-
-    std::function<void(fs::path)> open_callback;
 
     fs::path target_path;
     PopupType popup_type;

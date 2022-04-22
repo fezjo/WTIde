@@ -42,7 +42,11 @@ public:
         editor_plugins[0]->GetEditor().SetGlobalMode(Zep::ZepMode_Vim::StaticName());
         openEditor(fs::path("nonexistent.cpp"), false);
 
-        filetree_plugin = new FileTreePlugin(std::bind(&App::openEditor, this, std::placeholders::_1, true));
+        filetree_plugin = new FileTreePlugin();
+        filetree_plugin->setCallback("open_file", [&](CallbackData data) {
+            openEditor(std::get<std::string>(data), true);
+            return true;
+        });
         filetree_plugin->displaySize = ImVec2(120, 640);
         filetree_plugin->setPath(fs::path("."));
         plugins.push_back(filetree_plugin);

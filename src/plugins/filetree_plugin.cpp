@@ -22,8 +22,7 @@ void FileTreeNode::refresh() {
     children.clear();
 }
 
-FileTreePlugin::FileTreePlugin(std::function<void(fs::path)> _open_callback):
-    open_callback(_open_callback), 
+FileTreePlugin::FileTreePlugin():
     popup_type(PopupType::None),
     popup_string({})
 {
@@ -58,7 +57,7 @@ bool wasNodeSelected() {
 
 void FileTreePlugin::openAllSelected() {
     for(auto p: selection)
-        open_callback(p);
+        callbacks["open_file"](p);
 }
 
 bool FileTreePlugin::showFileMenu() {
