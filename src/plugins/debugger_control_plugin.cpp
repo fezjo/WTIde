@@ -15,30 +15,39 @@ void DebuggerControlPlugin::show() {
         return;
     }
 
+    if (ImGui::Button("Set source"))
+        debugger.setSource(source_fn);
+    ImGui::SameLine();
+    ImGui::InputText("##source_fn", &source_fn);
+
     if (ImGui::Button("Run")) {
-        runExecution();
+        debugger.runExecution();
     }
     ImGui::SameLine();
     if (ImGui::Button("Continue")) {
-        continueExecution();
+        debugger.continueExecution();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Pause")) {
+        debugger.pauseExecution();
     }
     ImGui::SameLine();
     if (ImGui::Button("Stop")) {
-        stopExecution();
+        debugger.stopExecution();
     }
 
     ImGui::Text("Step");
     ImGui::SameLine();
     if (ImGui::Button("Over")) {
-        stepOver();
+        debugger.stepOver();
     }
     ImGui::SameLine();
     if (ImGui::Button("Into")) {
-        stepInto();
+        debugger.stepInto();
     }
     ImGui::SameLine();
     if (ImGui::Button("Out")) {
-        stepOut();
+        debugger.stepOut();
     }
 
     if (ImGui::Button("Breakpoints")) {
@@ -54,7 +63,7 @@ void DebuggerControlPlugin::show() {
             ImGui::InputText("File", fileBuffer, sizeof(fileBuffer));
             ImGui::InputInt("Line", &lineBuffer);
             if (ImGui::Button("Add")) {
-                setBreakpoint(fileBuffer, lineBuffer);
+                debugger.setBreakpoint(fileBuffer, lineBuffer);
             }
             ImGui::EndPopup();
         }
@@ -66,54 +75,18 @@ void DebuggerControlPlugin::show() {
             ImGui::InputText("File", fileBuffer, sizeof(fileBuffer));
             ImGui::InputInt("Line", &lineBuffer);
             if (ImGui::Button("Remove")) {
-                removeBreakpoint(fileBuffer, lineBuffer);
+                debugger.removeBreakpoint(fileBuffer, lineBuffer);
             }
             ImGui::EndPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("Remove All")) {
-            removeAllBreakpoints();
+            debugger.removeAllBreakpoints();
         }
         ImGui::EndPopup();
     }
     ImGui::End();
 }
 void DebuggerControlPlugin::destroy() {
-
-}
-
-void DebuggerControlPlugin::runExecution() {
-
-}
-void DebuggerControlPlugin::continueExecution() {
-
-}
-void DebuggerControlPlugin::stopExecution() {
-
-}
-
-void DebuggerControlPlugin::stepOver() {
-
-}
-void DebuggerControlPlugin::stepInto() {
-
-}
-void DebuggerControlPlugin::stepOut() {
-
-}
-
-void DebuggerControlPlugin::setBreakpoint(const std::string &file, int line) {
-
-}
-void DebuggerControlPlugin::removeBreakpoint(const std::string &file, int line) {
-
-}
-void DebuggerControlPlugin::removeAllBreakpoints() {
-
-}
-void DebuggerControlPlugin::setBreakpointEnabled(const std::string &file, int line, bool enabled) {
-
-}
-void DebuggerControlPlugin::setBreakpointCondition(const std::string &file, int line, const std::string &condition) {
 
 }
