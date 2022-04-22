@@ -1,7 +1,7 @@
 #include "filetree_plugin.h"
 
 
-FileTreeNode::FileTreeNode(fs::path path): path(path), initialized(false) {}
+FileTreeNode::FileTreeNode(fs::path path): initialized(false), path(path) {}
 
 std::vector<FileTreeNode>& FileTreeNode::listDir() {
     if (!initialized)
@@ -23,9 +23,9 @@ void FileTreeNode::refresh() {
 }
 
 FileTreePlugin::FileTreePlugin():
+    files_changed(false),
     popup_type(PopupType::None),
-    popup_string(""),
-    files_changed(false)
+    popup_string("")
 {
     pluginType = PluginType::FileTree;
     title = "FileTree";
@@ -76,7 +76,7 @@ bool FileTreePlugin::showFileMenu() {
             return true;
         }
 
-        if (ImGui::Selectable("Nothing"));
+        if (ImGui::Selectable("Nothing")) {}
         ImGui::EndPopup();
         return true;
     }
@@ -265,7 +265,7 @@ bool FileTreePlugin::renameFile() {
     {
         fs::rename(target_path, create_path);
     }
-    catch (fs::filesystem_error)
+    catch (fs::filesystem_error const&)
     {
         return false;
     }

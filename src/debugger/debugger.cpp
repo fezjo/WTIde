@@ -117,7 +117,7 @@ bool Debugger::initialize()
     reset();
     if (!compile() || !readBinary())
         return false;
-    env = WTStar::virtual_machine_t_new(binary.data(), binary.size());
+    env = WTStar::virtual_machine_t_new(binary.data(), static_cast<int>(binary.size()));
     std::cerr << "created virtual machine" << std::endl;
     return true;
 }
@@ -157,6 +157,8 @@ int Debugger::runExecution()
 
 int Debugger::continueExecution()
 {
+    if (!env)
+        return -2;
     int resp = WTStar::execute(env, -1, 0, 1);
     std::cerr << "continueExecution execute stopped with resp " << resp << std::endl;
     return resp;
@@ -216,7 +218,7 @@ bool Debugger::setBreakpointEnabled(const std::string &file, int line, bool enab
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
-    if (!WTStar::enable_breakpoint(env, bp->bp_pos, enabled) == -1)
+    if (WTStar::enable_breakpoint(env, bp->bp_pos, enabled) == -1)
         return false;
     bp->enabled = enabled;
     return true;
@@ -225,10 +227,15 @@ bool Debugger::setBreakpointEnabled(const std::string &file, int line, bool enab
 bool Debugger::setBreakpointWithCondition(const std::string &file, int line, const std::string &condition)
 {
     uint32_t bp_pos = findInstructionNumber(file, line);
-    if (bp_pos == -1)
+    if (bp_pos == -1u)
         return false;
     std::vector<uint8_t> code = compileCondition(condition);
-    if (WTStar::add_breakpoint(env, bp_pos, code.empty() ? NULL : code.data(), code.size()) == -1)
+    if (WTStar::add_breakpoint(
+            env,
+            bp_pos,
+            code.empty() ? NULL : code.data(),
+            static_cast<uint32_t>(code.size())
+        ) == -1)
         return false;
     breakpoints.push_back({file, line, condition, true, bp_pos});
     return true;

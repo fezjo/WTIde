@@ -81,7 +81,7 @@ int main(int, char**)
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    SDL_TimerID my_timer_id = SDL_AddTimer(1000 / 10, minimum_refresh_rate_callback, NULL);
+    SDL_AddTimer(1000 / 10, minimum_refresh_rate_callback, NULL);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

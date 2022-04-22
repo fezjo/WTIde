@@ -38,8 +38,7 @@ private:
 EditorPlugin::EditorPlugin(
     const fs::path& rootPath,
     const Zep::NVec2f& pixelScale,
-    std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB,
-    imid_t _id
+    std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB
 ) :
     zepEditor(Zep::ZepPath(rootPath), pixelScale),
     Callback(fnCommandCB),
@@ -60,7 +59,7 @@ EditorPlugin::EditorPlugin(
 
 Zep::ZepEditor& EditorPlugin::GetEditor() const
 {
-    return (Zep::ZepEditor&)zepEditor;
+    return static_cast<Zep::ZepEditor&>(const_cast<Zep::ZepEditor_ImGui&>(zepEditor));
 }
 
 void EditorPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message)
@@ -119,12 +118,10 @@ void EditorPlugin::HandleInput()
 
 EditorPlugin* EditorPlugin::init(const Zep::NVec2f& pixelScale, std::string rootPath)
 {
-    static uint editor_id = 0;
     EditorPlugin *ep = new EditorPlugin(
         rootPath.empty() ? APP_ROOT : rootPath,
         Zep::NVec2f(pixelScale.x, pixelScale.y),
-        [](std::shared_ptr<ZepMessage> spMessage) -> void {},
-        editor_id++
+        [](std::shared_ptr<ZepMessage> spMessage) -> void {}
     );
 
     auto& display = ep->GetEditor().GetDisplay();
@@ -149,7 +146,7 @@ void EditorPlugin::destroy()
 
 void EditorPlugin::load(const Zep::ZepPath& file)
 {
-    auto pBuffer = GetEditor().InitWithFileOrDir(file);
+    GetEditor().InitWithFileOrDir(file);
 }
 
 void EditorPlugin::show()

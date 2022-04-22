@@ -17,8 +17,7 @@ public:
     EditorPlugin(
         const fs::path& rootPath,
         const Zep::NVec2f& pixelScale,
-        std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB,
-        imid_t _id
+        std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB
     );
     virtual Zep::ZepEditor& GetEditor() const override;
     virtual void Notify(std::shared_ptr<Zep::ZepMessage> message) override;

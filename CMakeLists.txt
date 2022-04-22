@@ -46,6 +46,7 @@ target_compile_options(
         -Wshadow -Wformat=2 -Wfloat-equal -Wconversion
         -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond
         -Wcast-qual -Wcast-align
+        -Wno-unused-parameter -Wno-shadow
 ) 
 
 configure_file(zep.cfg zep.cfg COPYONLY)
