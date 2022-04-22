@@ -24,7 +24,8 @@ void FileTreeNode::refresh() {
 
 FileTreePlugin::FileTreePlugin():
     popup_type(PopupType::None),
-    popup_string({})
+    popup_string(""),
+    files_changed(false)
 {
     pluginType = PluginType::FileTree;
     title = "FileTree";
@@ -160,8 +161,7 @@ bool FileTreePlugin::showFileNameActionPopup() {
         ImGui::SetKeyboardFocusHere(0);
         if (ImGui::InputText(
             "##filetree_create",
-            popup_string.data(),
-            popup_string.max_size(),
+            &popup_string,
             ImGuiInputTextFlags_EnterReturnsTrue
             ))
         {
@@ -174,7 +174,7 @@ bool FileTreePlugin::showFileNameActionPopup() {
     }
     else
     {
-        popup_string[0] = 0;
+        popup_string.clear();
         res = true;
     }
     return res;
@@ -200,7 +200,7 @@ void FileTreePlugin::handlePopupActions() {
     if (showFileNameActionPopup())
     {
         bool ok = true;
-        if (popup_string[0]) // if not cancelled
+        if (!popup_string.empty()) // if not cancelled
         {
             switch(popup_type)
             {
@@ -224,7 +224,7 @@ void FileTreePlugin::handlePopupActions() {
             target_path.clear();
             popup_type = PopupType::None;
             popup_location = "";
-            popup_string[0] = 0;
+            popup_string.clear();
             popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
             files_changed = true;
         }
@@ -236,9 +236,9 @@ void FileTreePlugin::handlePopupActions() {
 }
 
 bool FileTreePlugin::createFile() {
-    if (!popup_string[0])
+    if (popup_string.empty())
         return false;
-    fs::path create_path = target_path / popup_string.data();
+    fs::path create_path = target_path / popup_string;
     if (fs::exists(create_path))
         return false;
     std::fstream creation(create_path, std::fstream::out);
@@ -247,18 +247,18 @@ bool FileTreePlugin::createFile() {
 }
 
 bool FileTreePlugin::createDirectory() {
-    if (!popup_string[0])
+    if (popup_string.empty())
         return false;
-    fs::path create_path = target_path / popup_string.data();
+    fs::path create_path = target_path / popup_string;
     if (fs::exists(create_path))
         return false;
     return fs::create_directory(create_path);
 }
 
 bool FileTreePlugin::renameFile() {
-    if (!popup_string[0])
+    if (popup_string.empty())
         return false;
-    fs::path create_path = target_path.parent_path() / popup_string.data();
+    fs::path create_path = target_path.parent_path() / popup_string;
     if (fs::exists(create_path))
         return false;
     try

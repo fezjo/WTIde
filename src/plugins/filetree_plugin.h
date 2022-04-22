@@ -60,6 +60,6 @@ private:
     fs::path target_path;
     PopupType popup_type;
     std::string popup_location;
-    std::array<char, 64> popup_string;
+    std::string popup_string;
     ImVec4 popup_color;
 };
