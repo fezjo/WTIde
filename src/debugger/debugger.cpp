@@ -1,5 +1,26 @@
 #include "debugger.h"
 
+Writer::Writer() {
+    w = WTStar::writer_t_new(WTStar::WRITER_STRING);
+}
+
+Writer::Writer(const std::string &fn, const std::string &mode) {
+    w = WTStar::writer_t_new(WTStar::WRITER_FILE);
+    w->f = fopen(fn.c_str(), mode.c_str());
+}
+
+Writer::~Writer() {
+    WTStar::writer_t_delete(w);
+}
+
+std::string Writer::read(size_t pos, size_t len) {
+    if (w->type == WTStar::WRITER_FILE)
+        throw std::logic_error("Read from file-based writer is not yet supported");
+    pos = std::min(pos, static_cast<size_t>(w->str.ptr));
+    len = std::min(len, w->str.ptr - pos);
+    return std::string(w->str.base + pos, len);
+}
+
 Debugger::~Debugger()
 {
     reset();
@@ -83,6 +104,44 @@ bool Debugger::readInput()
     return env != nullptr;
 }
 
+void printOutVariable(Writer &wout, WTStar::virtual_machine_t *env, int var_i)
+{
+    WTStar::input_layout_item_t &var = env->out_vars[var_i];
+    if (var.num_dim > 0)
+    {
+        // int elem_size = count_size(&(var)); // TODO! why is this unused
+        uint8_t *global_mem =
+            STACK(STACK(env->threads, WTStar::stack_t*)[0], WTStar::thread_t*)[0]->mem->data;
+        uint32_t base = lval(global_mem + var.addr, uint32_t);
+
+        uint8_t nd = var.num_dim;
+        int *sizes = (int *)malloc(nd * sizeof(int));
+        for (int j = 0; j < nd; j++)
+            sizes[j] =
+                lval(global_mem + var.addr + 4 * (j + 2), uint32_t);
+        WTStar::print_array(wout.w, env, &(var), nd, sizes, base, 0, 0);
+        free(sizes);
+    }
+    else
+        WTStar::print_var(
+            wout.w,
+            STACK(STACK(env->threads, WTStar::stack_t*)[0], WTStar::thread_t*)[0]->mem->data +
+                var.addr,
+            &(var));
+    WTStar::out_text(wout.w, "\n");
+}
+
+std::string Debugger::getOutput()
+{
+    if (!env)
+        return "";
+    Writer wout;
+    for (uint i = 0; i < env->n_out_vars; i++)
+        printOutVariable(wout, env, i);
+    WTStar::out_text(wout.w, "work: %d\ntime: %d\n", env->W, env->T);
+    return wout.read();
+}
+
 bool Debugger::compile()
 {
     if (source_fn.empty())
@@ -96,11 +155,9 @@ bool Debugger::compile()
     ast = WTStar::driver_parse(ip, source_fn.c_str());
     std::cerr << "parsed source into ast" << std::endl;
 
-    WTStar::writer_t *out = WTStar::writer_t_new(WTStar::WRITER_FILE);
-    out->f = fopen(binary_fn.c_str(), "wb");
-    int resp = WTStar::emit_code(ast, out, 0);
+    Writer out(binary_fn, "wb");
+    int resp = WTStar::emit_code(ast, out.w, 0);
     std::cerr << "emited code into " << binary_fn << " with resp " << resp << std::endl;
-    WTStar::writer_t_delete(out);
     
     if (resp)
     {

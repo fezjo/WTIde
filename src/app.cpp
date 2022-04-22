@@ -74,6 +74,11 @@ public:
             debugger_control_plugin->setInput(input_plugin->read());
             return true;
         });
+        debugger_control_plugin->setCallback("set_output", [&](CallbackData data) {
+            output_plugin->clear();
+            output_plugin->write(std::get<std::string>(data));
+            return true;
+        });
         plugins.push_back(debugger_control_plugin);
     }
 
@@ -81,8 +86,6 @@ public:
         handleInput();
         for(auto p: plugins)
             p->update();
-        output_plugin->clear();
-        output_plugin->write(input_plugin->read());
     }
 
     void show(bool *p_open) {

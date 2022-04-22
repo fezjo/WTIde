@@ -21,6 +21,16 @@ struct Breakpoint {
     uint32_t bp_pos;
 };
 
+class Writer {
+public:
+    Writer();
+    Writer(const std::string &fn, const std::string &mode);
+    ~Writer();
+    std::string read(size_t pos=0, size_t len=-1);
+
+    WTStar::writer_t *w;
+};
+
 using code_t = std::vector<uint8_t>;
 
 class Debugger {
@@ -30,6 +40,7 @@ public:
 
     bool setSource(const std::string &source_fn);
     void setInput(const std::string &input);
+    std::string getOutput();
 
     uint32_t findInstructionNumber(const std::string &file, int line);
     Breakpoint* findBreakpoint(const std::string &file, int line);

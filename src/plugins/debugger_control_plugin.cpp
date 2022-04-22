@@ -23,11 +23,13 @@ void DebuggerControlPlugin::show() {
 
     if (ImGui::Button("Run")) {
         callbacks["set_input"](0);
-        debugger.runExecution();
+        if (debugger.runExecution() == -1)
+            callbacks["set_output"](debugger.getOutput());
     }
     ImGui::SameLine();
     if (ImGui::Button("Continue")) {
-        debugger.continueExecution();
+        if (debugger.continueExecution() == -1)
+            callbacks["set_output"](debugger.getOutput());
     }
     ImGui::SameLine();
     if (ImGui::Button("Pause")) {
