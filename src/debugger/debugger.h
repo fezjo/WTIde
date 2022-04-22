@@ -29,6 +29,7 @@ public:
     ~Debugger();
 
     bool setSource(const std::string &source_fn);
+    void setInput(const std::string &input);
 
     uint32_t findInstructionNumber(const std::string &file, int line);
     Breakpoint* findBreakpoint(const std::string &file, int line);
@@ -52,6 +53,7 @@ public:
 protected:
     void reset();
     bool readBinary();
+    bool readInput();
     bool compile();
     bool initialize();
 
@@ -59,6 +61,8 @@ protected:
     std::string source_fn = "";
     std::string binary_fn = "";
     code_t binary = {};
+    std::string input = "";
+    
     WTStar::virtual_machine_t *env = nullptr;
     WTStar::ast_t *ast = nullptr;
     WTStar::include_project_t *ip = nullptr;

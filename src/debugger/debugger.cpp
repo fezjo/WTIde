@@ -22,16 +22,24 @@ bool Debugger::setSource(const std::string &file)
     return true;
 }
 
+void Debugger::setInput(const std::string &input)
+{
+    this->input = input;
+}
+
 void Debugger::reset()
 {
     binary_fn.clear();
     binary.clear();
     if (env)
         WTStar::virtual_machine_t_delete(env);
+    env = nullptr;
     if (ip)
         WTStar::driver_destroy(ip);
+    ip = nullptr;
     if (ast)
         WTStar::ast_t_delete(ast);
+    ast = nullptr;
     std::cerr << "reset" << std::endl;
 }
 
@@ -53,6 +61,26 @@ bool Debugger::readBinary()
     ifs.close();
     std::cerr << "read " << binary_fn << " " << size << " bytes" << std::endl;
     return true;
+}
+
+bool Debugger::readInput()
+{
+    if (input.empty())
+    {
+        std::cerr << "empty input" << std::endl;
+        return false;
+    }
+    if (!env)
+    {
+        std::cerr << "not compiled" << std::endl;
+        return false;
+    }
+    WTStar::reader_t *in = reader_t_new(WTStar::READER_STRING, input.c_str());
+    if (WTStar::read_input(in, env) != 0)
+        reset();
+    WTStar::reader_t_delete(in);
+    std::cerr << "read input success" << (env != nullptr) << std::endl;
+    return env != nullptr;
 }
 
 bool Debugger::compile()
@@ -122,7 +150,7 @@ std::vector<uint8_t> Debugger::compileCondition(const std::string &condition)
 
 int Debugger::runExecution()
 {
-    if (!initialize())
+    if (!initialize() || !readInput())
         return -2;
     return continueExecution();
 }
