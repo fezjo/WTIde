@@ -1,11 +1,5 @@
-add_definitions(-Wall -Wextra) # todo
-
-file(GLOB_RECURSE SOURCE_FILES
-    src *.cpp
-)
-file(GLOB_RECURSE HEADER_FILES
-    src *.h
-)
+file(GLOB_RECURSE SOURCE_FILES src *.cpp)
+file(GLOB_RECURSE HEADER_FILES src *.h)
 
 target_sources(
     ${TARGET_NAME}

@@ -13,18 +13,19 @@ target_link_libraries(
         OpenGL::OpenGL
 )
 target_include_directories("ImGui"
-    PUBLIC
+    SYSTEM PUBLIC
         ${IMGUI_PATH}
         ${IMGUI_PATH}/backends
         ${IMGUI_PATH}/misc/cpp)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zep/src)
 set(APP_ROOT ${CMAKE_SOURCE_DIR})
-configure_file(${CMAKE_SOURCE_DIR}/cmake/config_app.h.cmake config_app.h, COPYONLY)
+target_include_directories(Zep SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/zep/include)
+configure_file(${CMAKE_SOURCE_DIR}/cmake/config_app.h.cmake config_app.h COPYONLY)
 
 set(CLIP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/clip)
 add_subdirectory(${CLIP_PATH})
-target_include_directories(clip PUBLIC ${CLIP_PATH})
+target_include_directories(clip SYSTEM PUBLIC ${CLIP_PATH})
 
 set(WTSTAR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wtstar)
 file(GLOB WTSTAR_SOURCES ${WTSTAR_PATH}/src/*.c)
