@@ -24,3 +24,5 @@ extern std::hash<std::string> hash_string;
 
 using timepoint = std::chrono::time_point<std::chrono::steady_clock>;
 timepoint get_time();
+
+bool ends_with(const std::string &str, const std::string &suffix);
