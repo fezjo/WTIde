@@ -31,6 +31,11 @@ set(WTSTAR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wtstar)
 file(GLOB WTSTAR_SOURCES ${WTSTAR_PATH}/src/*.c)
 list(REMOVE_ITEM WTSTAR_SOURCES 
     ${WTSTAR_PATH}/src/parser_utils.c 
-    ${WTSTAR_PATH}/src/web_interface.c)
-add_library("WTStar" STATIC ${WTSTAR_SOURCES}) # TODO SHARED
+    ${WTSTAR_PATH}/src/web_interface.c
+    ${WTSTAR_PATH}/src/wtc.c
+    ${WTSTAR_PATH}/src/wtrun.c
+    ${WTSTAR_PATH}/src/wtdb.c
+    ${WTSTAR_PATH}/src/wtdump.c
+)
+add_library("WTStar" SHARED ${WTSTAR_SOURCES})
 target_include_directories(WTStar PUBLIC ${WTSTAR_PATH}/src)
