@@ -20,6 +20,7 @@ protected:
     FileTreePlugin *filetree_plugin;
     InputPlugin *input_plugin;
     OutputPlugin *output_plugin;
+    OutputPlugin *compiler_output_plugin;
     DebuggerControlPlugin *debugger_control_plugin;
     std::vector<IPlugin*> plugins;
 
@@ -66,6 +67,11 @@ public:
         output_plugin->displaySize = ImVec2(300, 300);
         output_plugin->title = "Output";
         plugins.push_back(output_plugin);
+
+        compiler_output_plugin = new OutputPlugin();
+        compiler_output_plugin->displaySize = ImVec2(300, 300);
+        compiler_output_plugin->title = "Compiler output";
+        plugins.push_back(compiler_output_plugin);
         
         debugger_control_plugin = new DebuggerControlPlugin();
         debugger_control_plugin->displaySize = ImVec2(250, 100);
@@ -77,6 +83,11 @@ public:
         debugger_control_plugin->setCallback("set_output", [&](CallbackData data) {
             output_plugin->clear();
             output_plugin->write(std::get<std::string>(data));
+            return true;
+        });
+        debugger_control_plugin->setCallback("set_compilation_output", [&](CallbackData data) {
+            compiler_output_plugin->write("\n\n-----\n\n");
+            compiler_output_plugin->write(std::get<std::string>(data));
             return true;
         });
         plugins.push_back(debugger_control_plugin);

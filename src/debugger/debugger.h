@@ -10,6 +10,7 @@ namespace WTStar
         #include "ast.h"
         #include "driver.h"
         #include "code_generation.h"
+        #include "errors.h"
     }
 }
 
@@ -33,6 +34,10 @@ public:
 
 using code_t = std::vector<uint8_t>;
 
+extern "C"
+{
+    void debugger_error_handler(WTStar::error_t *error, void *data);
+}
 class Debugger {
 public:
     Debugger() = default;
@@ -41,6 +46,8 @@ public:
     bool setSource(const std::string &source_fn);
     void setInput(const std::string &input);
     std::string getOutput();
+    std::string getCompilationOutput();
+    void clearCompilationOutput();
 
     uint32_t findInstructionNumber(const std::string &file, int line);
     Breakpoint* findBreakpoint(const std::string &file, int line);
@@ -68,11 +75,15 @@ protected:
     bool compile();
     bool initialize();
 
+    void errorHandler(WTStar::error_t *error);
+    friend void debugger_error_handler(WTStar::error_t *error, void *data);
+
 protected:
     std::string source_fn = "";
     std::string binary_fn = "";
     code_t binary = {};
     std::string input = "";
+    std::stringstream error_stream;
     
     WTStar::virtual_machine_t *env = nullptr;
     WTStar::ast_t *ast = nullptr;

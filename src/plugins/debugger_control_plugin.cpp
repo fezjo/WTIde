@@ -22,9 +22,11 @@ void DebuggerControlPlugin::show() {
     ImGui::InputText("##source_fn", &source_fn);
 
     if (ImGui::Button("Run")) {
+        debugger.clearCompilationOutput();
         callbacks["set_input"](0);
         if (debugger.runExecution() == -1)
             callbacks["set_output"](debugger.getOutput());
+        callbacks["set_compilation_output"](debugger.getCompilationOutput());
     }
     ImGui::SameLine();
     if (ImGui::Button("Continue")) {
