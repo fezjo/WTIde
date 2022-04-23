@@ -59,21 +59,19 @@ void TextPlugin::destroy() {
 
 }
 
-bool TextPlugin::clear() {
+void TextPlugin::clear() {
     data.clear();
-    return true;
+}
+
+void TextPlugin::write(const std::string &_data, size_t start) {
+    start = std::min(start, data.size());
+    size_t new_size = std::max(data.size(), start + _data.size());
+    data.resize(new_size);
+    _data.copy(data.data() + start, _data.size());
 }
 
 std::string TextPlugin::read(size_t start, size_t size) {
     return data.substr(start, size);
-}
-
-bool TextPlugin::write(const std::string &_data, size_t start) {
-    start = std::min(start, data.size());
-    size_t new_size = std::max(data.size(), start + _data.size());
-    data.resize(new_size);
-    _data.copy(data.data(), _data.size(), start);
-    return true;
 }
 
 void TextPlugin::setReadonly(bool state) {
