@@ -1,10 +1,10 @@
 #pragma once
 
+#include "../debugger/debugger.h"
 #include "../utils.h"
 #include "plugin.h"
-#include "../debugger/debugger.h"
 
-class DebuggerControlPlugin: public IPlugin {
+class DebuggerControlPlugin : public IPlugin {
 public:
     DebuggerControlPlugin() = default;
     void show() override;
@@ -24,8 +24,9 @@ public:
     // void removeBreakpoint(const std::string &file, int line);
     // void removeAllBreakpoints();
     // void setBreakpointEnabled(const std::string &file, int line, bool enabled);
-    // void setBreakpointWithCondition(const std::string &file, int line, const std::string &condition);
-    
+    // void setBreakpointWithCondition(const std::string &file, int line, const std::string
+    // &condition);
+
 protected:
     Debugger debugger;
     std::string source_fn = "test.wt"; // TODO testing

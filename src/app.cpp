@@ -1,13 +1,13 @@
-#include <imgui.h>
-#include <zep.h>
-#include "utils.h"
-#include "plugins/plugin.h"
+#include "plugins/debugger_control_plugin.h"
 #include "plugins/editor_plugin.h"
 #include "plugins/filetree_plugin.h"
-#include "plugins/text_plugin.h"
 #include "plugins/input_plugin.h"
 #include "plugins/output_plugin.h"
-#include "plugins/debugger_control_plugin.h"
+#include "plugins/plugin.h"
+#include "plugins/text_plugin.h"
+#include "utils.h"
+#include <imgui.h>
+#include <zep.h>
 
 class App {
 public:
@@ -16,13 +16,13 @@ public:
 protected:
     bool initialized = false;
     ImGuiWindowFlags flags;
-    std::vector<EditorPlugin*> editor_plugins;
+    std::vector<EditorPlugin *> editor_plugins;
     FileTreePlugin *filetree_plugin;
     InputPlugin *input_plugin;
     OutputPlugin *output_plugin;
     OutputPlugin *compiler_output_plugin;
     DebuggerControlPlugin *debugger_control_plugin;
-    std::vector<IPlugin*> plugins;
+    std::vector<IPlugin *> plugins;
 
 public:
     App() = default;
@@ -31,12 +31,9 @@ public:
         if (initialized)
             return;
         initialized = true;
-        flags = ImGuiWindowFlags_NoDecoration |
-            ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoSavedSettings;
+        flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
 
         // Called once the fonts/device is guaranteed setup
         openEditor(fs::path("..") / "src" / "WTEdu.cpp", false);
@@ -62,7 +59,7 @@ public:
         input_plugin->title = "Input";
         input_plugin->write("5\n[1 2 3 4 5]\n"); // TODO testing
         plugins.push_back(input_plugin);
-        
+
         output_plugin = new OutputPlugin();
         output_plugin->displaySize = ImVec2(300, 300);
         output_plugin->title = "Output";
@@ -72,7 +69,7 @@ public:
         compiler_output_plugin->displaySize = ImVec2(300, 300);
         compiler_output_plugin->title = "Compiler output";
         plugins.push_back(compiler_output_plugin);
-        
+
         debugger_control_plugin = new DebuggerControlPlugin();
         debugger_control_plugin->displaySize = ImVec2(250, 100);
         debugger_control_plugin->title = "Debug Control";
@@ -95,7 +92,7 @@ public:
 
     void update() {
         handleInput();
-        for(auto p: plugins)
+        for (auto p : plugins)
             p->update();
     }
 
@@ -104,11 +101,12 @@ public:
 
         // Just show it
         bool use_work_area = true;
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        const ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
         ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You
+        // can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
@@ -119,34 +117,37 @@ public:
             return;
         }
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a
+        // named window.
         {
             static int counter = 0;
 
-            ImGui::Begin("Debug");                                  // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("Debug"); // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo App", &show_demo_window);      // Edit bools storing our window open/close state
+            ImGui::Text("This is some useful text."); // Display some text (you can use a format
+                                                      // strings too)
+            ImGui::Checkbox("Demo App",
+                            &show_demo_window); // Edit bools storing our window open/close state
 
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            ImGui::ColorEdit3("clear color",
+                              (float *)&clear_color); // Edit 3 floats representing a color
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return
+                                         // true when edited/activated)
                 counter++;
             ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
 
-            ImGui::Text(
-                "average of 120 frames\n"
-                "%7.3f ms/fr (%5.1f FPS)\n"
-                "last frame\n"
-                "%7.3fms/fr (%5.1f FPS)",
-                1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
-                1000 * ImGui::GetIO().DeltaTime, 1.0f / ImGui::GetIO().DeltaTime
-            );
+            ImGui::Text("average of 120 frames\n"
+                        "%7.3f ms/fr (%5.1f FPS)\n"
+                        "last frame\n"
+                        "%7.3fms/fr (%5.1f FPS)",
+                        1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
+                        1000 * ImGui::GetIO().DeltaTime, 1.0f / ImGui::GetIO().DeltaTime);
             ImGui::End();
         }
 
-        for(auto p: plugins) {
+        for (auto p : plugins) {
             p->show();
             if (!p->alive)
                 delete_plugin(p);
@@ -156,9 +157,8 @@ public:
     }
 
     void handleInput() {
-        auto& io = ImGui::GetIO();
-        if (io.KeyMods == ImGuiKeyModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_N))
-        {
+        auto &io = ImGui::GetIO();
+        if (io.KeyMods == ImGuiKeyModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_N)) {
             openEditor();
         }
     }
@@ -170,7 +170,7 @@ public:
         delete plugin;
     }
 
-    void openEditor(fs::path path="", bool mimickLastFocused=true) {
+    void openEditor(fs::path path = "", bool mimickLastFocused = true) {
         EditorPlugin *ep = EditorPlugin::init(Zep::NVec2f(1.0f, 1.0f));
         ep->displaySize = ImVec2(640, 480);
         ep->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
@@ -179,11 +179,10 @@ public:
         editor_plugins.push_back(ep);
         plugins.push_back(ep);
 
-        if (mimickLastFocused && !editor_plugins.empty())
-        {
-            std::pair<timepoint, EditorPlugin*> latest = {editor_plugins[0]->lastFocusedTime, nullptr};
-            for (EditorPlugin *epi: editor_plugins)
-            {
+        if (mimickLastFocused && !editor_plugins.empty()) {
+            std::pair<timepoint, EditorPlugin *> latest = {editor_plugins[0]->lastFocusedTime,
+                                                           nullptr};
+            for (EditorPlugin *epi : editor_plugins) {
                 if (epi->lastFocusedTime >= latest.first)
                     latest = {epi->lastFocusedTime, epi};
             }

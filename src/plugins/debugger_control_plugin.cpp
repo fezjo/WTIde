@@ -2,12 +2,8 @@
 
 void DebuggerControlPlugin::show() {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin(
-        (title + "###" + std::to_string(getId())).c_str(),
-        nullptr,
-        ImGuiWindowFlags_HorizontalScrollbar
-    ))
-    {
+    if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(), nullptr,
+                      ImGuiWindowFlags_HorizontalScrollbar)) {
         ImGui::End();
         return;
     }
@@ -95,6 +91,4 @@ void DebuggerControlPlugin::setSource(const std::string &source) {
     debugger.setSource(source);
 }
 
-void DebuggerControlPlugin::setInput(const std::string &input) {
-    debugger.setInput(input);
-}
+void DebuggerControlPlugin::setInput(const std::string &input) { debugger.setInput(input); }
