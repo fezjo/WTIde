@@ -15,6 +15,7 @@
 class App {
 public:
     bool show_demo_window = false;
+    ImVec4 clear_color = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 
 protected:
     bool initialized = false;
@@ -105,27 +106,7 @@ public:
             p->update();
     }
 
-    void show(bool *p_open) {
-        static ImVec4 clear_color = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
-
-        // Just show it
-        bool use_work_area = true;
-        const ImGuiViewport *viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
-        ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
-
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You
-        // can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, clear_color);
-        if (!ImGui::Begin("Main", p_open, flags)) {
-            ImGui::PopStyleColor();
-            ImGui::End();
-            return;
-        }
-
+    void showDebugWindow() {
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a
         // named window.
         {
@@ -155,6 +136,28 @@ public:
                         1000 * ImGui::GetIO().DeltaTime, 1.0f / ImGui::GetIO().DeltaTime);
             ImGui::End();
         }
+    }
+
+    void show(bool *p_open) {
+        // Just show it
+        bool use_work_area = true;
+        const ImGuiViewport *viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
+        ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
+
+        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You
+        // can browse its code to learn more about Dear ImGui!).
+        if (show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
+
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, clear_color);
+        if (!ImGui::Begin("Main", p_open, flags)) {
+            ImGui::PopStyleColor();
+            ImGui::End();
+            return;
+        }
+
+        showDebugWindow();
 
         for (auto p : plugins) {
             p->show();
