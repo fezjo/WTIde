@@ -15,14 +15,22 @@ void DebuggerControlPlugin::show() {
     ImGui::SameLine();
     ImGui::InputText("##source_fn", &source_fn);
 
-    if (ImGui::Button("Run")) {
+    if (ImGui::Button("Compile")) {
         debugger.clearCompilationOutput();
-        callbacks["set_input"](0);
-        if (debugger.runExecution() == -1)
-            callbacks["set_output"](debugger.getOutput());
+        debugger.compile();
         callbacks["set_compilation_output"](debugger.getCompilationOutput());
     }
     ImGui::SameLine();
+    if (ImGui::Button("Run")) {
+        callbacks["set_input"](0);
+        if (debugger.runExecution() == -1)
+            callbacks["set_output"](debugger.getOutput());
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Stop")) {
+        debugger.stopExecution();
+    }
+    
     if (ImGui::Button("Continue")) {
         if (debugger.continueExecution() == -1)
             callbacks["set_output"](debugger.getOutput());
@@ -30,10 +38,6 @@ void DebuggerControlPlugin::show() {
     ImGui::SameLine();
     if (ImGui::Button("Pause")) {
         debugger.pauseExecution();
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Stop")) {
-        debugger.stopExecution();
     }
 
     ImGui::Text("Step");

@@ -50,6 +50,7 @@ public:
     Breakpoint *findBreakpoint(const std::string &file, int line);
     std::vector<uint8_t> compileCondition(const std::string &condition);
 
+    bool compile();
     int runExecution();
     int continueExecution();
     void pauseExecution();
@@ -70,7 +71,6 @@ protected:
     void reset();
     bool readBinary();
     bool readInput();
-    bool compile();
     bool initialize();
 
     void errorHandler(WTStar::error_t *error);

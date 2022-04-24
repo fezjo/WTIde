@@ -43,7 +43,6 @@ bool Debugger::setSource(const std::string &file) {
 void Debugger::setInput(const std::string &input) { this->input = input; }
 
 void Debugger::reset() {
-    binary_fn.clear();
     binary.clear();
     if (env)
         WTStar::virtual_machine_t_delete(env);
@@ -138,7 +137,7 @@ bool Debugger::compile() {
 
 bool Debugger::initialize() {
     reset();
-    if (!compile() || !readBinary())
+    if (!readBinary())
         return false;
     env = WTStar::virtual_machine_t_new(binary.data(), static_cast<int>(binary.size()));
     std::cerr << "created virtual machine" << std::endl;
