@@ -149,7 +149,7 @@ public:
         for(auto p: plugins) {
             p->show();
             if (!p->alive)
-                destroy_plugin(p);
+                delete_plugin(p);
         }
         ImGui::PopStyleColor();
         ImGui::End();
@@ -163,17 +163,11 @@ public:
         }
     }
 
-    void destroy_plugin(IPlugin *plugin) {
+    void delete_plugin(IPlugin *plugin) {
         if (plugin->getPluginType() == PluginType::Editor)
             editor_plugins.erase(find(editor_plugins.begin(), editor_plugins.end(), plugin));
         plugins.erase(find(plugins.begin(), plugins.end(), plugin));
-        plugin->destroy();
         delete plugin;
-    }
-
-    void destroy() {
-        for (auto it = plugins.rbegin(); it != plugins.rend(); ++it)
-            destroy_plugin(*it);
     }
 
     void openEditor(fs::path path="", bool mimickLastFocused=true) {

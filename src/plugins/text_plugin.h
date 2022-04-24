@@ -10,9 +10,7 @@ class TextPlugin: public IPlugin {
 public:
     TextPlugin(bool readonly=false);
     virtual ~TextPlugin() = default;
-    virtual void update() override;
     virtual void show() override;
-    virtual void destroy() override;
 
     virtual void clear();
     virtual void write(const std::string &data, size_t start=-1);

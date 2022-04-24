@@ -1,9 +1,5 @@
 #include "debugger_control_plugin.h"
 
-void DebuggerControlPlugin::update() {
-
-}
-
 void DebuggerControlPlugin::show() {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
@@ -92,10 +88,6 @@ void DebuggerControlPlugin::show() {
         ImGui::EndPopup();
     }
     ImGui::End();
-}
-
-void DebuggerControlPlugin::destroy() {
-
 }
 
 void DebuggerControlPlugin::setSource(const std::string &source) {

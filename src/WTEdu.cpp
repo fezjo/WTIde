@@ -162,9 +162,6 @@ int main(int, char**)
         SDL_GL_SwapWindow(window);
     }
 
-    // Cleanup
-    app.destroy();
-
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();

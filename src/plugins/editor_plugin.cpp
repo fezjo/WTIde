@@ -140,10 +140,6 @@ void EditorPlugin::update()
     GetEditor().RefreshRequired();
 }
 
-void EditorPlugin::destroy()
-{
-}
-
 void EditorPlugin::load(const Zep::ZepPath& file)
 {
     GetEditor().InitWithFileOrDir(file);

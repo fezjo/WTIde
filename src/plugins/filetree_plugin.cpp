@@ -31,10 +31,6 @@ FileTreePlugin::FileTreePlugin():
     title = "FileTree";
 }
 
-void FileTreePlugin::update() {
-
-}
-
 void updateSelection(fs::path s, std::set<fs::path> &selection) {
     if (s.empty())
         return;
@@ -349,9 +345,6 @@ void FileTreePlugin::show() {
     node_selected = "";
     
     ImGui::End();
-}
-
-void FileTreePlugin::destroy() {
 }
 
 fs::path FileTreePlugin::getPath() {

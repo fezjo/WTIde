@@ -27,5 +27,4 @@ public:
     static EditorPlugin* init(const Zep::NVec2f& pixelScale, std::string rootPath="");
     void update() override;
     void show() override;
-    void destroy() override;
 };

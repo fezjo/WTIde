@@ -24,9 +24,7 @@ enum class PopupType {
 class FileTreePlugin: public IPlugin {
 public:
     FileTreePlugin();
-    void update() override;
     void show() override;
-    void destroy() override;
 
     fs::path getPath();
     fs::path setPath(fs::path path);

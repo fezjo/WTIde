@@ -5,10 +5,6 @@ TextPlugin::TextPlugin(bool readonly):
 {
 }
 
-void TextPlugin::update() {
-
-}
-
 void TextPlugin::show() {
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin(
@@ -53,10 +49,6 @@ void TextPlugin::show() {
     }
 
     ImGui::End();
-}
-
-void TextPlugin::destroy() {
-
 }
 
 void TextPlugin::clear() {
