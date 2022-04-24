@@ -36,7 +36,7 @@ void TextPlugin::show() {
         ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_ReadOnly * readonly;
     ImGui::InputTextMultiline("##data", &data, ImVec2(max_width, -1), flags);
 
-    if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::BeginPopupContextItem("##menu")) {
         if (ImGui::Selectable("Clear"))
             clear();
         ImGui::EndPopup();

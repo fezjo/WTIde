@@ -50,7 +50,7 @@ void FileTreePlugin::openAllSelected() {
 }
 
 bool FileTreePlugin::showFileMenu() {
-    if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::BeginPopupContextItem("##menu")) {
         if (ImGui::Selectable("Rename")) {
             popup_type = PopupType::Rename;
             target_path = menu_node;
