@@ -5,6 +5,7 @@
 #include "plugins/filetree_plugin.h"
 #include "plugins/input_plugin.h"
 #include "plugins/output_plugin.h"
+#include "plugins/plugin_control_plugin.h"
 #include "plugins/plugin.h"
 #include "plugins/text_plugin.h"
 #include "utils.h"
@@ -24,6 +25,7 @@ protected:
     OutputPlugin *output_plugin;
     OutputPlugin *compiler_output_plugin;
     DebuggerControlPlugin *debugger_control_plugin;
+    PluginControlPlugin *plugin_control_plugin;
     std::vector<IPlugin *> plugins;
 
 public:
@@ -90,6 +92,11 @@ public:
             return true;
         });
         plugins.push_back(debugger_control_plugin);
+
+        plugin_control_plugin = new PluginControlPlugin(&plugins);
+        plugin_control_plugin->displaySize = ImVec2(300, 300);
+        plugin_control_plugin->title = "Plugins";
+        plugins.push_back(plugin_control_plugin);
     }
 
     void update() {
