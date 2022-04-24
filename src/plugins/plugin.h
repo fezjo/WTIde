@@ -30,6 +30,8 @@ protected:
     }
 
 public:
+    bool shown = true;
+    bool immortal = true;
     bool alive = true;
     ImVec2 displaySize;
     std::string title;

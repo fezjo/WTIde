@@ -34,6 +34,7 @@ EditorPlugin::EditorPlugin(const fs::path &rootPath, const Zep::NVec2f &pixelSca
                                                                        wt_identifiers);
                                 })});
     pluginType = PluginType::Editor;
+    immortal = false;
 }
 
 Zep::ZepEditor &EditorPlugin::GetEditor() const {
@@ -104,6 +105,8 @@ void EditorPlugin::update() { GetEditor().RefreshRequired(); }
 void EditorPlugin::load(const Zep::ZepPath &file) { GetEditor().InitWithFileOrDir(file); }
 
 void EditorPlugin::show() {
+    if (!shown)
+        return;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     auto windowClass = ImGuiWindowClass();
     windowClass.DockingAlwaysTabBar = true;
@@ -111,7 +114,8 @@ void EditorPlugin::show() {
     title = zepEditor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer().GetFilePath().filename();
     if (title.empty())
         title = "Untitled";
-    if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(), &alive,
+    if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(),
+                      immortal ? nullptr : &alive,
                       ImGuiWindowFlags_None // TODO | ImGuiWindowFlags_NoSavedSettings
                       )) {
         ImGui::End();
