@@ -3,7 +3,7 @@
 #include "../utils.h"
 #include "text_plugin.h"
 
-class InputPlugin: public TextPlugin {
+class InputPlugin : public TextPlugin {
 public:
     InputPlugin() = default;
 

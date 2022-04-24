@@ -1,25 +1,19 @@
 #include "debugger.h"
 
-extern "C"
-{
-    void debugger_error_handler(WTStar::error_t *error, void *data)
-    {
-        static_cast<Debugger*>(data)->errorHandler(error);
-    }
+extern "C" {
+void debugger_error_handler(WTStar::error_t *error, void *data) {
+    static_cast<Debugger *>(data)->errorHandler(error);
+}
 }
 
-Writer::Writer() {
-    w = WTStar::writer_t_new(WTStar::WRITER_STRING);
-}
+Writer::Writer() { w = WTStar::writer_t_new(WTStar::WRITER_STRING); }
 
 Writer::Writer(const std::string &fn, const std::string &mode) {
     w = WTStar::writer_t_new(WTStar::WRITER_FILE);
     w->f = fopen(fn.c_str(), mode.c_str());
 }
 
-Writer::~Writer() {
-    WTStar::writer_t_delete(w);
-}
+Writer::~Writer() { WTStar::writer_t_delete(w); }
 
 std::string Writer::read(size_t pos, size_t len) {
     if (w->type == WTStar::WRITER_FILE)
@@ -29,15 +23,10 @@ std::string Writer::read(size_t pos, size_t len) {
     return std::string(w->str.base + pos, len);
 }
 
-Debugger::~Debugger()
-{
-    reset();
-}
+Debugger::~Debugger() { reset(); }
 
-bool Debugger::setSource(const std::string &file)
-{
-    if (file.empty())
-    {
+bool Debugger::setSource(const std::string &file) {
+    if (file.empty()) {
         std::cerr << "empty file" << std::endl;
         reset();
         source_fn.clear();
@@ -51,13 +40,9 @@ bool Debugger::setSource(const std::string &file)
     return true;
 }
 
-void Debugger::setInput(const std::string &input)
-{
-    this->input = input;
-}
+void Debugger::setInput(const std::string &input) { this->input = input; }
 
-void Debugger::reset()
-{
+void Debugger::reset() {
     binary_fn.clear();
     binary.clear();
     if (env)
@@ -72,13 +57,11 @@ void Debugger::reset()
     std::cerr << "reset" << std::endl;
 }
 
-bool Debugger::readBinary()
-{
+bool Debugger::readBinary() {
     if (binary_fn.empty())
         return false;
     std::ifstream ifs(binary_fn, std::ios::binary);
-    if (!ifs.is_open())
-    {
+    if (!ifs.is_open()) {
         std::cerr << "failed to open " << binary_fn << std::endl;
         return false;
     }
@@ -86,21 +69,18 @@ bool Debugger::readBinary()
     size_t size = ifs.tellg();
     ifs.seekg(0, std::ios::beg);
     binary.resize(size);
-    ifs.read(reinterpret_cast<char*>(binary.data()), size);
+    ifs.read(reinterpret_cast<char *>(binary.data()), size);
     ifs.close();
     std::cerr << "read " << binary_fn << " " << size << " bytes" << std::endl;
     return true;
 }
 
-bool Debugger::readInput()
-{
-    if (input.empty())
-    {
+bool Debugger::readInput() {
+    if (input.empty()) {
         std::cerr << "empty input" << std::endl;
         return false;
     }
-    if (!env)
-    {
+    if (!env) {
         std::cerr << "not compiled" << std::endl;
         return false;
     }
@@ -112,8 +92,7 @@ bool Debugger::readInput()
     return env != nullptr;
 }
 
-std::string Debugger::getOutput()
-{
+std::string Debugger::getOutput() {
     if (!env)
         return "";
     Writer wout;
@@ -123,18 +102,11 @@ std::string Debugger::getOutput()
     return wout.read();
 }
 
-std::string Debugger::getCompilationOutput()
-{
-    return error_stream.str();
-}
+std::string Debugger::getCompilationOutput() { return error_stream.str(); }
 
-void Debugger::clearCompilationOutput()
-{
-    error_stream.str("");
-}
+void Debugger::clearCompilationOutput() { error_stream.str(""); }
 
-bool Debugger::compile()
-{
+bool Debugger::compile() {
     if (source_fn.empty())
         return false;
 
@@ -144,8 +116,7 @@ bool Debugger::compile()
     ip = WTStar::include_project_t_new();
     WTStar::driver_init(ip);
     ast = WTStar::driver_parse(ip, source_fn.c_str(), debugger_error_handler, this);
-    if (ast->error_occured)
-    {
+    if (ast->error_occured) {
         std::cerr << "parse error" << std::endl;
         reset();
         return false;
@@ -155,9 +126,8 @@ bool Debugger::compile()
     Writer out(binary_fn, "wb");
     int resp = WTStar::emit_code(ast, out.w, 0);
     std::cerr << "emited code into " << binary_fn << " with resp " << resp << std::endl;
-    
-    if (resp)
-    {
+
+    if (resp) {
         std::cerr << "compilation UNsucessful" << std::endl;
         reset();
         return false;
@@ -166,8 +136,7 @@ bool Debugger::compile()
     return true;
 }
 
-bool Debugger::initialize()
-{
+bool Debugger::initialize() {
     reset();
     if (!compile() || !readBinary())
         return false;
@@ -176,19 +145,15 @@ bool Debugger::initialize()
     return true;
 }
 
-void Debugger::errorHandler(WTStar::error_t *error) {
-    error_stream << error->msg->str.base;
-}
+void Debugger::errorHandler(WTStar::error_t *error) { error_stream << error->msg->str.base; }
 
 // TODO
-uint32_t Debugger::findInstructionNumber(const std::string &file, int line)
-{
+uint32_t Debugger::findInstructionNumber(const std::string &file, int line) {
     std::cerr << "NOT IMPLEMENTED" << std::endl;
     return -1;
 }
 
-Breakpoint* Debugger::findBreakpoint(const std::string &file, int line)
-{
+Breakpoint *Debugger::findBreakpoint(const std::string &file, int line) {
     auto it = std::find_if(breakpoints.begin(), breakpoints.end(), [&](const Breakpoint &bp) {
         return bp.file == file && bp.line == line;
     });
@@ -198,23 +163,20 @@ Breakpoint* Debugger::findBreakpoint(const std::string &file, int line)
 }
 
 // TODO
-std::vector<uint8_t> Debugger::compileCondition(const std::string &condition)
-{
+std::vector<uint8_t> Debugger::compileCondition(const std::string &condition) {
     if (condition.empty())
         return {};
     std::cerr << "NOT IMPLEMENTED" << std::endl;
     return {};
 }
 
-int Debugger::runExecution()
-{
+int Debugger::runExecution() {
     if (!initialize() || !readInput())
         return -2;
     return continueExecution();
 }
 
-int Debugger::continueExecution()
-{
+int Debugger::continueExecution() {
     if (!env)
         return -2;
     int resp = WTStar::execute(env, -1, 0, 1);
@@ -222,57 +184,37 @@ int Debugger::continueExecution()
     return resp;
 }
 
-void Debugger::pauseExecution()
-{
-    std::cerr << "NOT IMPLEMENTED" << std::endl;
-}
+void Debugger::pauseExecution() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
-void Debugger::stopExecution()
-{
-    reset();
-}
+void Debugger::stopExecution() { reset(); }
 
-void Debugger::stepOver()
-{
-    std::cerr << "NOT IMPLEMENTED" << std::endl;
-}
+void Debugger::stepOver() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
-void Debugger::stepInto()
-{
-    std::cerr << "NOT IMPLEMENTED" << std::endl;
-}
+void Debugger::stepInto() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
-void Debugger::stepOut()
-{
-    std::cerr << "NOT IMPLEMENTED" << std::endl;
-}
+void Debugger::stepOut() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
-bool Debugger::setBreakpoint(const std::string &file, int line)
-{
+bool Debugger::setBreakpoint(const std::string &file, int line) {
     return setBreakpointWithCondition(file, line, "");
 }
 
-bool Debugger::removeBreakpoint(const std::string &file, int line)
-{
+bool Debugger::removeBreakpoint(const std::string &file, int line) {
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
     WTStar::remove_breakpoint(env, bp->bp_pos);
-    std::remove_if(breakpoints.begin(), breakpoints.end(), [&](const Breakpoint &bp) {
-        return bp.file == file && bp.line == line;
-    });
+    std::remove_if(breakpoints.begin(), breakpoints.end(),
+                   [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; });
     return true;
 }
 
-void Debugger::removeAllBreakpoints()
-{
+void Debugger::removeAllBreakpoints() {
     for (auto &bp : breakpoints)
         WTStar::remove_breakpoint(env, bp.bp_pos);
     breakpoints.clear();
 }
 
-bool Debugger::setBreakpointEnabled(const std::string &file, int line, bool enabled)
-{
+bool Debugger::setBreakpointEnabled(const std::string &file, int line, bool enabled) {
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
@@ -282,18 +224,14 @@ bool Debugger::setBreakpointEnabled(const std::string &file, int line, bool enab
     return true;
 }
 
-bool Debugger::setBreakpointWithCondition(const std::string &file, int line, const std::string &condition)
-{
+bool Debugger::setBreakpointWithCondition(const std::string &file, int line,
+                                          const std::string &condition) {
     uint32_t bp_pos = findInstructionNumber(file, line);
     if (bp_pos == -1u)
         return false;
     std::vector<uint8_t> code = compileCondition(condition);
-    if (WTStar::add_breakpoint(
-            env,
-            bp_pos,
-            code.empty() ? NULL : code.data(),
-            static_cast<uint32_t>(code.size())
-        ) == -1)
+    if (WTStar::add_breakpoint(env, bp_pos, code.empty() ? NULL : code.data(),
+                               static_cast<uint32_t>(code.size())) == -1)
         return false;
     breakpoints.push_back({file, line, condition, true, bp_pos});
     return true;

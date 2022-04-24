@@ -2,17 +2,15 @@
 
 #include "../utils.h"
 
-namespace WTStar
-{
-    extern "C"
-    {
-        #include "vm.h"
-        #include "ast.h"
-        #include "driver.h"
-        #include "code_generation.h"
-        #include "errors.h"
-    }
+namespace WTStar {
+extern "C" {
+#include "ast.h"
+#include "code_generation.h"
+#include "driver.h"
+#include "errors.h"
+#include "vm.h"
 }
+} // namespace WTStar
 
 struct Breakpoint {
     std::string file;
@@ -27,16 +25,15 @@ public:
     Writer();
     Writer(const std::string &fn, const std::string &mode);
     ~Writer();
-    std::string read(size_t pos=0, size_t len=-1);
+    std::string read(size_t pos = 0, size_t len = -1);
 
     WTStar::writer_t *w;
 };
 
 using code_t = std::vector<uint8_t>;
 
-extern "C"
-{
-    void debugger_error_handler(WTStar::error_t *error, void *data);
+extern "C" {
+void debugger_error_handler(WTStar::error_t *error, void *data);
 }
 class Debugger {
 public:
@@ -50,7 +47,7 @@ public:
     void clearCompilationOutput();
 
     uint32_t findInstructionNumber(const std::string &file, int line);
-    Breakpoint* findBreakpoint(const std::string &file, int line);
+    Breakpoint *findBreakpoint(const std::string &file, int line);
     std::vector<uint8_t> compileCondition(const std::string &condition);
 
     int runExecution();
@@ -66,7 +63,8 @@ public:
     bool removeBreakpoint(const std::string &file, int line);
     void removeAllBreakpoints();
     bool setBreakpointEnabled(const std::string &file, int line, bool enabled);
-    bool setBreakpointWithCondition(const std::string &file, int line, const std::string &condition);
+    bool setBreakpointWithCondition(const std::string &file, int line,
+                                    const std::string &condition);
 
 protected:
     void reset();
@@ -84,7 +82,7 @@ protected:
     code_t binary = {};
     std::string input = "";
     std::stringstream error_stream;
-    
+
     WTStar::virtual_machine_t *env = nullptr;
     WTStar::ast_t *ast = nullptr;
     WTStar::include_project_t *ip = nullptr;

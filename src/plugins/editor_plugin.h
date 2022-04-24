@@ -1,9 +1,9 @@
 #pragma once
 
-#include <functional>
-#include <zep.h>
 #include "../utils.h"
 #include "plugin.h"
+#include <functional>
+#include <zep.h>
 
 class EditorPlugin : public IPlugin, public Zep::IZepComponent {
     Zep::ZepEditor_ImGui zepEditor;
@@ -14,17 +14,14 @@ public:
     int dockId;
 
 public:
-    EditorPlugin(
-        const fs::path& rootPath,
-        const Zep::NVec2f& pixelScale,
-        std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB
-    );
-    virtual Zep::ZepEditor& GetEditor() const override;
+    EditorPlugin(const fs::path &rootPath, const Zep::NVec2f &pixelScale,
+                 std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB);
+    virtual Zep::ZepEditor &GetEditor() const override;
     virtual void Notify(std::shared_ptr<Zep::ZepMessage> message) override;
     virtual void HandleInput();
-    void load(const Zep::ZepPath& file);
+    void load(const Zep::ZepPath &file);
 
-    static EditorPlugin* init(const Zep::NVec2f& pixelScale, std::string rootPath="");
+    static EditorPlugin *init(const Zep::NVec2f &pixelScale, std::string rootPath = "");
     void update() override;
     void show() override;
 };
