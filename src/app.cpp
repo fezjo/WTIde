@@ -1,4 +1,3 @@
-#include "plugins/debugger_control_plugin.h"
 #include "plugins/editor_plugin.h"
 #include "plugins/filetree_plugin.h"
 #include "plugins/input_plugin.h"
@@ -8,6 +7,7 @@
 #include "utils.h"
 #include <imgui.h>
 #include <zep.h>
+#include "plugins/debugger_control_plugin.h" // TODO why does it need to be afte zep
 
 class App {
 public:
