@@ -168,7 +168,7 @@ public:
             editor_plugins.erase(find(editor_plugins.begin(), editor_plugins.end(), plugin));
         plugins.erase(find(plugins.begin(), plugins.end(), plugin));
         plugin->destroy();
-        free(plugin);
+        delete plugin;
     }
 
     void destroy() {

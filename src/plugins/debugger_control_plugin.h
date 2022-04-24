@@ -7,9 +7,9 @@
 class DebuggerControlPlugin: public IPlugin {
 public:
     DebuggerControlPlugin() = default;
-    virtual void update() override;
-    virtual void show() override;
-    virtual void destroy() override;
+    void update() override;
+    void show() override;
+    void destroy() override;
 
     void setSource(const std::string &source);
     void setInput(const std::string &input);
