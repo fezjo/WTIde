@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../utils.h"
 #include <imgui.h>
 #include <imgui_stdlib.h>
+
+#include "../utils.h"
 
 enum class PluginType { Unknown = 0, Editor, FileTree, Terminal, Debugger, Output, Search };
 

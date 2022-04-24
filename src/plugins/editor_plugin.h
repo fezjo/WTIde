@@ -1,9 +1,11 @@
 #pragma once
 
+#include <functional>
+
+#include <zep.h>
+
 #include "../utils.h"
 #include "plugin.h"
-#include <functional>
-#include <zep.h>
 
 class EditorPlugin : public IPlugin, public Zep::IZepComponent {
     Zep::ZepEditor_ImGui zepEditor;

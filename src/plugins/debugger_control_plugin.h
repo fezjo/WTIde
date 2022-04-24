@@ -2,6 +2,7 @@
 
 #include "../utils.h"
 #include "plugin.h"
+
 #include "../debugger/debugger.h" // TODO why does it need to be at the end
 
 class DebuggerControlPlugin : public IPlugin {
