@@ -58,6 +58,9 @@ void DebuggerControlPlugin::show() {
     if (ImGui::Button("Breakpoints")) {
         ImGui::OpenPopup("Breakpoints");
     }
+    ImGui::SameLine();
+    ImGui::Checkbox("Stop on BP", &debugger.stop_on_bp);
+    
     static char fileBuffer[256] = "";
     static int lineBuffer = 0;
     if (ImGui::BeginPopup("Breakpoints")) {

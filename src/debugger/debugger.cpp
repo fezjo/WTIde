@@ -178,7 +178,7 @@ int Debugger::runExecution() {
 int Debugger::continueExecution() {
     if (!env)
         return -2;
-    int resp = WTStar::execute(env, -1, 0, 1);
+    int resp = WTStar::execute(env, -1, 0, stop_on_bp);
     std::cerr << "continueExecution execute stopped with resp " << resp << std::endl;
     return resp;
 }
@@ -192,7 +192,7 @@ int Debugger::stepOver() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 int Debugger::stepInto() {
     if (!env)
         return -2;
-    int resp = WTStar::execute(env, -1, 0, 3);
+    int resp = WTStar::execute(env, -1, 0, 2 | stop_on_bp);
     std::cerr << "stepInto execute stopped with resp " << resp << std::endl;
     return resp;
 }

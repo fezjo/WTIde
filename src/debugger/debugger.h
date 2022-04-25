@@ -76,6 +76,9 @@ protected:
     void errorHandler(WTStar::error_t *error);
     friend void debugger_error_handler(WTStar::error_t *error, void *data);
 
+public:
+    bool stop_on_bp = true;
+
 protected:
     std::string source_fn = "";
     std::string binary_fn = "";
