@@ -1,5 +1,7 @@
 #include "debugger_control_plugin.h"
 
+DebuggerControlPlugin::DebuggerControlPlugin(Debugger *debugger) : debugger(debugger) {}
+
 void DebuggerControlPlugin::show() {
     if (!shown)
         return;
@@ -16,51 +18,52 @@ void DebuggerControlPlugin::show() {
     ImGui::InputText("##source_fn", &source_fn);
 
     if (ImGui::Button("Compile")) {
-        debugger.clearCompilationOutput();
-        debugger.compile();
-        callbacks["set_compilation_output"](debugger.getCompilationOutput());
+        debugger->clearCompilationOutput();
+        debugger->compile();
+        callbacks["refresh_analyzer"](0);
+        callbacks["set_compilation_output"](debugger->getCompilationOutput());
     }
     ImGui::SameLine();
     if (ImGui::Button("Run")) {
         callbacks["set_input"](0);
-        if (debugger.runExecution() == -1)
-            callbacks["set_output"](debugger.getOutput());
+        if (debugger->runExecution() == -1)
+            callbacks["set_output"](debugger->getOutput());
     }
     ImGui::SameLine();
     if (ImGui::Button("Stop")) {
-        debugger.stopExecution();
+        debugger->stopExecution();
     }
-    
+
     if (ImGui::Button("Continue")) {
-        if (debugger.continueExecution() == -1)
-            callbacks["set_output"](debugger.getOutput());
+        if (debugger->continueExecution() == -1)
+            callbacks["set_output"](debugger->getOutput());
     }
     ImGui::SameLine();
     if (ImGui::Button("Pause")) {
-        debugger.pauseExecution();
+        debugger->pauseExecution();
     }
 
     ImGui::Text("Step");
     ImGui::SameLine();
     if (ImGui::Button("Over")) {
-        debugger.stepOver();
+        debugger->stepOver();
     }
     ImGui::SameLine();
     if (ImGui::Button("Into")) {
-        if (debugger.stepInto() == -1)
-            callbacks["set_output"](debugger.getOutput());
+        if (debugger->stepInto() == -1)
+            callbacks["set_output"](debugger->getOutput());
     }
     ImGui::SameLine();
     if (ImGui::Button("Out")) {
-        debugger.stepOut();
+        debugger->stepOut();
     }
 
     if (ImGui::Button("Breakpoints")) {
         ImGui::OpenPopup("Breakpoints");
     }
     ImGui::SameLine();
-    ImGui::Checkbox("Stop on BP", &debugger.stop_on_bp);
-    
+    ImGui::Checkbox("Stop on BP", &debugger->stop_on_bp);
+
     static char fileBuffer[256] = "";
     static int lineBuffer = 0;
     if (ImGui::BeginPopup("Breakpoints")) {
@@ -71,7 +74,7 @@ void DebuggerControlPlugin::show() {
             ImGui::InputText("File", fileBuffer, sizeof(fileBuffer));
             ImGui::InputInt("Line", &lineBuffer);
             if (ImGui::Button("Add")) {
-                debugger.setBreakpoint(fileBuffer, lineBuffer);
+                debugger->setBreakpoint(fileBuffer, lineBuffer);
             }
             ImGui::EndPopup();
         }
@@ -83,13 +86,13 @@ void DebuggerControlPlugin::show() {
             ImGui::InputText("File", fileBuffer, sizeof(fileBuffer));
             ImGui::InputInt("Line", &lineBuffer);
             if (ImGui::Button("Remove")) {
-                debugger.removeBreakpoint(fileBuffer, lineBuffer);
+                debugger->removeBreakpoint(fileBuffer, lineBuffer);
             }
             ImGui::EndPopup();
         }
         ImGui::SameLine();
         if (ImGui::Button("Remove All")) {
-            debugger.removeAllBreakpoints();
+            debugger->removeAllBreakpoints();
         }
         ImGui::EndPopup();
     }
@@ -98,7 +101,7 @@ void DebuggerControlPlugin::show() {
 
 void DebuggerControlPlugin::setSource(const std::string &source) {
     source_fn = source;
-    debugger.setSource(source);
+    debugger->setSource(source);
 }
 
-void DebuggerControlPlugin::setInput(const std::string &input) { debugger.setInput(input); }
+void DebuggerControlPlugin::setInput(const std::string &input) { debugger->setInput(input); }

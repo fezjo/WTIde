@@ -15,12 +15,31 @@ Writer::Writer(const std::string &fn, const std::string &mode) {
 
 Writer::~Writer() { WTStar::writer_t_delete(w); }
 
+void Writer::clear() {
+    if (w->type == WTStar::WRITER_FILE)
+        throw std::logic_error("Clearing file-based writer is not yet supported");
+    w->str.base[0] = 0;
+    w->str.ptr = 0;
+}
+
 std::string Writer::read(size_t pos, size_t len) {
     if (w->type == WTStar::WRITER_FILE)
         throw std::logic_error("Read from file-based writer is not yet supported");
     pos = std::min(pos, static_cast<size_t>(w->str.ptr));
     len = std::min(len, w->str.ptr - pos);
     return std::string(w->str.base + pos, len);
+}
+
+code_t readCode(const std::string &fn) {
+    std::ifstream ifs(fn, std::ios::binary);
+    if (!ifs.is_open())
+        throw std::runtime_error("Failed to open file " + fn);
+    code_t code;
+    ifs.seekg(0, std::ios::end);
+    code.resize(ifs.tellg());
+    ifs.seekg(0, std::ios::beg);
+    ifs.read(reinterpret_cast<char *>(code.data()), code.size());
+    return code;
 }
 
 Debugger::~Debugger() { reset(); }
@@ -59,18 +78,13 @@ void Debugger::reset() {
 bool Debugger::readBinary() {
     if (binary_fn.empty())
         return false;
-    std::ifstream ifs(binary_fn, std::ios::binary);
-    if (!ifs.is_open()) {
-        std::cerr << "failed to open " << binary_fn << std::endl;
+    try {
+        binary = readCode(binary_fn);
+    } catch (const std::exception &e) {
+        std::cerr << "Failed to read binary file " << binary_fn << ": " << e.what() << std::endl;
         return false;
     }
-    ifs.seekg(0, std::ios::end);
-    size_t size = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-    binary.resize(size);
-    ifs.read(reinterpret_cast<char *>(binary.data()), size);
-    ifs.close();
-    std::cerr << "read " << binary_fn << " " << size << " bytes" << std::endl;
+    std::cerr << "read from " << binary_fn << " " << binary.size() << " bytes" << std::endl;
     return true;
 }
 

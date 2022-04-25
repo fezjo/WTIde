@@ -7,7 +7,7 @@
 
 class DebuggerControlPlugin : public IPlugin {
 public:
-    DebuggerControlPlugin() = default;
+    DebuggerControlPlugin(Debugger *debugger);
     void show() override;
 
     void setSource(const std::string &source);
@@ -29,6 +29,6 @@ public:
     // &condition);
 
 protected:
-    Debugger debugger;
+    Debugger *debugger;
     std::string source_fn = "test.wt"; // TODO testing
 };

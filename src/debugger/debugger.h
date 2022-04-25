@@ -25,12 +25,16 @@ public:
     Writer();
     Writer(const std::string &fn, const std::string &mode);
     ~Writer();
+    void clear();
     std::string read(size_t pos = 0, size_t len = -1);
 
     WTStar::writer_t *w;
 };
 
+
 using code_t = std::vector<uint8_t>;
+
+code_t readCode(const std::string &fn);
 
 extern "C" {
 void debugger_error_handler(WTStar::error_t *error, void *data);
@@ -90,4 +94,6 @@ protected:
     WTStar::ast_t *ast = nullptr;
     WTStar::include_project_t *ip = nullptr;
     std::vector<Breakpoint> breakpoints = {};
+
+    friend class ProgramAnalyzerPlugin;
 };

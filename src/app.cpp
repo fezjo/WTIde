@@ -7,10 +7,13 @@
 #include "plugins/output_plugin.h"
 #include "plugins/plugin_control_plugin.h"
 #include "plugins/plugin.h"
+#include "plugins/program_analyzer_plugin.h"
 #include "plugins/text_plugin.h"
 #include "utils.h"
 
 #include "plugins/debugger_control_plugin.h" // TODO why does it need to be after zep
+
+#include "debugger/debugger.h"
 
 class App {
 public:
@@ -20,12 +23,16 @@ public:
 protected:
     bool initialized = false;
     ImGuiWindowFlags flags;
+
+    Debugger *debugger;
+
     std::vector<EditorPlugin *> editor_plugins;
     FileTreePlugin *filetree_plugin;
     InputPlugin *input_plugin;
     OutputPlugin *output_plugin;
     OutputPlugin *compiler_output_plugin;
     DebuggerControlPlugin *debugger_control_plugin;
+    ProgramAnalyzerPlugin *program_analyzer_plugin;
     PluginControlPlugin *plugin_control_plugin;
     std::vector<IPlugin *> plugins;
 
@@ -39,6 +46,8 @@ public:
         flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar |
                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove |
                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+
+        debugger = new Debugger();
 
         // Called once the fonts/device is guaranteed setup
         openEditor(fs::path("..") / "src" / "WTEdu.cpp", false);
@@ -75,7 +84,7 @@ public:
         compiler_output_plugin->title = "Compiler output";
         plugins.push_back(compiler_output_plugin);
 
-        debugger_control_plugin = new DebuggerControlPlugin();
+        debugger_control_plugin = new DebuggerControlPlugin(debugger);
         debugger_control_plugin->displaySize = ImVec2(250, 100);
         debugger_control_plugin->title = "Debug Control";
         debugger_control_plugin->setCallback("set_input", [&](CallbackData data) {
@@ -92,7 +101,16 @@ public:
             compiler_output_plugin->write(std::get<std::string>(data));
             return true;
         });
+        debugger_control_plugin->setCallback("refresh_analyzer", [&](CallbackData data) {
+            program_analyzer_plugin->refresh();
+            return true;
+        });
         plugins.push_back(debugger_control_plugin);
+
+        program_analyzer_plugin = new ProgramAnalyzerPlugin(debugger);
+        program_analyzer_plugin->displaySize = ImVec2(400, 600);
+        program_analyzer_plugin->title = "Program Analyzer";
+        plugins.push_back(program_analyzer_plugin);
 
         plugin_control_plugin = new PluginControlPlugin(&plugins);
         plugin_control_plugin->displaySize = ImVec2(300, 300);
