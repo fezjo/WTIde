@@ -107,17 +107,22 @@ void EditorPlugin::load(const Zep::ZepPath &file) { GetEditor().InitWithFileOrDi
 void EditorPlugin::show() {
     if (!shown)
         return;
+
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     auto windowClass = ImGuiWindowClass();
     windowClass.DockingAlwaysTabBar = true;
     ImGui::SetNextWindowClass(&windowClass);
-    title = zepEditor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer().GetFilePath().filename();
+
+    auto &zepBuffer = zepEditor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
+    title = zepBuffer.GetFilePath().filename();
     if (title.empty())
         title = "Untitled";
+    bool dirty = zepBuffer.HasFileFlags(Zep::FileFlags::Dirty);
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_UnsavedDocument * dirty; // TODO | ImGuiWindowFlags_NoSavedSettings
+
     if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(),
-                      immortal ? nullptr : &alive,
-                      ImGuiWindowFlags_None // TODO | ImGuiWindowFlags_NoSavedSettings
-                      )) {
+                      immortal ? nullptr : &alive, flags)) {
         ImGui::End();
         return;
     }
