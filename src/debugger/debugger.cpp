@@ -187,7 +187,22 @@ void Debugger::pauseExecution() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
 void Debugger::stopExecution() { reset(); }
 
-int Debugger::stepOver() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
+int Debugger::stepOver() {
+    if (!env)
+        return -2;
+    uint32_t initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+    int resp;
+    while (true) {
+        resp = WTStar::execute(env, -1, 0, 2 | stop_on_bp);
+        if (resp != -11)
+            break;
+        uint32_t current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+        if (current_level <= initial_level)
+            break;
+    }
+    std::cerr << "stepOver execute stopped with resp " << resp << std::endl;
+    return resp;
+}
 
 int Debugger::stepInto() {
     if (!env)
