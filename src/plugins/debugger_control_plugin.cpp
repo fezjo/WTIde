@@ -54,9 +54,11 @@ void DebuggerControlPlugin::show() {
             callbacks["set_output"](debugger->getOutput());
     }
     ImGui::SameLine();
+    ImGui::BeginDisabled(true);
     if (ImGui::Button("Pause")) {
         debugger->pauseExecution();
     }
+    ImGui::EndDisabled();
 
     ImGui::Text("Step");
     ImGui::SameLine();
@@ -82,6 +84,7 @@ void DebuggerControlPlugin::show() {
     static char fileBuffer[256] = "";
     static int lineBuffer = 0;
     if (ImGui::BeginPopup("Breakpoints")) {
+        ImGui::BeginDisabled(true);
         if (ImGui::Button("Add")) {
             ImGui::OpenPopup("Add Breakpoint");
         }
@@ -109,6 +112,7 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Remove All")) {
             debugger->removeAllBreakpoints();
         }
+    ImGui::EndDisabled();
         ImGui::EndPopup();
     }
     ImGui::End();
