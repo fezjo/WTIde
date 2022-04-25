@@ -53,6 +53,7 @@ public:
         openEditor(fs::path("..") / "src" / "WTEdu.cpp", false);
         editor_plugins[0]->GetEditor().SetGlobalMode(Zep::ZepMode_Vim::StaticName());
         openEditor(fs::path("nonexistent.cpp"), false);
+        openEditor(fs::path("test.wt"), false);
 
         filetree_plugin = new FileTreePlugin();
         filetree_plugin->setCallback("open_file", [&](CallbackData data) {
