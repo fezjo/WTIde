@@ -187,11 +187,17 @@ void Debugger::pauseExecution() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
 void Debugger::stopExecution() { reset(); }
 
-void Debugger::stepOver() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
+int Debugger::stepOver() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
-void Debugger::stepInto() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
+int Debugger::stepInto() {
+    if (!env)
+        return -2;
+    int resp = WTStar::execute(env, -1, 0, 3);
+    std::cerr << "stepInto execute stopped with resp " << resp << std::endl;
+    return resp;
+}
 
-void Debugger::stepOut() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
+int Debugger::stepOut() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
 bool Debugger::setBreakpoint(const std::string &file, int line) {
     return setBreakpointWithCondition(file, line, "");

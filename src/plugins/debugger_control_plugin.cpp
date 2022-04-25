@@ -47,7 +47,8 @@ void DebuggerControlPlugin::show() {
     }
     ImGui::SameLine();
     if (ImGui::Button("Into")) {
-        debugger.stepInto();
+        if (debugger.stepInto() == -1)
+            callbacks["set_output"](debugger.getOutput());
     }
     ImGui::SameLine();
     if (ImGui::Button("Out")) {

@@ -56,9 +56,9 @@ public:
     void pauseExecution();
     void stopExecution();
 
-    void stepOver();
-    void stepInto();
-    void stepOut();
+    int stepOver();
+    int stepInto();
+    int stepOut();
 
     bool setBreakpoint(const std::string &file, int line);
     bool removeBreakpoint(const std::string &file, int line);
