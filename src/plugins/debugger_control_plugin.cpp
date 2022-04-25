@@ -12,10 +12,25 @@ void DebuggerControlPlugin::show() {
         return;
     }
 
-    if (ImGui::Button("Set source"))
-        setSource(source_fn);
+    auto set_source = [&]() {
+        if (setSource(source_fn))
+            callbacks["refresh_analyzer"](0);
+        else
+            source_fn_color = ImVec4(1.0, 0.25, 0.25, 1.0);
+    };
+    if (ImGui::Button("Set source")) {
+        set_source();
+    }
     ImGui::SameLine();
-    ImGui::InputText("##source_fn", &source_fn);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, source_fn_color);
+    if (ImGui::InputText("##source_fn", &source_fn,
+                         ImGuiInputTextFlags_EnterReturnsTrue |
+                             ImGuiInputTextFlags_AutoSelectAll)) {
+        set_source();
+    }
+    ImGui::PopStyleColor();
+    if (ImGui::IsItemEdited() || !seen)
+        source_fn_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
 
     if (ImGui::Button("Compile")) {
         debugger->clearCompilationOutput();
@@ -97,11 +112,14 @@ void DebuggerControlPlugin::show() {
         ImGui::EndPopup();
     }
     ImGui::End();
+    seen = true;
 }
 
-void DebuggerControlPlugin::setSource(const std::string &source) {
+bool DebuggerControlPlugin::setSource(const std::string &source) {
+    if (!debugger->setSource(source))
+        return false;
     source_fn = source;
-    debugger->setSource(source);
+    return true;
 }
 
 void DebuggerControlPlugin::setInput(const std::string &input) { debugger->setInput(input); }

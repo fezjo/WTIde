@@ -10,7 +10,7 @@ public:
     DebuggerControlPlugin(Debugger *debugger);
     void show() override;
 
-    void setSource(const std::string &source);
+    bool setSource(const std::string &source);
     void setInput(const std::string &input);
 
     // void runExecution();
@@ -31,4 +31,6 @@ public:
 protected:
     Debugger *debugger;
     std::string source_fn = "test.wt"; // TODO testing
+    bool seen = false;
+    ImVec4 source_fn_color = ImVec4();
 };

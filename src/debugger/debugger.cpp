@@ -55,6 +55,8 @@ bool Debugger::setSource(const std::string &file) {
         return false;
     source_fn = file;
     std::cerr << "set source " << source_fn << std::endl;
+    binary_fn = source_fn.substr(0, source_fn.size() - 3) + ".wtb";
+    std::cerr << "binary_fn " << binary_fn << std::endl;
     reset();
     return true;
 }
@@ -122,9 +124,6 @@ void Debugger::clearCompilationOutput() { error_stream.str(""); }
 bool Debugger::compile() {
     if (source_fn.empty())
         return false;
-
-    binary_fn = source_fn.substr(0, source_fn.size() - 3) + ".wtb";
-    std::cerr << "binary_fn " << binary_fn << std::endl;
 
     ip = WTStar::include_project_t_new();
     WTStar::driver_init(ip);
