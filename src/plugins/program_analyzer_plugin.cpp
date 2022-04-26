@@ -17,28 +17,30 @@ void ProgramAnalyzerPlugin::show() {
         return;
     }
 
-    std::string fn = debugger->binary_fn;
-    if (fn.empty()) {
-        ImGui::TextWrapped("No binary file");
-        ImGui::End();
-        return;
-    }
-
-    code_t code;
-    try {
-        code = readCode(fn);
-    } catch (const std::exception &e) {
-        ImGui::TextWrapped("Failed to read binary file %s: %s", fn.c_str(), e.what());
-        ImGui::End();
-        return;
-    }
-
-    WTStar::virtual_machine_t *env =
-        WTStar::virtual_machine_t_new(code.data(), static_cast<int>(code.size()));
+    WTStar::virtual_machine_t *env = debugger->env;
     if (!env) {
-        ImGui::TextWrapped("Failed to create virtual machine, corrupted binary?");
-        ImGui::End();
-        return;
+        std::string fn = debugger->binary_fn;
+        if (fn.empty()) {
+            ImGui::TextWrapped("No binary file");
+            ImGui::End();
+            return;
+        }
+
+        code_t code;
+        try {
+            code = readCode(fn);
+        } catch (const std::exception &e) {
+            ImGui::TextWrapped("Failed to read binary file %s: %s", fn.c_str(), e.what());
+            ImGui::End();
+            return;
+        }
+
+        env = WTStar::virtual_machine_t_new(code.data(), static_cast<int>(code.size()));
+        if (!env) {
+            ImGui::TextWrapped("Failed to create virtual machine, corrupted binary?");
+            ImGui::End();
+            return;
+        }
     }
 
     Writer outw;
@@ -98,7 +100,7 @@ void ProgramAnalyzerPlugin::show() {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Code")) {
-            ImGui::TextWrapped("Code size: %ld", code.size());
+            ImGui::TextWrapped("Code size: %d", env->code_size);
             print_code(outw.w, env->code, env->code_size);
             writeTextWrappedAndClear(outw);
             ImGui::EndTabItem();
