@@ -179,8 +179,24 @@ bool Debugger::initialize() {
 void Debugger::errorHandler(WTStar::error_t *error) { error_stream << error->msg->str.base; }
 
 // TODO
-uint32_t Debugger::findInstructionNumber(const std::string &file, int line) {
-    std::cerr << "NOT IMPLEMENTED" << std::endl;
+uint32_t Debugger::findInstructionNumber(const std::string &file, uint line) {
+    if (!env)
+        return -1;
+    if (!env->debug_info)
+        return -1;
+    for (uint i = 0; i < env->debug_info->source_items_map->n; i++) {
+        uint instr_i = env->debug_info->source_items_map->bp[i];
+        int item_i = env->debug_info->source_items_map->val[i];
+        if (item_i < 0)
+            continue;
+        WTStar::item_info_t *item = &env->debug_info->items[item_i];
+        std::string i_file(env->debug_info->files[item->fileid]);
+        std::cerr << "item " << i << " " << item_i << " " << instr_i << " " << i_file << " " << item->fl << std::endl;
+        if (i_file == file && item->fl == line) {
+            std::cerr << "found item " << item_i << std::endl;
+            return instr_i;
+        }
+    }
     return -1;
 }
 
@@ -320,6 +336,7 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, int line,
     if (WTStar::add_breakpoint(env, bp_pos, code.empty() ? NULL : code.data(),
                                static_cast<uint32_t>(code.size())) == -1)
         return false;
+    std::cerr << "setBreakpointWithCondition added breakpoint at " << bp_pos << std::endl;
     breakpoints.push_back({file, line, condition, true, bp_pos});
     return true;
 }
@@ -328,7 +345,8 @@ bool Debugger::removeBreakpoint(const std::string &file, int line) {
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
-    WTStar::remove_breakpoint(env, bp->bp_pos);
+    if (WTStar::remove_breakpoint(env, bp->bp_pos) == -1)
+        return false;
     std::remove_if(breakpoints.begin(), breakpoints.end(),
                    [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; });
     return true;

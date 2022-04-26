@@ -85,8 +85,8 @@ void DebuggerControlPlugin::show() {
     ImGui::SameLine();
     ImGui::Checkbox("Stop on BP", &debugger->stop_on_bp);
 
-    static std::string fileBuffer = "";
-    static int lineBuffer = 0;
+    static std::string fileBuffer = "test.wt";
+    static int lineBuffer = 18;
     if (ImGui::BeginPopup("Breakpoints")) {
         if (ImGui::Button("Add")) {
             ImGui::OpenPopup("Add Breakpoint");
