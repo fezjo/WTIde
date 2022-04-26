@@ -5,7 +5,10 @@
 
 class OutputPlugin : public TextPlugin {
 public:
-    OutputPlugin();
+    OutputPlugin() {
+        pluginType = PluginType::Output;
+        setReadonly(true);
+    }
 
 protected:
     using TextPlugin::setReadonly;

@@ -1,6 +1,8 @@
 #include "plugin_control_plugin.h"
 
-PluginControlPlugin::PluginControlPlugin(std::vector<IPlugin *> *plugins) : plugins(plugins) {}
+PluginControlPlugin::PluginControlPlugin(std::vector<IPlugin *> *plugins) : plugins(plugins) {
+    pluginType = PluginType::PluginControl;
+}
 
 void PluginControlPlugin::showLine(IPlugin *plugin) {
     ImGui::Checkbox(plugin->title.c_str(), &plugin->shown);

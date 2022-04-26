@@ -5,7 +5,19 @@
 
 #include "../utils.h"
 
-enum class PluginType { Unknown = 0, Editor, FileTree, Terminal, Debugger, Output, Search };
+enum class PluginType {
+    Unknown = 0,
+    Editor,
+    Search,
+    FileTree,
+    Terminal,
+    Text,
+    Input,
+    Output,
+    PluginControl,
+    ProgramAnalyzer,
+    DebuggerControl
+};
 
 using CallbackData = std::variant<bool, int, std::string>;
 using CallbackFunction = std::function<CallbackData(CallbackData)>;

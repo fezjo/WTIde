@@ -1,6 +1,8 @@
 #include "debugger_control_plugin.h"
 
-DebuggerControlPlugin::DebuggerControlPlugin(Debugger *debugger) : debugger(debugger) {}
+DebuggerControlPlugin::DebuggerControlPlugin(Debugger *debugger) : debugger(debugger) {
+    pluginType = PluginType::PluginControl;
+}
 
 void DebuggerControlPlugin::show() {
     if (!shown)
@@ -86,7 +88,6 @@ void DebuggerControlPlugin::show() {
     static std::string fileBuffer = "";
     static int lineBuffer = 0;
     if (ImGui::BeginPopup("Breakpoints")) {
-        ImGui::BeginDisabled(true);
         if (ImGui::Button("Add")) {
             ImGui::OpenPopup("Add Breakpoint");
         }
@@ -114,7 +115,6 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Remove All")) {
             debugger->removeAllBreakpoints();
         }
-        ImGui::EndDisabled();
         ImGui::EndPopup();
     }
 

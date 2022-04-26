@@ -1,6 +1,8 @@
 #include "text_plugin.h"
 
-TextPlugin::TextPlugin(bool readonly) : readonly(readonly) {}
+TextPlugin::TextPlugin(bool readonly) : readonly(readonly) {
+    pluginType = PluginType::Text;
+}
 
 void TextPlugin::show() {
     if (!shown)

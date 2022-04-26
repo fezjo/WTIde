@@ -1,6 +1,9 @@
 #include "program_analyzer_plugin.h"
 
-ProgramAnalyzerPlugin::ProgramAnalyzerPlugin(Debugger *debugger) : debugger(debugger) { refresh(); }
+ProgramAnalyzerPlugin::ProgramAnalyzerPlugin(Debugger *debugger) : debugger(debugger) {
+    pluginType = PluginType::ProgramAnalyzer;
+    refresh();
+}
 
 void ProgramAnalyzerPlugin::refresh() {}
 
