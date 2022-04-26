@@ -118,8 +118,9 @@ void DebuggerControlPlugin::show() {
         ImGui::EndPopup();
     }
 
-    SourcePosition pos = debugger->getSourcePosition();
-    ImGui::TextWrapped("%s:%ld(%d:%d:%d:%d)", pos.file.c_str(), pos.line, pos.fl, pos.fc, pos.ll, pos.lc);
+    auto [pc, spos] = debugger->getSourcePosition();
+    ImGui::TextWrapped("%04ld>%s:%ld(%d:%d:%d:%d)", pc, spos.file.c_str(), spos.line, spos.fl,
+                       spos.fc, spos.ll, spos.lc);
 
     ImGui::End();
     seen = true;

@@ -206,10 +206,10 @@ uint32_t Debugger::findInstructionNumber(const std::string &file, int line) {
 //     printf("\n");
 // }
 
-SourcePosition Debugger::getSourcePosition() {
+std::pair<size_t, SourcePosition> Debugger::getSourcePosition() {
     if (!env)
-        return SourcePosition();
-    return findSourcePosition(env, env->pc);
+        return {-1, SourcePosition()};
+    return {env->pc, findSourcePosition(env, env->pc)};
 }
 
 Breakpoint *Debugger::findBreakpoint(const std::string &file, int line) {

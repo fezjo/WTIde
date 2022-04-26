@@ -68,7 +68,7 @@ public:
     void clearCompilationOutput();
 
     uint32_t findInstructionNumber(const std::string &file, int line);
-    SourcePosition getSourcePosition();
+    std::pair<size_t, SourcePosition> getSourcePosition();
     Breakpoint *findBreakpoint(const std::string &file, int line);
     std::vector<uint8_t> compileCondition(const std::string &condition);
 
