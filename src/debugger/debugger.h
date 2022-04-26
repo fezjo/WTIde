@@ -6,6 +6,7 @@ namespace WTStar {
 extern "C" {
 #include "ast.h"
 #include "code_generation.h"
+#include "debug.h"
 #include "driver.h"
 #include "errors.h"
 #include "vm.h"
@@ -31,6 +32,21 @@ public:
     WTStar::writer_t *w;
 };
 
+struct SourcePosition {
+    SourcePosition() = default;
+    SourcePosition(WTStar::item_info_t *info, WTStar::virtual_machine_t *env);
+
+    uint32_t fileid, //!< index of the source file
+        fl,          //!< first line
+        fc,          //!< first column
+        ll,          //!< last line
+        lc;          //!< last column
+    std::string file;
+    size_t line;
+    bool valid = false;
+};
+
+SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instruction_number);
 
 using code_t = std::vector<uint8_t>;
 
@@ -39,6 +55,7 @@ code_t readCode(const std::string &fn);
 extern "C" {
 void debugger_error_handler(WTStar::error_t *error, void *data);
 }
+
 class Debugger {
 public:
     Debugger() = default;
@@ -51,6 +68,7 @@ public:
     void clearCompilationOutput();
 
     uint32_t findInstructionNumber(const std::string &file, int line);
+    SourcePosition getSourcePosition();
     Breakpoint *findBreakpoint(const std::string &file, int line);
     std::vector<uint8_t> compileCondition(const std::string &condition);
 
@@ -65,11 +83,11 @@ public:
     int stepOut();
 
     bool setBreakpoint(const std::string &file, int line);
-    bool removeBreakpoint(const std::string &file, int line);
-    void removeAllBreakpoints();
     bool setBreakpointEnabled(const std::string &file, int line, bool enabled);
     bool setBreakpointWithCondition(const std::string &file, int line,
                                     const std::string &condition);
+    bool removeBreakpoint(const std::string &file, int line);
+    void removeAllBreakpoints();
 
 protected:
     void reset();

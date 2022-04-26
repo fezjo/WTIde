@@ -30,6 +30,25 @@ std::string Writer::read(size_t pos, size_t len) {
     return std::string(w->str.base + pos, len);
 }
 
+SourcePosition::SourcePosition(WTStar::item_info_t *info, WTStar::virtual_machine_t *env)
+    : fileid(info->fileid), fl(info->fl), fc(info->fc), ll(info->ll), lc(info->lc),
+      file(env->debug_info->files[info->fileid]), line(info->fl), valid(true) {}
+
+SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instruction_number) {
+    if (!env->debug_info)
+        return SourcePosition();
+    int i = code_map_find(env->debug_info->source_items_map, env->pc);
+    if (i < 0)
+        return SourcePosition();
+    int it = env->debug_info->source_items_map->val[i];
+    if (it < 0)
+        return SourcePosition();
+
+    WTStar::item_info_t *item = &env->debug_info->items[it];
+    SourcePosition res(item, env);
+    return res;
+}
+
 code_t readCode(const std::string &fn) {
     std::ifstream ifs(fn, std::ios::binary);
     if (!ifs.is_open())
@@ -113,7 +132,7 @@ std::string Debugger::getOutput() {
     Writer wout;
     for (uint i = 0; i < env->n_out_vars; i++)
         WTStar::write_output(wout.w, env, i);
-    WTStar::out_text(wout.w, "-----\nwork: %d\ntime: %d\n", env->W, env->T);
+    WTStar::out_text(wout.w, "-----\nwork: %10d\ntime: %10d\n", env->W, env->T);
     return wout.read();
 }
 
@@ -165,6 +184,34 @@ uint32_t Debugger::findInstructionNumber(const std::string &file, int line) {
     return -1;
 }
 
+// if (trace_on) {
+//     printf("\nthread groups: ");
+//     for (int i = 0; i < STACK_SIZE(env->threads, stack_t *); i++)
+//     printf(" %lu ",
+//             STACK_SIZE(STACK(env->threads, stack_t *)[i], thread_t *));
+//     printf("\nenv->n_thr=%2d env->a_thr=%2d env->virtual_grps=%d\n",
+//             env->n_thr, env->a_thr, env->virtual_grps);
+//     if (env->a_thr > 0) {
+//     printf("fbase=%d\n", env->frame->base);
+//     for (int t = 0; t < env->n_thr; t++) {
+//         printf("mem_base=%d size=%d parent=%lu", env->thr[t]->mem_base,
+//                 env->thr[t]->mem->top, (unsigned long)env->thr[t]->parent);
+//         printf("     [");
+//         for (int i = 0; i < env->thr[t]->op_stack->top; i++)
+//         printf("%d ", env->thr[t]->op_stack->data[i]);
+//         printf("]\n");
+//     }
+//     printf("W=%d T=%d\n\n", env->W, env->T);
+//     } else
+//     printf("\n");
+// }
+
+SourcePosition Debugger::getSourcePosition() {
+    if (!env)
+        return SourcePosition();
+    return findSourcePosition(env, env->pc);
+}
+
 Breakpoint *Debugger::findBreakpoint(const std::string &file, int line) {
     auto it = std::find_if(breakpoints.begin(), breakpoints.end(), [&](const Breakpoint &bp) {
         return bp.file == file && bp.line == line;
@@ -191,7 +238,7 @@ int Debugger::runExecution() {
 int Debugger::continueExecution() {
     if (!env)
         return -2;
-    int resp = WTStar::execute(env, -1, 0, stop_on_bp);
+    int resp = WTStar::execute(env, -1, 1, stop_on_bp);
     std::cerr << "continueExecution execute stopped with resp " << resp << std::endl;
     return resp;
 }
@@ -254,22 +301,6 @@ bool Debugger::setBreakpoint(const std::string &file, int line) {
     return setBreakpointWithCondition(file, line, "");
 }
 
-bool Debugger::removeBreakpoint(const std::string &file, int line) {
-    auto bp = findBreakpoint(file, line);
-    if (!bp)
-        return false;
-    WTStar::remove_breakpoint(env, bp->bp_pos);
-    std::remove_if(breakpoints.begin(), breakpoints.end(),
-                   [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; });
-    return true;
-}
-
-void Debugger::removeAllBreakpoints() {
-    for (auto &bp : breakpoints)
-        WTStar::remove_breakpoint(env, bp.bp_pos);
-    breakpoints.clear();
-}
-
 bool Debugger::setBreakpointEnabled(const std::string &file, int line, bool enabled) {
     auto bp = findBreakpoint(file, line);
     if (!bp)
@@ -291,4 +322,20 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, int line,
         return false;
     breakpoints.push_back({file, line, condition, true, bp_pos});
     return true;
+}
+
+bool Debugger::removeBreakpoint(const std::string &file, int line) {
+    auto bp = findBreakpoint(file, line);
+    if (!bp)
+        return false;
+    WTStar::remove_breakpoint(env, bp->bp_pos);
+    std::remove_if(breakpoints.begin(), breakpoints.end(),
+                   [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; });
+    return true;
+}
+
+void Debugger::removeAllBreakpoints() {
+    for (auto &bp : breakpoints)
+        WTStar::remove_breakpoint(env, bp.bp_pos);
+    breakpoints.clear();
 }

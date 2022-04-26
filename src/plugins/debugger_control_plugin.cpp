@@ -114,9 +114,13 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Remove All")) {
             debugger->removeAllBreakpoints();
         }
-    ImGui::EndDisabled();
+        ImGui::EndDisabled();
         ImGui::EndPopup();
     }
+
+    SourcePosition pos = debugger->getSourcePosition();
+    ImGui::TextWrapped("%s:%ld(%d:%d:%d:%d)", pos.file.c_str(), pos.line, pos.fl, pos.fc, pos.ll, pos.lc);
+
     ImGui::End();
     seen = true;
 }
