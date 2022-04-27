@@ -12,7 +12,7 @@ void ProgramAnalyzerPlugin::show() {
         return;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(),
-                      immortal ? nullptr : &alive, ImGuiWindowFlags_HorizontalScrollbar)) {
+                      immortal ? nullptr : &alive, ImGuiWindowFlags_None)) {
         ImGui::End();
         return;
     }
@@ -49,12 +49,13 @@ void ProgramAnalyzerPlugin::show() {
         outw.clear();
     };
 
-    if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+    if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_Reorderable)) {
         // if (ImGui::BeginTabItem("Current compilation output")) {
         //     ImGui::TextWrapped(debugger->getCompilationOutput().c_str());
         //     ImGui::EndTabItem();
         // }
         if (ImGui::BeginTabItem("Misc")) {
+            ImGui::BeginChild("##child");
             WTStar::dump_header(outw.w, env);
             writeTextWrappedAndClear(outw);
 
@@ -72,9 +73,11 @@ void ProgramAnalyzerPlugin::show() {
                 }
             } else
                 ImGui::TextDisabled("Debug info");
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Variables")) {
+            ImGui::BeginChild("##child");
             ImGui::SetNextItemOpen(true, ImGuiCond_Once);
             if (ImGui::TreeNode("Input")) {
                 WTStar::print_io_vars(outw.w, env, env->n_in_vars, env->in_vars);
@@ -93,16 +96,21 @@ void ProgramAnalyzerPlugin::show() {
                 writeTextWrappedAndClear(outw);
                 ImGui::TreePop();
             }
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Functions")) {
+            ImGui::BeginChild("##child");
             ImGui::TextWrapped("TODO");
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Code")) {
+            ImGui::BeginChild("##child");
             ImGui::TextWrapped("Code size: %d", env->code_size);
             print_code(outw.w, env->code, env->code_size);
             writeTextWrappedAndClear(outw);
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
