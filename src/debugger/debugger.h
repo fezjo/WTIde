@@ -5,6 +5,7 @@
 namespace WTStar {
 extern "C" {
 #include "ast.h"
+#include "ast_debug_print.h"
 #include "code_generation.h"
 #include "debug.h"
 #include "driver.h"
@@ -15,7 +16,7 @@ extern "C" {
 
 struct Breakpoint {
     std::string file;
-    int line;
+    uint line;
     std::string condition;
     bool enabled;
     uint32_t bp_pos;
@@ -27,7 +28,7 @@ public:
     Writer(const std::string &fn, const std::string &mode);
     ~Writer();
     void clear();
-    std::string read(size_t pos = 0, size_t len = -1);
+    std::string read(size_t pos = 0, size_t len = -1u);
 
     WTStar::writer_t *w;
 };
@@ -67,9 +68,9 @@ public:
     std::string getCompilationOutput();
     void clearCompilationOutput();
 
-    uint32_t findInstructionNumber(const std::string &file, uint line);
+    uint findInstructionNumber(const std::string &file, uint line);
     std::pair<size_t, SourcePosition> getSourcePosition();
-    Breakpoint *findBreakpoint(const std::string &file, int line);
+    Breakpoint *findBreakpoint(const std::string &file, uint line);
     std::vector<uint8_t> compileCondition(const std::string &condition);
 
     bool compile();
@@ -82,15 +83,16 @@ public:
     int stepInto();
     int stepOut();
 
-    bool setBreakpoint(const std::string &file, int line);
-    bool setBreakpointEnabled(const std::string &file, int line, bool enabled);
-    bool setBreakpointWithCondition(const std::string &file, int line,
+    bool setBreakpoint(const std::string &file, uint line);
+    bool setBreakpointEnabled(const std::string &file, uint line, bool enabled);
+    bool setBreakpointWithCondition(const std::string &file, uint line,
                                     const std::string &condition);
-    bool removeBreakpoint(const std::string &file, int line);
+    bool removeBreakpoint(const std::string &file, uint line);
     void removeAllBreakpoints();
 
 protected:
     void reset();
+    void resetVm();
     bool readBinary();
     bool readInput();
     bool initialize();

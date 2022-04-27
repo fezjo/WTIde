@@ -83,10 +83,7 @@ bool Debugger::setSource(const std::string &file) {
 void Debugger::setInput(const std::string &input) { this->input = input; }
 
 void Debugger::reset() {
-    binary.clear();
-    if (env)
-        WTStar::virtual_machine_t_delete(env);
-    env = nullptr;
+    resetVm();
     if (ip)
         WTStar::driver_destroy(ip);
     ip = nullptr;
@@ -94,6 +91,13 @@ void Debugger::reset() {
         WTStar::ast_t_delete(ast);
     ast = nullptr;
     std::cerr << "reset" << std::endl;
+}
+
+void Debugger::resetVm() {
+    binary.clear();
+    if (env)
+        WTStar::virtual_machine_t_delete(env);
+    env = nullptr;
 }
 
 bool Debugger::readBinary() {
@@ -120,7 +124,7 @@ bool Debugger::readInput() {
     }
     WTStar::reader_t *in = reader_t_new(WTStar::READER_STRING, input.c_str());
     if (WTStar::read_input(in, env) != 0)
-        reset();
+        resetVm();
     WTStar::reader_t_delete(in);
     std::cerr << "read input success" << (env != nullptr) << std::endl;
     return env != nullptr;
@@ -168,7 +172,7 @@ bool Debugger::compile() {
 }
 
 bool Debugger::initialize() {
-    reset();
+    resetVm();
     if (!readBinary())
         return false;
     env = WTStar::virtual_machine_t_new(binary.data(), static_cast<int>(binary.size()));
@@ -176,14 +180,17 @@ bool Debugger::initialize() {
     return true;
 }
 
-void Debugger::errorHandler(WTStar::error_t *error) { error_stream << error->msg->str.base; }
+void Debugger::errorHandler(WTStar::error_t *error) {
+    std::cerr << error->msg->str.base << std::endl;
+    error_stream << error->msg->str.base;
+}
 
 // TODO
-uint32_t Debugger::findInstructionNumber(const std::string &file, uint line) {
+uint Debugger::findInstructionNumber(const std::string &file, uint line) {
     if (!env)
-        return -1;
+        return -1u;
     if (!env->debug_info)
-        return -1;
+        return -1u;
     for (uint i = 0; i < env->debug_info->source_items_map->n; i++) {
         uint instr_i = env->debug_info->source_items_map->bp[i];
         int item_i = env->debug_info->source_items_map->val[i];
@@ -191,13 +198,14 @@ uint32_t Debugger::findInstructionNumber(const std::string &file, uint line) {
             continue;
         WTStar::item_info_t *item = &env->debug_info->items[item_i];
         std::string i_file(env->debug_info->files[item->fileid]);
-        std::cerr << "item " << i << " " << item_i << " " << instr_i << " " << i_file << " " << item->fl << std::endl;
+        std::cerr << "instruction to source " << i << " " << item_i << " " << instr_i << " "
+                  << i_file << " " << item->fl << std::endl;
         if (i_file == file && item->fl == line) {
             std::cerr << "found item " << item_i << std::endl;
             return instr_i;
         }
     }
-    return -1;
+    return -1u;
 }
 
 // if (trace_on) {
@@ -228,7 +236,7 @@ std::pair<size_t, SourcePosition> Debugger::getSourcePosition() {
     return {env->pc, findSourcePosition(env, env->pc)};
 }
 
-Breakpoint *Debugger::findBreakpoint(const std::string &file, int line) {
+Breakpoint *Debugger::findBreakpoint(const std::string &file, uint line) {
     auto it = std::find_if(breakpoints.begin(), breakpoints.end(), [&](const Breakpoint &bp) {
         return bp.file == file && bp.line == line;
     });
@@ -237,12 +245,112 @@ Breakpoint *Debugger::findBreakpoint(const std::string &file, int line) {
     return &*it;
 }
 
-// TODO
-std::vector<uint8_t> Debugger::compileCondition(const std::string &condition) {
+using ast_scope_and_node = std::pair<WTStar::scope_t *, WTStar::ast_node_t *>;
+ast_scope_and_node findAstScopeAndNode(WTStar::ast_t *ast,
+                                       std::function<bool(WTStar::ast_node_t *)> predicate,
+                                       WTStar::scope_t *scope = nullptr,
+                                       WTStar::ast_node_t *node = nullptr,
+                                       bool viable_scope = true) {
+    static auto maybe_add_scope = [](WTStar::scope_t *scope, ast_scope_and_node &pair) {
+        if (!pair.first)
+            pair.first = scope;
+        return pair;
+    };
+    std::cerr << "findAstScopeAndNode " << (void *)scope << " " << (void *)node << std::endl;
+    if (!node && !scope)
+        scope = ast->root_scope;
+    if (scope) {
+        std::cerr << "scope " << std::endl;
+        for (WTStar::ast_node_t *node = scope->items; node; node = node->next) {
+            ast_scope_and_node res = findAstScopeAndNode(ast, predicate, nullptr, node);
+            if (res.second) {
+                if (viable_scope)
+                    return maybe_add_scope(scope, res);
+                else
+                    return res;
+            }
+        }
+        return {};
+    }
+    std::cerr << "node " << node->node_type << " [" << node->loc.fl << ":" << node->loc.fc << ":"
+              << node->loc.ll << ":" << node->loc.lc << "] instr" << node->code_from << "-"
+              << node->code_to << std::endl;
+    if (!predicate(node))
+        return {};
+    if (node->node_type == WTStar::AST_NODE_SCOPE) {
+        return findAstScopeAndNode(ast, predicate, node->val.sc, nullptr);
+    } else if (node->node_type == WTStar::AST_NODE_FUNCTION) {
+        return findAstScopeAndNode(ast, predicate, node->val.f->root_scope, nullptr);
+    } else if (node->node_type == WTStar::AST_NODE_STATEMENT) {
+        for (int pi = 0; pi < 2; ++pi) {
+            WTStar::ast_node_t *p = node->val.s->par[pi];
+            ast_scope_and_node res;
+            if (p->node_type == WTStar::AST_NODE_SCOPE)
+                res = findAstScopeAndNode(ast, predicate, p->val.sc, nullptr, false);
+            else
+                res = findAstScopeAndNode(ast, predicate, nullptr, p);
+            if (res.first)
+                return res;
+            if (res.second)             // if we found node but it does not have scope, then we have
+                return {nullptr, node}; // also don't have scope so we return ourselves
+        }
+        assert(!(bool)"unreachable");
+    } else {
+        return {nullptr, node};
+    }
+}
+
+code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
+                             WTStar::scope_t *scope_pos) {
     if (condition.empty())
         return {};
-    std::cerr << "NOT IMPLEMENTED" << std::endl;
-    return {};
+
+    WTStar::include_project_t *ip = WTStar::include_project_t_new();
+    WTStar::driver_init(ip);
+
+    std::string cond_fn = "condition";
+    WTStar::driver_set_file(ip, cond_fn.c_str(), condition.c_str());
+
+    WTStar::ast_node_t *bp_scope_node =
+        WTStar::ast_node_t_new(NULL, WTStar::AST_NODE_SCOPE, scope_pos);
+
+    ast->current_scope = bp_scope_node->val.sc;
+    ast = WTStar::driver_parse_from(ast, ip, cond_fn.c_str());
+    ast->current_scope = ast->root_scope;
+
+    Writer dout;
+    WTStar::ast_debug_set_writer(dout.w);
+    WTStar::ast_debug_print_node(0, bp_scope_node);
+    std::cerr << dout.read() << std::endl;
+
+    std::cerr << "ast resp " << ast->error_occured << std::endl;
+
+    Writer out;
+    int resp = WTStar::emit_code_scope_section(ast, bp_scope_node->val.sc, out.w);
+
+    WTStar::driver_destroy(ip);
+    WTStar::ast_node_t_delete(bp_scope_node);
+
+    if (resp)
+        throw std::runtime_error("compilation failed");
+
+    std::string code_s = out.read();
+    code_t code(code_s.begin(), code_s.end());
+
+    dout.clear();
+    WTStar::print_code(dout.w, code.data(), code.size());
+    std::cerr << dout.read() << std::endl;
+
+    if (!( // this is only a heuristic
+            code[code.size() - 1] == WTStar::ENDVM && code[code.size() - 2] == WTStar::MEM_FREE &&
+            code[code.size() - 3] != WTStar::MEM_FREE)) {
+        throw std::runtime_error("no final expression");
+    }
+    code.pop_back(); // remove last instruction (ENDVM)
+
+    std::cerr << "breakpoint code_size" << code.size() << std::endl;
+
+    return code;
 }
 
 int Debugger::runExecution() {
@@ -261,7 +369,7 @@ int Debugger::continueExecution() {
 
 void Debugger::pauseExecution() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
-void Debugger::stopExecution() { reset(); }
+void Debugger::stopExecution() { resetVm(); }
 
 int Debugger::stepOver() {
     if (!env)
@@ -313,11 +421,11 @@ int Debugger::stepOut() {
     return resp;
 }
 
-bool Debugger::setBreakpoint(const std::string &file, int line) {
+bool Debugger::setBreakpoint(const std::string &file, uint line) {
     return setBreakpointWithCondition(file, line, "");
 }
 
-bool Debugger::setBreakpointEnabled(const std::string &file, int line, bool enabled) {
+bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool enabled) {
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
@@ -327,28 +435,37 @@ bool Debugger::setBreakpointEnabled(const std::string &file, int line, bool enab
     return true;
 }
 
-bool Debugger::setBreakpointWithCondition(const std::string &file, int line,
+bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
                                           const std::string &condition) {
-    uint32_t bp_pos = findInstructionNumber(file, line);
+    uint bp_pos = findInstructionNumber(file, line);
     if (bp_pos == -1u)
         return false;
-    std::vector<uint8_t> code = compileCondition(condition);
+    ast_scope_and_node scope_and_node = findAstScopeAndNode(ast, [&](WTStar::ast_node_t *node) {
+        return node->code_from <= (int)bp_pos && node->code_to >= (int)bp_pos;
+    });
+    std::cerr << "found scope and node id " << scope_and_node.first->items->id << " "
+              << scope_and_node.second->id << std::endl;
+    std::vector<uint8_t> code = compileConditionInAst(ast, condition, scope_and_node.first);
     if (WTStar::add_breakpoint(env, bp_pos, code.empty() ? NULL : code.data(),
-                               static_cast<uint32_t>(code.size())) == -1)
+                               static_cast<uint>(code.size())) == -1) {
+        std::cerr << "setBreakpointWithCondition failed" << std::endl;
         return false;
+    }
     std::cerr << "setBreakpointWithCondition added breakpoint at " << bp_pos << std::endl;
     breakpoints.push_back({file, line, condition, true, bp_pos});
     return true;
 }
 
-bool Debugger::removeBreakpoint(const std::string &file, int line) {
+bool Debugger::removeBreakpoint(const std::string &file, uint line) {
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
     if (WTStar::remove_breakpoint(env, bp->bp_pos) == -1)
         return false;
-    std::remove_if(breakpoints.begin(), breakpoints.end(),
-                   [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; });
+    breakpoints.erase(
+        std::remove_if(breakpoints.begin(), breakpoints.end(),
+                       [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; }),
+        breakpoints.end());
     return true;
 }
 

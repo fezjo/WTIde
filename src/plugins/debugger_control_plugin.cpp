@@ -86,7 +86,8 @@ void DebuggerControlPlugin::show() {
     ImGui::Checkbox("Stop on BP", &debugger->stop_on_bp);
 
     static std::string fileBuffer = "test.wt";
-    static int lineBuffer = 18;
+    static std::string condition = "sum % 2 == 0;";
+    static int lineBuffer = 44;
     if (ImGui::BeginPopup("Breakpoints")) {
         if (ImGui::Button("Add")) {
             ImGui::OpenPopup("Add Breakpoint");
@@ -94,8 +95,9 @@ void DebuggerControlPlugin::show() {
         if (ImGui::BeginPopup("Add Breakpoint")) {
             ImGui::InputText("File", &fileBuffer);
             ImGui::InputInt("Line", &lineBuffer);
+            ImGui::InputTextMultiline("Condition", &condition);
             if (ImGui::Button("Add")) {
-                debugger->setBreakpoint(fileBuffer, lineBuffer);
+                debugger->setBreakpointWithCondition(fileBuffer, lineBuffer, condition);
             }
             ImGui::EndPopup();
         }
