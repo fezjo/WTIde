@@ -458,8 +458,14 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
         return false;
     }
     std::cerr << "setBreakpointWithCondition added breakpoint at " << bp_pos << std::endl;
-    breakpoints.push_back(
-        {file, line, condition, bp_pos, "", code, WTStar::get_breakpoint(env, bp_pos), true}); // TODO compilation error
+    breakpoints.erase(
+        std::remove_if(breakpoints.begin(), breakpoints.end(),
+                       [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; }),
+        breakpoints.end());
+    auto it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
+                               [](uint pos, const Breakpoint &bp) { return pos < bp.bp_pos; });
+    breakpoints.insert(it, {file, line, condition, bp_pos, "", code,
+                            WTStar::get_breakpoint(env, bp_pos), true}); // TODO compilation error
     return true;
 }
 
