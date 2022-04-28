@@ -76,6 +76,7 @@ protected:
     uint findInstructionNumber(const std::string &file, uint line);
     Breakpoint *findBreakpoint(const std::string &file, uint line);
     std::vector<uint8_t> compileCondition(const std::string &condition);
+    bool addBreakpointToVm(const Breakpoint &bp);
 
     void errorHandler(WTStar::error_t *error);
     friend void debugger_error_handler(WTStar::error_t *error, void *data);

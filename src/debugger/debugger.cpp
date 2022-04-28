@@ -44,6 +44,8 @@ bool Debugger::initialize() {
     if (!readBinary())
         return false;
     env = WTStar::virtual_machine_t_new(binary.data(), static_cast<int>(binary.size()));
+    for (auto &bp: breakpoints)
+        addBreakpointToVm(bp);
     std::cerr << "created virtual machine" << std::endl;
     return true;
 }

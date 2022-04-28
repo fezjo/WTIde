@@ -157,6 +157,15 @@ Breakpoint *Debugger::findBreakpoint(const std::string &file, uint line) {
     return &*it;
 }
 
+bool Debugger::addBreakpointToVm(const Breakpoint &bp) {
+    if (WTStar::add_breakpoint(env, bp.bp_pos, bp.code.empty() ? NULL : bp.code.data(),
+                               static_cast<uint>(bp.code.size())) == -1) {
+        std::cerr << "setBreakpointWithCondition failed" << std::endl;
+        return false;
+    }
+    return true;
+}
+
 bool Debugger::setBreakpoint(const std::string &file, uint line) {
     return setBreakpointWithCondition(file, line, "");
 }
@@ -182,11 +191,6 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
     std::cerr << "found scope and node id " << scope_and_node.first->items->id << " "
               << scope_and_node.second->id << std::endl;
     std::vector<uint8_t> code = compileConditionInAst(ast, condition, scope_and_node.first);
-    if (WTStar::add_breakpoint(env, bp_pos, code.empty() ? NULL : code.data(),
-                               static_cast<uint>(code.size())) == -1) {
-        std::cerr << "setBreakpointWithCondition failed" << std::endl;
-        return false;
-    }
     std::cerr << "setBreakpointWithCondition added breakpoint at " << bp_pos << std::endl;
     breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
@@ -194,8 +198,11 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
         breakpoints.end());
     auto it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
                                [](uint pos, const Breakpoint &bp) { return pos < bp.bp_pos; });
-    breakpoints.insert(it, {file, line, condition, bp_pos, "", code,
-                            WTStar::get_breakpoint(env, bp_pos), true}); // TODO compilation error
+    Breakpoint bp{file, line, condition, bp_pos, "", code, WTStar::get_breakpoint(env, bp_pos),
+                  true};
+    it = breakpoints.insert(it, bp); // TODO compilation error
+    if (env)
+        addBreakpointToVm(bp);
     return true;
 }
 
