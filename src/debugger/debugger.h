@@ -67,8 +67,8 @@ public:
     void removeAllBreakpoints();
 
 protected:
-    void reset();
-    void resetVm();
+    void destroy();
+    void destroyVm();
     bool readBinary();
     bool readInput();
     bool initialize();

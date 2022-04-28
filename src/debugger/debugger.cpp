@@ -6,10 +6,10 @@ void debugger_error_handler(WTStar::error_t *error, void *data) {
 }
 }
 
-Debugger::~Debugger() { reset(); }
+Debugger::~Debugger() { destroy(); }
 
-void Debugger::reset() {
-    resetVm();
+void Debugger::destroy() {
+    destroyVm();
     if (ip)
         WTStar::driver_destroy(ip);
     ip = nullptr;
@@ -19,7 +19,7 @@ void Debugger::reset() {
     std::cerr << "reset" << std::endl;
 }
 
-void Debugger::resetVm() {
+void Debugger::destroyVm() {
     binary.clear();
     if (env)
         WTStar::virtual_machine_t_delete(env);
@@ -40,7 +40,7 @@ bool Debugger::readBinary() {
 }
 
 bool Debugger::initialize() {
-    resetVm();
+    destroyVm();
     if (!readBinary())
         return false;
     env = WTStar::virtual_machine_t_new(binary.data(), static_cast<int>(binary.size()));
@@ -51,7 +51,7 @@ bool Debugger::initialize() {
 bool Debugger::setSource(const std::string &file) {
     if (file.empty()) {
         std::cerr << "empty file" << std::endl;
-        reset();
+        destroy();
         source_fn.clear();
         return true;
     }
@@ -61,7 +61,7 @@ bool Debugger::setSource(const std::string &file) {
     std::cerr << "set source " << source_fn << std::endl;
     binary_fn = source_fn.substr(0, source_fn.size() - 3) + ".wtb";
     std::cerr << "binary_fn " << binary_fn << std::endl;
-    reset();
+    destroy();
     return true;
 }
 
@@ -78,7 +78,7 @@ bool Debugger::readInput() {
     }
     WTStar::reader_t *in = reader_t_new(WTStar::READER_STRING, input.c_str());
     if (WTStar::read_input(in, env) != 0)
-        resetVm();
+        destroyVm();
     WTStar::reader_t_delete(in);
     std::cerr << "read input success" << (env != nullptr) << std::endl;
     return env != nullptr;
@@ -107,7 +107,7 @@ bool Debugger::compile() {
     ast = WTStar::driver_parse(ip, source_fn.c_str(), debugger_error_handler, this);
     if (ast->error_occured) {
         std::cerr << "parse error" << std::endl;
-        reset();
+        destroy();
         return false;
     }
     std::cerr << "parsed source into ast" << std::endl;
@@ -118,7 +118,7 @@ bool Debugger::compile() {
 
     if (resp) {
         std::cerr << "compilation UNsucessful" << std::endl;
-        reset();
+        destroy();
         return false;
     }
     std::cerr << "compilation sucessful" << std::endl;
@@ -174,7 +174,7 @@ int Debugger::continueExecution() {
 
 void Debugger::pauseExecution() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 
-void Debugger::stopExecution() { resetVm(); }
+void Debugger::stopExecution() { destroyVm(); }
 
 int Debugger::stepOver() {
     if (!env)
