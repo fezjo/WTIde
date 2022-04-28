@@ -17,6 +17,7 @@
 
 #include "app.cpp"
 #include "utils.h"
+#include "themes.h"
 
 Uint32 minimum_refresh_rate_callback(Uint32 interval, void *param) {
     SDL_Event event;
@@ -126,6 +127,8 @@ int main(int, char **) {
     auto fontPath = fs::path("..") / "resources/fonts" / "Roboto Mono Nerd Font Complete Mono.ttf";
     ImWchar glyph_ranges[] = {1, 0x10FFFF, 0};
     io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16.0, NULL, glyph_ranges);
+
+    theme_YetAnotherDarkTheme();
 
     App app;
     app.show_demo_window = true;
