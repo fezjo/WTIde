@@ -117,36 +117,35 @@ void ProgramAnalyzerPlugin::show() {
             ImGui::BeginChild("##child");
             ImGui::TextWrapped("Breakpoints: %ld", debugger->breakpoints.size());
             for (auto &bp : debugger->breakpoints) {
-                bool editing = edit_bp.bp_pos == bp.bp_pos;
-                bool changed = false;
-                bool remove = false;
+                bool is_editing = edit_bp.bp_pos == bp.bp_pos;
+                bool action_update = false, action_remove = false;
                 bool enabled = bp.enabled;
-                
-                std::string &file = editing ? edit_bp.file : bp.file;
-                int line = static_cast<int>(editing ? edit_bp.line : bp.line);
-                std::string &condition = editing ? edit_bp.condition : bp.condition;
-                ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_ReadOnly * !editing;
+
+                std::string &file = is_editing ? edit_bp.file : bp.file;
+                int line = static_cast<int>(is_editing ? edit_bp.line : bp.line);
+                std::string &condition = is_editing ? edit_bp.condition : bp.condition;
+                ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_ReadOnly * !is_editing;
 
                 ImGui::SetNextItemOpen(true, ImGuiCond_Once);
                 if (ImGui::TreeNode(std::to_string(bp.bp_pos).c_str(), "%s:%d", bp.file.c_str(),
                                     bp.line)) {
-                    // compilation error, enable/disable, remove, edit
+                    // TODO compilation error
                     ImGui::Checkbox("Enabled", &enabled);
                     ImGui::SameLine();
                     if (ImGui::Button("Edit")) {
-                        if (!editing)
+                        if (!is_editing)
                             edit_bp = bp;
                         else
                             edit_bp = {};
                     }
                     ImGui::SameLine();
-                    ImGui::BeginDisabled(!editing);
+                    ImGui::BeginDisabled(!is_editing);
                     if (ImGui::Button("Update"))
-                        changed = editing;
+                        action_update = is_editing;
                     ImGui::EndDisabled();
                     ImGui::SameLine();
                     if (ImGui::Button("Remove"))
-                        remove = true;
+                        action_remove = true;
 
                     ImGui::Text("File:");
                     ImGui::SameLine();
@@ -154,7 +153,8 @@ void ProgramAnalyzerPlugin::show() {
 
                     ImGui::Text("Line:");
                     ImGui::SameLine();
-                    ImGui::InputInt("##line", &line, 1, 10, input_flags | ImGuiInputTextFlags_CharsDecimal);
+                    ImGui::InputInt("##line", &line, 1, 10,
+                                    input_flags | ImGuiInputTextFlags_CharsDecimal);
 
                     if (ImGui::TreeNode("Condition:")) {
                         ImGui::InputTextMultiline("##condition", &condition, ImVec2(-1, 0),
@@ -189,15 +189,16 @@ void ProgramAnalyzerPlugin::show() {
                     ImGui::TreePop();
                 }
 
-                if (editing)
+                if (is_editing)
                     bp.line = static_cast<uint>(line);
 
                 if (enabled != bp.enabled)
                     debugger->setBreakpointEnabled(bp.file, bp.line, enabled);
-                if (changed || remove)
+                if (action_update || action_remove)
                     debugger->removeBreakpoint(bp.file, bp.line);
-                if (changed) {
-                    debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line, edit_bp.condition);
+                if (action_update) {
+                    debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line,
+                                                         edit_bp.condition);
                 }
             }
             ImGui::EndChild();
