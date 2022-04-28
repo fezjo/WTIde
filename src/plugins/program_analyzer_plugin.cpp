@@ -199,6 +199,7 @@ void ProgramAnalyzerPlugin::show() {
                 if (action_update) {
                     debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line,
                                                          edit_bp.condition);
+                    edit_bp = {};
                 }
             }
             ImGui::EndChild();
