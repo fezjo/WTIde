@@ -14,14 +14,6 @@ extern "C" {
 }
 } // namespace WTStar
 
-struct Breakpoint {
-    std::string file;
-    uint line;
-    std::string condition;
-    bool enabled;
-    uint32_t bp_pos;
-};
-
 class Writer {
 public:
     Writer();
@@ -31,6 +23,23 @@ public:
     std::string read(size_t pos = 0, size_t len = -1u);
 
     WTStar::writer_t *w;
+};
+
+using code_t = std::vector<uint8_t>;
+
+code_t readCode(const std::string &fn);
+
+struct Breakpoint {
+    std::string file;
+    uint line;
+    std::string condition;
+
+    uint bp_pos;
+    std::string error;
+    code_t code;
+    WTStar::breakpoint_t *vm_bp;
+
+    bool enabled;
 };
 
 struct SourcePosition {
@@ -48,10 +57,6 @@ struct SourcePosition {
 };
 
 SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instruction_number);
-
-using code_t = std::vector<uint8_t>;
-
-code_t readCode(const std::string &fn);
 
 extern "C" {
 void debugger_error_handler(WTStar::error_t *error, void *data);

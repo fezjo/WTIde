@@ -113,6 +113,53 @@ void ProgramAnalyzerPlugin::show() {
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Breakpoints")) {
+            ImGui::BeginChild("##child");
+            ImGui::TextWrapped("Breakpoints: %ld", debugger->breakpoints.size());
+            for (auto &bp: debugger->breakpoints) {
+                ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+                if (ImGui::TreeNode(std::to_string(bp.bp_pos).c_str(), "%s:%d", bp.file.c_str(), bp.line)) {
+                    // compilation error, enable/disable, remove, edit
+                    ImGui::Text("File:");
+                    ImGui::SameLine();
+                    ImGui::InputText("##file", &bp.file, ImGuiInputTextFlags_ReadOnly);
+                    int line = static_cast<int>(bp.line);
+                    ImGui::Text("Line:");
+                    ImGui::SameLine();
+                    ImGui::InputInt("##line", &line, 1, 10, ImGuiInputTextFlags_ReadOnly);
+                    bool enabled = bp.enabled;
+                    ImGui::Checkbox("Enabled", &enabled);
+                    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+                    if (ImGui::TreeNode("VM")) {
+                        ImGui::TextWrapped("ID: %d", bp.vm_bp->id);
+                        ImGui::TextWrapped("BREAK position: %5d", bp.vm_bp->bp_pos);
+                        ImGui::TextWrapped("Code  position: %5d", bp.vm_bp->code_pos);
+                        ImGui::TextWrapped("Code  size: %5d", bp.vm_bp->code_size);
+                        if (ImGui::TreeNode("Instructions")) {
+                            outw.clear();
+                            WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos, bp.vm_bp->code_size);
+                            ImGui::TextWrapped("%s", outw.read().c_str());
+                            ImGui::TreePop();
+                        }
+                        ImGui::TreePop();
+                    }
+                    if (ImGui::TreeNode("Condition:")) {
+                        ImGui::InputTextMultiline("##condition", &bp.condition, ImVec2(-1, 0), ImGuiInputTextFlags_ReadOnly);
+                        ImGui::TreePop();
+                    }
+                    if (!bp.error.empty()) {
+                        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+                        if (ImGui::TreeNode("Compilation error")) {
+                            ImGui::TextWrapped("%s", bp.error.c_str());
+                            ImGui::TreePop();
+                        }
+                    }
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
         ImGui::EndTabBar();
     }
 

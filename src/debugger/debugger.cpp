@@ -323,7 +323,13 @@ code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
     WTStar::ast_debug_print_node(0, bp_scope_node);
     std::cerr << dout.read() << std::endl;
 
-    std::cerr << "ast resp " << ast->error_occured << std::endl;
+    if (ast->error_occured) {
+        ast->error_occured = 0;
+        std::cerr << "Error occured while parsing condition" << std::endl;
+        WTStar::driver_destroy(ip);
+        WTStar::ast_node_t_delete(bp_scope_node);
+        return {};
+    }
 
     Writer out;
     int resp = WTStar::emit_code_scope_section(ast, bp_scope_node->val.sc, out.w);
@@ -338,7 +344,7 @@ code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
     code_t code(code_s.begin(), code_s.end());
 
     dout.clear();
-    WTStar::print_code(dout.w, code.data(), code.size());
+    WTStar::print_code(dout.w, code.data(), (int)code.size());
     std::cerr << dout.read() << std::endl;
 
     if (!( // this is only a heuristic
@@ -452,7 +458,8 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
         return false;
     }
     std::cerr << "setBreakpointWithCondition added breakpoint at " << bp_pos << std::endl;
-    breakpoints.push_back({file, line, condition, true, bp_pos});
+    breakpoints.push_back(
+        {file, line, condition, bp_pos, "", code, WTStar::get_breakpoint(env, bp_pos), true}); // TODO compilation error
     return true;
 }
 

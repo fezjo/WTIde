@@ -25,6 +25,7 @@ void DebuggerControlPlugin::show() {
     }
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_FrameBg, source_fn_color);
+    ImGui::SetNextItemWidth(-1);
     if (ImGui::InputText("##source_fn", &source_fn,
                          ImGuiInputTextFlags_EnterReturnsTrue |
                              ImGuiInputTextFlags_AutoSelectAll)) {
@@ -79,16 +80,15 @@ void DebuggerControlPlugin::show() {
             callbacks["set_output"](debugger->getOutput());
     }
 
-    if (ImGui::Button("Breakpoints")) {
-        ImGui::OpenPopup("Breakpoints");
-    }
-    ImGui::SameLine();
-    ImGui::Checkbox("Stop on BP", &debugger->stop_on_bp);
+    {
+        static std::string fileBuffer = "test.wt";
+        static std::string condition = "sum % 2 == 0;";
+        static int lineBuffer = 50;
 
-    static std::string fileBuffer = "test.wt";
-    static std::string condition = "sum % 2 == 0;";
-    static int lineBuffer = 44;
-    if (ImGui::BeginPopup("Breakpoints")) {
+        ImGui::Text("Breakpoint:");
+        ImGui::SameLine();
+        ImGui::Checkbox("Stop on BP", &debugger->stop_on_bp);
+
         if (ImGui::Button("Add")) {
             ImGui::OpenPopup("Add Breakpoint");
         }
@@ -117,7 +117,6 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Remove All")) {
             debugger->removeAllBreakpoints();
         }
-        ImGui::EndPopup();
     }
 
     auto [pc, spos] = debugger->getSourcePosition();
