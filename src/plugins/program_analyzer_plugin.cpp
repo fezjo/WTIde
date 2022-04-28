@@ -197,7 +197,6 @@ void ProgramAnalyzerPlugin::show() {
                 if (changed || remove)
                     debugger->removeBreakpoint(bp.file, bp.line);
                 if (changed) {
-                    std::cerr << bp.condition << std::endl;
                     debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line, edit_bp.condition);
                 }
             }

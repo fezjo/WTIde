@@ -8,25 +8,6 @@ void debugger_error_handler(WTStar::error_t *error, void *data) {
 
 Debugger::~Debugger() { reset(); }
 
-bool Debugger::setSource(const std::string &file) {
-    if (file.empty()) {
-        std::cerr << "empty file" << std::endl;
-        reset();
-        source_fn.clear();
-        return true;
-    }
-    if (!ends_with(file, ".wt"))
-        return false;
-    source_fn = file;
-    std::cerr << "set source " << source_fn << std::endl;
-    binary_fn = source_fn.substr(0, source_fn.size() - 3) + ".wtb";
-    std::cerr << "binary_fn " << binary_fn << std::endl;
-    reset();
-    return true;
-}
-
-void Debugger::setInput(const std::string &input) { this->input = input; }
-
 void Debugger::reset() {
     resetVm();
     if (ip)
@@ -57,6 +38,34 @@ bool Debugger::readBinary() {
     std::cerr << "read from " << binary_fn << " " << binary.size() << " bytes" << std::endl;
     return true;
 }
+
+bool Debugger::initialize() {
+    resetVm();
+    if (!readBinary())
+        return false;
+    env = WTStar::virtual_machine_t_new(binary.data(), static_cast<int>(binary.size()));
+    std::cerr << "created virtual machine" << std::endl;
+    return true;
+}
+
+bool Debugger::setSource(const std::string &file) {
+    if (file.empty()) {
+        std::cerr << "empty file" << std::endl;
+        reset();
+        source_fn.clear();
+        return true;
+    }
+    if (!ends_with(file, ".wt"))
+        return false;
+    source_fn = file;
+    std::cerr << "set source " << source_fn << std::endl;
+    binary_fn = source_fn.substr(0, source_fn.size() - 3) + ".wtb";
+    std::cerr << "binary_fn " << binary_fn << std::endl;
+    reset();
+    return true;
+}
+
+void Debugger::setInput(const std::string &input) { this->input = input; }
 
 bool Debugger::readInput() {
     if (input.empty()) {
@@ -116,15 +125,6 @@ bool Debugger::compile() {
     return true;
 }
 
-bool Debugger::initialize() {
-    resetVm();
-    if (!readBinary())
-        return false;
-    env = WTStar::virtual_machine_t_new(binary.data(), static_cast<int>(binary.size()));
-    std::cerr << "created virtual machine" << std::endl;
-    return true;
-}
-
 void Debugger::errorHandler(WTStar::error_t *error) {
     std::cerr << error->msg->str.base << std::endl;
     error_stream << error->msg->str.base;
@@ -167,7 +167,7 @@ int Debugger::runExecution() {
 int Debugger::continueExecution() {
     if (!env)
         return -2;
-    int resp = WTStar::execute(env, -1, 1, stop_on_bp);
+    int resp = WTStar::execute(env, -1, 0, stop_on_bp);
     std::cerr << "continueExecution execute stopped with resp " << resp << std::endl;
     return resp;
 }

@@ -47,10 +47,7 @@ public:
     std::string getCompilationOutput();
     void clearCompilationOutput();
 
-    uint findInstructionNumber(const std::string &file, uint line);
     std::pair<size_t, SourcePosition> getSourcePosition();
-    Breakpoint *findBreakpoint(const std::string &file, uint line);
-    std::vector<uint8_t> compileCondition(const std::string &condition);
 
     bool compile();
     int runExecution();
@@ -75,6 +72,10 @@ protected:
     bool readBinary();
     bool readInput();
     bool initialize();
+
+    uint findInstructionNumber(const std::string &file, uint line);
+    Breakpoint *findBreakpoint(const std::string &file, uint line);
+    std::vector<uint8_t> compileCondition(const std::string &condition);
 
     void errorHandler(WTStar::error_t *error);
     friend void debugger_error_handler(WTStar::error_t *error, void *data);

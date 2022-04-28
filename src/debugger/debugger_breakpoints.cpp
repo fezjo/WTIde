@@ -31,10 +31,7 @@ uint Debugger::findInstructionNumber(const std::string &file, uint line) {
             continue;
         WTStar::item_info_t *item = &env->debug_info->items[item_i];
         std::string i_file(env->debug_info->files[item->fileid]);
-        std::cerr << "instruction to source " << i << " " << item_i << " " << instr_i << " "
-                  << i_file << " " << item->fl << std::endl;
         if (i_file == file && item->fl == line) {
-            std::cerr << "found item " << item_i << std::endl;
             return instr_i;
         }
     }
@@ -57,7 +54,6 @@ ast_scope_and_node findAstScopeAndNode(WTStar::ast_t *ast,
     if (!node && !scope)
         scope = ast->root_scope;
     if (scope) {
-        std::cerr << "scope " << std::endl;
         for (WTStar::ast_node_t *node = scope->items; node; node = node->next) {
             ast_scope_and_node res = findAstScopeAndNode(ast, predicate, nullptr, node);
             if (res.second) {
@@ -140,10 +136,6 @@ code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
     std::string code_s = out.read();
     code_t code(code_s.begin(), code_s.end());
 
-    dout.clear();
-    WTStar::print_code(dout.w, code.data(), (int)code.size());
-    std::cerr << dout.read() << std::endl;
-
     if (!( // this is only a heuristic
             code[code.size() - 1] == WTStar::ENDVM && code[code.size() - 2] == WTStar::MEM_FREE &&
             code[code.size() - 3] != WTStar::MEM_FREE)) {
@@ -151,7 +143,7 @@ code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
     }
     code.pop_back(); // remove last instruction (ENDVM)
 
-    std::cerr << "breakpoint code_size" << code.size() << std::endl;
+    std::cerr << "breakpoint code_size " << code.size() << std::endl;
 
     return code;
 }
