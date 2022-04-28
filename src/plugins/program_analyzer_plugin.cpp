@@ -116,20 +116,53 @@ void ProgramAnalyzerPlugin::show() {
         if (ImGui::BeginTabItem("Breakpoints")) {
             ImGui::BeginChild("##child");
             ImGui::TextWrapped("Breakpoints: %ld", debugger->breakpoints.size());
-            for (auto &bp: debugger->breakpoints) {
+            for (auto &bp : debugger->breakpoints) {
+                bool editing = edit_bp.bp_pos == bp.bp_pos;
+                bool changed = false;
+                bool remove = false;
+                bool enabled = bp.enabled;
+                
+                std::string &file = editing ? edit_bp.file : bp.file;
+                int line = static_cast<int>(editing ? edit_bp.line : bp.line);
+                std::string &condition = editing ? edit_bp.condition : bp.condition;
+                ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_ReadOnly * !editing;
+
                 ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-                if (ImGui::TreeNode(std::to_string(bp.bp_pos).c_str(), "%s:%d", bp.file.c_str(), bp.line)) {
+                if (ImGui::TreeNode(std::to_string(bp.bp_pos).c_str(), "%s:%d", bp.file.c_str(),
+                                    bp.line)) {
                     // compilation error, enable/disable, remove, edit
+                    ImGui::Checkbox("Enabled", &enabled);
+                    ImGui::SameLine();
+                    if (ImGui::Button("Edit")) {
+                        if (!editing)
+                            edit_bp = bp;
+                        else
+                            edit_bp = {};
+                    }
+                    ImGui::SameLine();
+                    ImGui::BeginDisabled(!editing);
+                    if (ImGui::Button("Update"))
+                        changed = editing;
+                    ImGui::EndDisabled();
+                    ImGui::SameLine();
+                    if (ImGui::Button("Remove"))
+                        remove = true;
+
                     ImGui::Text("File:");
                     ImGui::SameLine();
-                    ImGui::InputText("##file", &bp.file, ImGuiInputTextFlags_ReadOnly);
-                    int line = static_cast<int>(bp.line);
+                    ImGui::InputText("##file", &file, input_flags);
+
                     ImGui::Text("Line:");
                     ImGui::SameLine();
-                    ImGui::InputInt("##line", &line, 1, 10, ImGuiInputTextFlags_ReadOnly);
-                    bool enabled = bp.enabled;
-                    ImGui::Checkbox("Enabled", &enabled);
-                    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+                    ImGui::InputInt("##line", &line, 1, 10, input_flags | ImGuiInputTextFlags_CharsDecimal);
+
+                    if (ImGui::TreeNode("Condition:")) {
+                        ImGui::InputTextMultiline("##condition", &condition, ImVec2(-1, 0),
+                                                  input_flags);
+                        ImGui::TreePop();
+                    }
+
+                    ImGui::SetNextItemOpen(true, ImGuiCond_Once); // TODO testing hide
                     if (ImGui::TreeNode("VM")) {
                         ImGui::TextWrapped("ID: %d", bp.vm_bp->id);
                         ImGui::TextWrapped("BREAK position: %5d", bp.vm_bp->bp_pos);
@@ -137,16 +170,14 @@ void ProgramAnalyzerPlugin::show() {
                         ImGui::TextWrapped("Code  size: %5d", bp.vm_bp->code_size);
                         if (ImGui::TreeNode("Instructions")) {
                             outw.clear();
-                            WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos, bp.vm_bp->code_size);
+                            WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos,
+                                               static_cast<int>(bp.vm_bp->code_size));
                             ImGui::TextWrapped("%s", outw.read().c_str());
                             ImGui::TreePop();
                         }
                         ImGui::TreePop();
                     }
-                    if (ImGui::TreeNode("Condition:")) {
-                        ImGui::InputTextMultiline("##condition", &bp.condition, ImVec2(-1, 0), ImGuiInputTextFlags_ReadOnly);
-                        ImGui::TreePop();
-                    }
+
                     if (!bp.error.empty()) {
                         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
                         if (ImGui::TreeNode("Compilation error")) {
@@ -154,7 +185,20 @@ void ProgramAnalyzerPlugin::show() {
                             ImGui::TreePop();
                         }
                     }
+
                     ImGui::TreePop();
+                }
+
+                if (editing)
+                    bp.line = static_cast<uint>(line);
+
+                if (enabled != bp.enabled)
+                    debugger->setBreakpointEnabled(bp.file, bp.line, enabled);
+                if (changed || remove)
+                    debugger->removeBreakpoint(bp.file, bp.line);
+                if (changed) {
+                    std::cerr << bp.condition << std::endl;
+                    debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line, edit_bp.condition);
                 }
             }
             ImGui::EndChild();

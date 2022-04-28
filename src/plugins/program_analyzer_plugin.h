@@ -13,4 +13,5 @@ public:
     void refresh();
 protected:
     Debugger *debugger;
+    Breakpoint edit_bp;
 };
