@@ -20,8 +20,10 @@ SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instructio
 }
 
 uint Debugger::findInstructionNumber(const std::string &file, uint line) {
+    std::cerr << "findInstructionNumber " << file << " " << line << std::endl;
     if (!env)
         return -1u;
+    std::cerr << "debug_info?" << std::endl;
     if (!env->debug_info)
         return -1u;
     for (uint i = 0; i < env->debug_info->source_items_map->n; i++) {
@@ -30,6 +32,8 @@ uint Debugger::findInstructionNumber(const std::string &file, uint line) {
         if (item_i < 0)
             continue;
         WTStar::item_info_t *item = &env->debug_info->items[item_i];
+        std::cerr << "item: " << item->fileid << " " << item->fl << " " << item->fc << " "
+                  << item->ll << " " << item->lc << std::endl;
         std::string i_file(env->debug_info->files[item->fileid]);
         if (i_file == file && item->fl == line) {
             return instr_i;
@@ -157,12 +161,13 @@ Breakpoint *Debugger::findBreakpoint(const std::string &file, uint line) {
     return &*it;
 }
 
-bool Debugger::addBreakpointToVm(const Breakpoint &bp) {
+bool Debugger::addBreakpointToVm(Breakpoint &bp) {
     if (WTStar::add_breakpoint(env, bp.bp_pos, bp.code.empty() ? NULL : bp.code.data(),
                                static_cast<uint>(bp.code.size())) == -1) {
         std::cerr << "setBreakpointWithCondition failed" << std::endl;
         return false;
     }
+    bp.vm_bp = WTStar::get_breakpoint(env, bp.bp_pos);
     return true;
 }
 
@@ -183,6 +188,7 @@ bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool ena
 bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
                                           const std::string &condition) {
     uint bp_pos = findInstructionNumber(file, line);
+    std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp_pos << std::endl;
     if (bp_pos == -1u)
         return false;
     ast_scope_and_node scope_and_node = findAstScopeAndNode(ast, [&](WTStar::ast_node_t *node) {
@@ -198,9 +204,8 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
         breakpoints.end());
     auto it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
                                [](uint pos, const Breakpoint &bp) { return pos < bp.bp_pos; });
-    Breakpoint bp{file, line, condition, bp_pos, "", code, WTStar::get_breakpoint(env, bp_pos),
-                  true};
-    it = breakpoints.insert(it, bp); // TODO compilation error
+    Breakpoint &bp = *breakpoints.insert(
+        it, {file, line, condition, bp_pos, "", code, NULL, true}); // TODO compilation error
     if (env)
         addBreakpointToVm(bp);
     return true;

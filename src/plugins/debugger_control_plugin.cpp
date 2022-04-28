@@ -15,13 +15,23 @@ void DebuggerControlPlugin::show() {
     }
 
     auto set_source = [&]() {
-        if (setSource(source_fn))
-            callbacks["refresh_analyzer"](0);
-        else
+        if (!setSource(source_fn)) {
             source_fn_color = ImVec4(1.0, 0.25, 0.25, 1.0);
+            return false;
+        }
+        callbacks["refresh_analyzer"](0);
+        return true;
     };
     if (ImGui::Button("Set source")) {
-        set_source();
+        if (set_source()) {
+            if (debugger->compile(true)) {
+                if (debugger->initialize(true)) {
+                } else
+                    std::cerr << "Failed to initialize" << std::endl;
+            } else
+                std::cerr << "Failed to compile source" << std::endl;
+        } else
+            std::cerr << "Failed to set source" << std::endl;
     }
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_FrameBg, source_fn_color);
@@ -39,7 +49,8 @@ void DebuggerControlPlugin::show() {
         int resp = -1000;
         if (ImGui::Button("Compile")) {
             debugger->clearCompilationOutput();
-            debugger->compile();
+            if (debugger->compile())
+                debugger->initialize();
             callbacks["refresh_analyzer"](0);
             callbacks["set_compilation_output"](debugger->getCompilationOutput());
         }

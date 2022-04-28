@@ -42,6 +42,9 @@ public:
     ~Debugger();
 
     bool setSource(const std::string &source_fn);
+    bool compile(bool memory = false);
+    bool initialize(bool memory = false);
+
     void setInput(const std::string &input);
     std::string getOutput();
     std::string getCompilationOutput();
@@ -49,7 +52,6 @@ public:
 
     std::pair<size_t, SourcePosition> getSourcePosition();
 
-    bool compile();
     int runExecution();
     int continueExecution();
     void pauseExecution();
@@ -71,12 +73,11 @@ protected:
     void destroyVm();
     bool readBinary();
     bool readInput();
-    bool initialize();
 
     uint findInstructionNumber(const std::string &file, uint line);
     Breakpoint *findBreakpoint(const std::string &file, uint line);
     std::vector<uint8_t> compileCondition(const std::string &condition);
-    bool addBreakpointToVm(const Breakpoint &bp);
+    bool addBreakpointToVm(Breakpoint &bp);
 
     void errorHandler(WTStar::error_t *error);
     friend void debugger_error_handler(WTStar::error_t *error, void *data);
@@ -85,6 +86,7 @@ public:
     bool stop_on_bp = true;
 
 protected:
+    bool compiled = false;
     std::string source_fn = "";
     std::string binary_fn = "";
     code_t binary = {};
