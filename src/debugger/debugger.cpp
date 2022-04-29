@@ -81,7 +81,7 @@ bool Debugger::readInput() {
         std::cerr << "empty input" << std::endl;
         return false;
     }
-    if (!compiled || !env) {
+    if (!canRun()) {
         std::cerr << "not compiled" << std::endl;
         return false;
     }
@@ -93,7 +93,7 @@ bool Debugger::readInput() {
     return env != nullptr;
 }
 
-std::string Debugger::getOutput() {
+std::string Debugger::getOutput() const {
     if (!env)
         return "";
     Writer wout;
@@ -103,7 +103,7 @@ std::string Debugger::getOutput() {
     return wout.read();
 }
 
-std::string Debugger::getCompilationOutput() { return error_stream.str(); }
+std::string Debugger::getCompilationOutput() const { return error_stream.str(); }
 
 void Debugger::clearCompilationOutput() { error_stream.str(""); }
 
@@ -174,8 +174,12 @@ void Debugger::errorHandler(WTStar::error_t *error) {
 //     printf("\n");
 // }
 
-std::pair<size_t, SourcePosition> Debugger::getSourcePosition() {
-    if (!compiled || !env)
+bool Debugger::isCompiled() const { return compiled; }
+
+bool Debugger::canRun() const { return compiled && env; }
+
+std::pair<size_t, SourcePosition> Debugger::getSourcePosition() const {
+    if (!canRun())
         return {-1, SourcePosition()};
     return {env->pc, findSourcePosition(env, env->pc)};
 }
@@ -191,7 +195,7 @@ int Debugger::runExecution() {
 }
 
 int Debugger::continueExecution() {
-    if (!compiled || !env)
+    if (!canRun())
         return -2;
     int resp = WTStar::execute(env, -1, 0, stop_on_bp);
     std::cerr << "continueExecution execute stopped with resp " << resp << std::endl;
@@ -203,7 +207,7 @@ void Debugger::pauseExecution() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
 void Debugger::stopExecution() { destroyVm(); }
 
 int Debugger::stepOver() {
-    if (!compiled || !env)
+    if (!canRun())
         return -2;
     uint32_t initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
     int resp;
@@ -223,7 +227,7 @@ int Debugger::stepOver() {
 }
 
 int Debugger::stepInto() {
-    if (!compiled || !env)
+    if (!canRun())
         return -2;
     int resp = WTStar::execute(env, -1, 0, 2 | stop_on_bp);
     uint32_t current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
@@ -233,7 +237,7 @@ int Debugger::stepInto() {
 }
 
 int Debugger::stepOut() {
-    if (!compiled || !env)
+    if (!canRun())
         return -2;
     uint32_t initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
     int resp;

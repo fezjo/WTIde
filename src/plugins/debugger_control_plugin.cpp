@@ -4,6 +4,57 @@ DebuggerControlPlugin::DebuggerControlPlugin(Debugger *debugger) : debugger(debu
     pluginType = PluginType::PluginControl;
 }
 
+bool DebuggerControlPlugin::setSource(const std::string &source) {
+    if (!debugger->setSource(source))
+        return false;
+    source_fn = source;
+    return true;
+}
+
+void DebuggerControlPlugin::setInput(const std::string &input) { debugger->setInput(input); }
+
+bool DebuggerControlPlugin::setSourceAction(const std::string &source) {
+    static auto set_source = [&]() {
+        if (!setSource(source_fn)) {
+            source_fn_color = ImVec4(1.0, 0.25, 0.25, 1.0);
+            return false;
+        }
+        callbacks["refresh_analyzer"](0);
+        return true;
+    };
+    if (!set_source()) {
+        std::cerr << "Failed to set source" << std::endl;
+        return false;
+    }
+    if (!debugger->compile(true)) {
+        std::cerr << "Failed to compile source" << std::endl;
+        return false;
+    }
+    if (!debugger->initialize(true)) {
+        std::cerr << "Failed to initialize" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool DebuggerControlPlugin::compileAction() {
+    debugger->clearCompilationOutput();
+    bool resp = debugger->compile();
+    callbacks["refresh_analyzer"](0);
+    callbacks["set_compilation_output"](debugger->getCompilationOutput());
+    if (resp)
+        debugger->initialize();
+    return resp;
+}
+
+int DebuggerControlPlugin::runAction() {
+    callbacks["set_input"](0);
+    if (!debugger->isCompiled())
+        if (!compileAction())
+            return false;
+    return debugger->runExecution();
+}
+
 void DebuggerControlPlugin::show() {
     if (!shown)
         return;
@@ -14,24 +65,8 @@ void DebuggerControlPlugin::show() {
         return;
     }
 
-    auto set_source = [&]() {
-        if (!setSource(source_fn)) {
-            source_fn_color = ImVec4(1.0, 0.25, 0.25, 1.0);
-            return false;
-        }
-        callbacks["refresh_analyzer"](0);
-        return true;
-    };
     if (ImGui::Button("Set source")) {
-        if (set_source()) {
-            if (debugger->compile(true)) {
-                if (debugger->initialize(true)) {
-                } else
-                    std::cerr << "Failed to initialize" << std::endl;
-            } else
-                std::cerr << "Failed to compile source" << std::endl;
-        } else
-            std::cerr << "Failed to set source" << std::endl;
+        setSourceAction(source_fn);
     }
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_FrameBg, source_fn_color);
@@ -39,7 +74,7 @@ void DebuggerControlPlugin::show() {
     if (ImGui::InputText("##source_fn", &source_fn,
                          ImGuiInputTextFlags_EnterReturnsTrue |
                              ImGuiInputTextFlags_AutoSelectAll)) {
-        set_source();
+        setSourceAction(source_fn);
     }
     ImGui::PopStyleColor();
     if (ImGui::IsItemEdited() || !seen)
@@ -48,16 +83,11 @@ void DebuggerControlPlugin::show() {
     {
         int resp = -1000;
         if (ImGui::Button("Compile")) {
-            debugger->clearCompilationOutput();
-            if (debugger->compile())
-                debugger->initialize();
-            callbacks["refresh_analyzer"](0);
-            callbacks["set_compilation_output"](debugger->getCompilationOutput());
+            compileAction();
         }
         ImGui::SameLine();
         if (ImGui::Button("Run")) {
-            callbacks["set_input"](0);
-            resp = debugger->runExecution();
+            resp = runAction();
         }
         ImGui::SameLine();
         if (ImGui::Button("Stop")) {
@@ -137,12 +167,3 @@ void DebuggerControlPlugin::show() {
     ImGui::End();
     seen = true;
 }
-
-bool DebuggerControlPlugin::setSource(const std::string &source) {
-    if (!debugger->setSource(source))
-        return false;
-    source_fn = source;
-    return true;
-}
-
-void DebuggerControlPlugin::setInput(const std::string &input) { debugger->setInput(input); }

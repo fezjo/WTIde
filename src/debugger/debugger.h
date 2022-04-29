@@ -46,11 +46,13 @@ public:
     bool initialize(bool memory = false);
 
     void setInput(const std::string &input);
-    std::string getOutput();
-    std::string getCompilationOutput();
+    std::string getOutput() const;
+    std::string getCompilationOutput() const;
     void clearCompilationOutput();
 
-    std::pair<size_t, SourcePosition> getSourcePosition();
+    std::pair<size_t, SourcePosition> getSourcePosition() const;
+    bool isCompiled() const;
+    bool canRun() const;
 
     int runExecution();
     int continueExecution();

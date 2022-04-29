@@ -12,6 +12,9 @@ public:
 
     bool setSource(const std::string &source);
     void setInput(const std::string &input);
+    bool setSourceAction(const std::string &source);
+    bool compileAction();
+    int runAction();
 
     // void runExecution();
     // void continueExecution();
