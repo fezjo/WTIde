@@ -164,16 +164,20 @@ void ProgramAnalyzerPlugin::show() {
 
                     ImGui::SetNextItemOpen(true, ImGuiCond_Once); // TODO testing hide
                     if (ImGui::TreeNode("VM")) {
-                        ImGui::TextWrapped("ID: %d", bp.vm_bp->id);
-                        ImGui::TextWrapped("BREAK position: %5d", bp.vm_bp->bp_pos);
-                        ImGui::TextWrapped("Code  position: %5d", bp.vm_bp->code_pos);
-                        ImGui::TextWrapped("Code  size: %5d", bp.vm_bp->code_size);
-                        if (ImGui::TreeNode("Instructions")) {
-                            outw.clear();
-                            WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos,
-                                               static_cast<int>(bp.vm_bp->code_size));
-                            ImGui::TextWrapped("%s", outw.read().c_str());
-                            ImGui::TreePop();
+                        if (!bp.vm_bp)
+                            ImGui::Text("No VM breakpoint");
+                        else {
+                            ImGui::TextWrapped("ID: %d", bp.vm_bp->id);
+                            ImGui::TextWrapped("BREAK position: %5d", bp.vm_bp->bp_pos);
+                            ImGui::TextWrapped("Code  position: %5d", bp.vm_bp->code_pos);
+                            ImGui::TextWrapped("Code  size: %5d", bp.vm_bp->code_size);
+                            if (ImGui::TreeNode("Instructions")) {
+                                outw.clear();
+                                WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos,
+                                                static_cast<int>(bp.vm_bp->code_size));
+                                ImGui::TextWrapped("%s", outw.read().c_str());
+                                ImGui::TreePop();
+                            }
                         }
                         ImGui::TreePop();
                     }
