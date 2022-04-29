@@ -174,6 +174,8 @@ void Debugger::errorHandler(WTStar::error_t *error) {
 //     printf("\n");
 // }
 
+std::string Debugger::getSource() const { return source_fn; }
+
 bool Debugger::isCompiled() const { return compiled; }
 
 bool Debugger::canRun() const { return compiled && env; }

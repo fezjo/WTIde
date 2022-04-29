@@ -50,6 +50,7 @@ public:
     std::string getCompilationOutput() const;
     void clearCompilationOutput();
 
+    std::string getSource() const;
     std::pair<size_t, SourcePosition> getSourcePosition() const;
     bool isCompiled() const;
     bool canRun() const;

@@ -82,6 +82,7 @@ void DebuggerControlPlugin::show() {
 
     {
         int resp = -1000;
+        ImGui::BeginDisabled(debugger->getSource().empty());
         if (ImGui::Button("Compile")) {
             compileAction();
         }
@@ -89,6 +90,8 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Run")) {
             resp = runAction();
         }
+        ImGui::EndDisabled();
+        ImGui::BeginDisabled(!debugger->canRun());
         ImGui::SameLine();
         if (ImGui::Button("Stop")) {
             debugger->stopExecution();
@@ -117,6 +120,7 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Out")) {
             resp = debugger->stepOut();
         }
+        ImGui::EndDisabled();
         if (resp == -1)
             callbacks["set_output"](debugger->getOutput());
     }
@@ -130,6 +134,7 @@ void DebuggerControlPlugin::show() {
         ImGui::SameLine();
         ImGui::Checkbox("Stop on BP", &debugger->stop_on_bp);
 
+        ImGui::BeginDisabled(debugger->getSource().empty());
         if (ImGui::Button("Add")) {
             ImGui::OpenPopup("Add Breakpoint");
         }
@@ -158,6 +163,7 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Remove All")) {
             debugger->removeAllBreakpoints();
         }
+        ImGui::EndDisabled();
     }
 
     auto [pc, spos] = debugger->getSourcePosition();
