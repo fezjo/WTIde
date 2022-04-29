@@ -16,6 +16,8 @@ class Writer {
 public:
     Writer();
     Writer(const std::string &fn, const std::string &mode);
+    Writer(Writer &&writer);
+    Writer &operator=(Writer &&writer);
     ~Writer();
     void clear();
     std::string read(size_t pos = 0, size_t len = -1u);

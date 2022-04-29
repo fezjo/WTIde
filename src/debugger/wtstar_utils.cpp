@@ -5,6 +5,24 @@ Writer::Writer() { w = WTStar::writer_t_new(WTStar::WRITER_STRING); }
 Writer::Writer(const std::string &fn, const std::string &mode) {
     w = WTStar::writer_t_new(WTStar::WRITER_FILE);
     w->f = fopen(fn.c_str(), mode.c_str());
+    if (ferror(w->f)) {
+        WTStar::writer_t_delete(w);
+        w = nullptr;
+        throw std::runtime_error("failed to open file " + fn);
+    }
+}
+
+Writer::Writer(Writer &&writer) {
+    w = writer.w;
+    writer.w = nullptr;
+}
+
+Writer &Writer::operator=(Writer &&writer) {
+    if (w)
+        WTStar::writer_t_delete(w);
+    w = writer.w;
+    writer.w = nullptr;
+    return *this;
 }
 
 Writer::~Writer() { WTStar::writer_t_delete(w); }
