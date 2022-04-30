@@ -45,9 +45,9 @@ bool DebuggerControlPlugin::compileAction() {
     if (resp)
         debugger->initialize();
     if (resp)
-        ImGui::InsertNotification({ ImGuiToastType_Success, 5000, "Compilation successful"});
+        ImGui::InsertNotification({ImGuiToastType_Success, 5000, "Compilation successful"});
     else
-        ImGui::InsertNotification({ ImGuiToastType_Error, 5000, "Compilation failed"});
+        ImGui::InsertNotification({ImGuiToastType_Error, 5000, "Compilation failed"});
     return resp;
 }
 
@@ -147,7 +147,13 @@ void DebuggerControlPlugin::show() {
             ImGui::InputInt("Line", &lineBuffer);
             ImGui::InputTextMultiline("Condition", &condition);
             if (ImGui::Button("Add")) {
-                debugger->setBreakpointWithCondition(fileBuffer, lineBuffer, condition);
+                auto res = debugger->setBreakpointWithCondition(fileBuffer, lineBuffer, condition);
+                if (!res.first) {
+                    ImGui::InsertNotification(
+                        {ImGuiToastType_Error, 5000,
+                         "Failed to set breakpoint\nSee console for details"});
+                    callbacks["set_compilation_output"]("Failed to set breakpoint\n" + res.second);
+                }
             }
             ImGui::EndPopup();
         }

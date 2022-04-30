@@ -5,8 +5,8 @@
 #include "plugins/filetree_plugin.h"
 #include "plugins/input_plugin.h"
 #include "plugins/output_plugin.h"
-#include "plugins/plugin_control_plugin.h"
 #include "plugins/plugin.h"
+#include "plugins/plugin_control_plugin.h"
 #include "plugins/program_analyzer_plugin.h"
 #include "plugins/text_plugin.h"
 #include "utils.h"
@@ -98,8 +98,8 @@ public:
             return true;
         });
         debugger_control_plugin->setCallback("set_compilation_output", [&](CallbackData data) {
-            compiler_output_plugin->write("\n\n-----\n\n");
             compiler_output_plugin->write(std::get<std::string>(data));
+            compiler_output_plugin->write("\n\n-----\n\n");
             return true;
         });
         debugger_control_plugin->setCallback("refresh_analyzer", [&](CallbackData data) {
@@ -188,9 +188,10 @@ public:
         // Render toasts on top of everything, at the end of your code!
         // You should push style vars here
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.f); // Round borders
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(43.f / 255.f, 43.f / 255.f, 43.f / 255.f, 100.f / 255.f)); // Background color
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(43.f / 255.f, 43.f / 255.f, 43.f / 255.f,
+                                                        100.f / 255.f)); // Background color
         ImGui::RenderNotifications(); // <-- Here we render all notifications
-        ImGui::PopStyleVar(1); // Don't forget to Pop()
+        ImGui::PopStyleVar(1);        // Don't forget to Pop()
         ImGui::PopStyleColor(1);
 
         ImGui::End();

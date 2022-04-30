@@ -201,8 +201,13 @@ void ProgramAnalyzerPlugin::show() {
                 if (action_update || action_remove)
                     debugger->removeBreakpoint(bp.file, bp.line);
                 if (action_update) {
-                    debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line,
-                                                         edit_bp.condition);
+                    auto res = debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line,
+                                                                    edit_bp.condition);
+                    if (!res.first) {
+                        ImGui::InsertNotification(
+                            {ImGuiToastType_Error, 5000,
+                             "Failed to set breakpoint\nSee breakpoint info for details"});
+                    }
                     edit_bp = {};
                 }
             }

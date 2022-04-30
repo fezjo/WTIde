@@ -64,10 +64,10 @@ public:
     int stepInto();
     int stepOut();
 
-    bool setBreakpoint(const std::string &file, uint line);
+    std::pair<bool, std::string> setBreakpoint(const std::string &file, uint line);
+    std::pair<bool, std::string> setBreakpointWithCondition(const std::string &file, uint line,
+                                                            const std::string &condition);
     bool setBreakpointEnabled(const std::string &file, uint line, bool enabled);
-    bool setBreakpointWithCondition(const std::string &file, uint line,
-                                    const std::string &condition);
     bool removeBreakpoint(const std::string &file, uint line);
     void removeAllBreakpoints();
 
@@ -79,7 +79,6 @@ protected:
 
     uint findInstructionNumber(const std::string &file, uint line);
     Breakpoint *findBreakpoint(const std::string &file, uint line);
-    std::vector<uint8_t> compileCondition(const std::string &condition);
     bool addBreakpointToVm(Breakpoint &bp);
 
 public:
@@ -97,7 +96,6 @@ protected:
     WTStar::ast_t *ast = nullptr;
     WTStar::include_project_t *ip = nullptr;
     std::vector<Breakpoint> breakpoints = {};
-
 
     friend class ProgramAnalyzerPlugin;
 };

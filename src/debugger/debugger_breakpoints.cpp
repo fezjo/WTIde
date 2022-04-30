@@ -182,26 +182,17 @@ bool Debugger::addBreakpointToVm(Breakpoint &bp) {
     return true;
 }
 
-bool Debugger::setBreakpoint(const std::string &file, uint line) {
+std::pair<bool, std::string> Debugger::setBreakpoint(const std::string &file, uint line) {
     return setBreakpointWithCondition(file, line, "");
 }
 
-bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool enabled) {
-    auto bp = findBreakpoint(file, line);
-    if (!bp)
-        return false;
-    if (WTStar::enable_breakpoint(env, bp->bp_pos, enabled) == -1)
-        return false;
-    bp->enabled = enabled;
-    return true;
-}
-
-bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
-                                          const std::string &condition) {
+std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::string &file,
+                                                                  uint line,
+                                                                  const std::string &condition) {
     uint bp_pos = findInstructionNumber(file, line);
     std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp_pos << std::endl;
     if (bp_pos == -1u)
-        return false;
+        return {false, "Could not find corresponding instruction"};
     ast_scope_and_node scope_and_node = findAstScopeAndNode(ast, [&](WTStar::ast_node_t *node) {
         return node->code_from <= (int)bp_pos && node->code_to >= (int)bp_pos;
     });
@@ -221,7 +212,17 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
         it, {file, line, condition, bp_pos, compile_msg, code, NULL, compilation_successful});
     if (env && compilation_successful)
         addBreakpointToVm(bp);
-    return compilation_successful;
+    return {compilation_successful, compile_msg};
+}
+
+bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool enabled) {
+    auto bp = findBreakpoint(file, line);
+    if (!bp)
+        return false;
+    if (WTStar::enable_breakpoint(env, bp->bp_pos, enabled) == -1)
+        return false;
+    bp->enabled = enabled;
+    return true;
 }
 
 bool Debugger::removeBreakpoint(const std::string &file, uint line) {
