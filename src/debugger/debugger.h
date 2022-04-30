@@ -33,7 +33,7 @@ struct SourcePosition {
 SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instruction_number);
 
 extern "C" {
-void debugger_error_handler(WTStar::error_t *error, void *data);
+void error_handler_callback(WTStar::error_t *error, void *data);
 }
 
 class Debugger {
@@ -82,9 +82,6 @@ protected:
     std::vector<uint8_t> compileCondition(const std::string &condition);
     bool addBreakpointToVm(Breakpoint &bp);
 
-    void errorHandler(WTStar::error_t *error);
-    friend void debugger_error_handler(WTStar::error_t *error, void *data);
-
 public:
     bool stop_on_bp = true;
 
@@ -94,12 +91,13 @@ protected:
     std::string binary_fn = "";
     code_t binary = {};
     std::string input = "";
-    std::stringstream error_stream;
 
+    ErrorHandler error_handler;
     WTStar::virtual_machine_t *env = nullptr;
     WTStar::ast_t *ast = nullptr;
     WTStar::include_project_t *ip = nullptr;
     std::vector<Breakpoint> breakpoints = {};
+
 
     friend class ProgramAnalyzerPlugin;
 };

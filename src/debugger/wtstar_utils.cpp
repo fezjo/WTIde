@@ -53,3 +53,17 @@ code_t readCode(const std::string &fn) {
     ifs.read(reinterpret_cast<char *>(code.data()), code.size());
     return code;
 }
+
+extern "C" {
+void error_handler_callback(WTStar::error_t *error, void *data) {
+    static_cast<ErrorHandler *>(data)->handle(error);
+}
+}
+
+void ErrorHandler::clear() { ss.str(""); }
+
+void ErrorHandler::write(const std::string &msg) { ss << msg; }
+
+void ErrorHandler::handle(WTStar::error_t *error) { ss << error->msg->str.base << "\n"; }
+
+std::string ErrorHandler::read() const { return ss.str(); }

@@ -1,11 +1,5 @@
 #include "debugger.h"
 
-extern "C" {
-void debugger_error_handler(WTStar::error_t *error, void *data) {
-    static_cast<Debugger *>(data)->errorHandler(error);
-}
-}
-
 Debugger::~Debugger() { destroy(); }
 
 void Debugger::destroy() {
@@ -103,9 +97,9 @@ std::string Debugger::getOutput() const {
     return wout.read();
 }
 
-std::string Debugger::getCompilationOutput() const { return error_stream.str(); }
+std::string Debugger::getCompilationOutput() const { return error_handler.read(); }
 
-void Debugger::clearCompilationOutput() { error_stream.str(""); }
+void Debugger::clearCompilationOutput() { error_handler.clear(); }
 
 bool Debugger::compile(bool memory) {
     if (source_fn.empty())
@@ -114,7 +108,7 @@ bool Debugger::compile(bool memory) {
     ip = WTStar::include_project_t_new();
     WTStar::driver_init(ip);
     std::cerr << "compiling " << source_fn << std::endl;
-    ast = WTStar::driver_parse(ip, source_fn.c_str(), debugger_error_handler, this);
+    ast = WTStar::driver_parse(ip, source_fn.c_str(), error_handler_callback, &error_handler);
     if (ast->error_occured) {
         std::cerr << "parse error" << std::endl;
         destroy();
@@ -145,11 +139,6 @@ bool Debugger::compile(bool memory) {
         compiled = true;
     std::cerr << "compilation sucessful" << std::endl;
     return true;
-}
-
-void Debugger::errorHandler(WTStar::error_t *error) {
-    std::cerr << error->msg->str.base << std::endl;
-    error_stream << error->msg->str.base;
 }
 
 // if (trace_on) {

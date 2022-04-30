@@ -28,3 +28,14 @@ public:
 using code_t = std::vector<uint8_t>;
 
 code_t readCode(const std::string &fn);
+
+class ErrorHandler {
+public:
+    ErrorHandler() = default;
+    void handle(WTStar::error_t *error);
+    void clear();
+    void write(const std::string &msg);
+    std::string read() const;
+
+    std::stringstream ss;
+};
