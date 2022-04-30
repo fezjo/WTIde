@@ -18,6 +18,20 @@ target_include_directories("ImGui"
         ${IMGUI_PATH}/backends
         ${IMGUI_PATH}/misc/cpp)
 
+
+set(IMGUI_NOTIFY_PATH ${CMAKE_CURRENT_SOURCE_DIR}/imgui-notify/example/src)
+file(GLOB IMGUI_NOTIFY_SOURCES
+    ${IMGUI_PATH}/*.h
+)
+add_library("ImGui-Notify" STATIC ${IMGUI_NOTIFY_SOURCES})
+target_link_libraries(
+    "ImGui-Notify"
+    PRIVATE
+        ImGui
+)
+set_target_properties("ImGui-Notify" PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories("ImGui-Notify" SYSTEM PUBLIC ${IMGUI_NOTIFY_PATH})
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zep/src)
 set(APP_ROOT ${CMAKE_SOURCE_DIR})
 target_include_directories(Zep SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/zep/include)
@@ -25,7 +39,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/config_app.h.cmake config_app.h COPYONL
 
 set(CLIP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/clip)
 add_subdirectory(${CLIP_PATH})
-target_include_directories(clip SYSTEM PUBLIC ${CLIP_PATH})
+target_include_directories("clip" SYSTEM PUBLIC ${CLIP_PATH})
 
 set(WTSTAR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wtstar)
 file(GLOB WTSTAR_SOURCES ${WTSTAR_PATH}/src/*.c)
@@ -38,4 +52,4 @@ list(REMOVE_ITEM WTSTAR_SOURCES
     ${WTSTAR_PATH}/src/wtdump.c
 )
 add_library("WTStar" SHARED ${WTSTAR_SOURCES})
-target_include_directories(WTStar PUBLIC ${WTSTAR_PATH}/src)
+target_include_directories("WTStar" PUBLIC ${WTSTAR_PATH}/src)

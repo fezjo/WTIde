@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
+#include "imgui_notify.h"
 #include <SDL.h>
 #include <stdio.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -127,6 +128,7 @@ int main(int, char **) {
     auto fontPath = fs::path("..") / "resources/fonts" / "Roboto Mono Nerd Font Complete Mono.ttf";
     ImWchar glyph_ranges[] = {1, 0x10FFFF, 0};
     io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16.0, NULL, glyph_ranges);
+    ImGui::MergeIconsWithLatestFont(16.f, false);
 
     theme_YetAnotherDarkTheme();
 

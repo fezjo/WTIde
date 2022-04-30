@@ -44,6 +44,10 @@ bool DebuggerControlPlugin::compileAction() {
     callbacks["set_compilation_output"](debugger->getCompilationOutput());
     if (resp)
         debugger->initialize();
+    if (resp)
+        ImGui::InsertNotification({ ImGuiToastType_Success, 5000, "Compilation successful"});
+    else
+        ImGui::InsertNotification({ ImGuiToastType_Error, 5000, "Compilation failed"});
     return resp;
 }
 

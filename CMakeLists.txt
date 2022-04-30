@@ -37,6 +37,7 @@ target_link_libraries(
         SDL2::SDL2
         OpenGL::OpenGL
         ImGui
+        ImGui-Notify
         Zep::Zep
         WTStar
         clip

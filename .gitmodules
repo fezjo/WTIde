@@ -16,3 +16,6 @@
 [submodule "lib/wtstar"]
 	path = lib/wtstar
 	url = https://github.com/pocestny/wtstar.git
+[submodule "lib/imgui-notify"]
+	path = lib/imgui-notify
+	url = https://github.com/patrickcjk/imgui-notify.git
