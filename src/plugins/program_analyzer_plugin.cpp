@@ -174,7 +174,7 @@ void ProgramAnalyzerPlugin::show() {
                             if (ImGui::TreeNode("Instructions")) {
                                 outw.clear();
                                 WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos,
-                                                static_cast<int>(bp.vm_bp->code_size));
+                                                   static_cast<int>(bp.vm_bp->code_size));
                                 ImGui::TextWrapped("%s", outw.read().c_str());
                                 ImGui::TreePop();
                             }

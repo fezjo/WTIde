@@ -97,8 +97,9 @@ ast_scope_and_node findAstScopeAndNode(WTStar::ast_t *ast,
     }
 }
 
-code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
-                             WTStar::scope_t *scope_pos) {
+std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t *ast,
+                                                     const std::string &condition,
+                                                     WTStar::scope_t *scope_pos) {
     if (condition.empty())
         return {};
 
@@ -111,9 +112,16 @@ code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
     WTStar::ast_node_t *bp_scope_node =
         WTStar::ast_node_t_new(NULL, WTStar::AST_NODE_SCOPE, scope_pos);
 
+    auto original_error_handler = ast->error_handler;
+    auto original_error_handler_data = ast->error_handler_data;
+    ErrorHandler error_handler;
+    ast->error_handler = error_handler_callback;
+    ast->error_handler_data = &error_handler;
     ast->current_scope = bp_scope_node->val.sc;
     ast = WTStar::driver_parse_from(ast, ip, cond_fn.c_str());
     ast->current_scope = ast->root_scope;
+    ast->error_handler = original_error_handler;
+    ast->error_handler_data = original_error_handler_data;
 
     Writer dout;
     WTStar::ast_debug_set_writer(dout.w);
@@ -125,7 +133,7 @@ code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
         std::cerr << "Error occured while parsing condition" << std::endl;
         WTStar::driver_destroy(ip);
         WTStar::ast_node_t_delete(bp_scope_node);
-        return {};
+        return {{}, error_handler.read()};
     }
 
     Writer out;
@@ -134,8 +142,10 @@ code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
     WTStar::driver_destroy(ip);
     WTStar::ast_node_t_delete(bp_scope_node);
 
-    if (resp)
-        throw std::runtime_error("compilation failed");
+    if (resp) {
+        error_handler.write("Error occured while compiling condition: emitting code failed\n");
+        return {{}, error_handler.read()};
+    }
 
     std::string code_s = out.read();
     code_t code(code_s.begin(), code_s.end());
@@ -143,13 +153,14 @@ code_t compileConditionInAst(WTStar::ast_t *ast, const std::string &condition,
     if (!( // this is only a heuristic
             code[code.size() - 1] == WTStar::ENDVM && code[code.size() - 2] == WTStar::MEM_FREE &&
             code[code.size() - 3] != WTStar::MEM_FREE)) {
-        throw std::runtime_error("no final expression");
+        error_handler.write("Error occured while compiling condition: no final expression\n");
+        return {code, error_handler.read()};
     }
     code.pop_back(); // remove last instruction (ENDVM)
 
     std::cerr << "breakpoint code_size " << code.size() << std::endl;
 
-    return code;
+    return {code, error_handler.read()};
 }
 
 Breakpoint *Debugger::findBreakpoint(const std::string &file, uint line) {
@@ -196,7 +207,8 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
     });
     std::cerr << "found scope and node id " << scope_and_node.first->items->id << " "
               << scope_and_node.second->id << std::endl;
-    std::vector<uint8_t> code = compileConditionInAst(ast, condition, scope_and_node.first);
+    auto [code, compile_msg] = compileConditionInAst(ast, condition, scope_and_node.first);
+    bool compilation_successful = compile_msg.empty();
     std::cerr << "setBreakpointWithCondition added breakpoint at " << bp_pos << std::endl;
     breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
@@ -204,11 +216,12 @@ bool Debugger::setBreakpointWithCondition(const std::string &file, uint line,
         breakpoints.end());
     auto it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
                                [](uint pos, const Breakpoint &bp) { return pos < bp.bp_pos; });
+    std::cerr << "compile_msg " << compile_msg << std::endl;
     Breakpoint &bp = *breakpoints.insert(
-        it, {file, line, condition, bp_pos, "", code, NULL, true}); // TODO compilation error
-    if (env)
+        it, {file, line, condition, bp_pos, compile_msg, code, NULL, compilation_successful});
+    if (env && compilation_successful)
         addBreakpointToVm(bp);
-    return true;
+    return compilation_successful;
 }
 
 bool Debugger::removeBreakpoint(const std::string &file, uint line) {

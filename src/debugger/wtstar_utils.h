@@ -29,6 +29,10 @@ using code_t = std::vector<uint8_t>;
 
 code_t readCode(const std::string &fn);
 
+extern "C" {
+void error_handler_callback(WTStar::error_t *error, void *data);
+}
+
 class ErrorHandler {
 public:
     ErrorHandler() = default;
