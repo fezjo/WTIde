@@ -29,15 +29,15 @@ protected:
 
     Debugger *debugger;
 
+    std::vector<IPlugin *> plugins;
     std::vector<IEditorPlugin *> editor_plugins;
     FileTreePlugin *filetree_plugin;
+    PluginControlPlugin *plugin_control_plugin;
     InputPlugin *input_plugin;
     OutputPlugin *output_plugin;
     OutputPlugin *compiler_output_plugin;
     DebuggerControlPlugin *debugger_control_plugin;
     ProgramAnalyzerPlugin *program_analyzer_plugin;
-    PluginControlPlugin *plugin_control_plugin;
-    std::vector<IPlugin *> plugins;
 
 public:
     App() = default;
@@ -76,6 +76,11 @@ public:
         filetree_plugin->displaySize = ImVec2(120, 640);
         filetree_plugin->setPath(fs::path("."));
         plugins.push_back(filetree_plugin);
+
+        plugin_control_plugin = new PluginControlPlugin(&plugins);
+        plugin_control_plugin->displaySize = ImVec2(300, 300);
+        plugin_control_plugin->title = "Plugins";
+        plugins.push_back(plugin_control_plugin);
 
         TextPlugin *op = new TextPlugin();
         op->displaySize = ImVec2(300, 300);
@@ -125,11 +130,6 @@ public:
         program_analyzer_plugin->displaySize = ImVec2(400, 600);
         program_analyzer_plugin->title = "Program Analyzer";
         plugins.push_back(program_analyzer_plugin);
-
-        plugin_control_plugin = new PluginControlPlugin(&plugins);
-        plugin_control_plugin->displaySize = ImVec2(300, 300);
-        plugin_control_plugin->title = "Plugins";
-        plugins.push_back(plugin_control_plugin);
     }
 
     void update() {

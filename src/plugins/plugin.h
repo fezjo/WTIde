@@ -13,14 +13,19 @@ enum class PluginType {
     FileTree = 1,
     Terminal = 2,
     PluginControl = 3,
-    ProgramAnalyzer = 4,
-    DebuggerControl = 5,
+
+    Text = 1 << 6,
+    Input = 1 << 6 | 1,
+    Output = 1 << 6 | 2,
+
     Editor = 1 << 7,
     EditorIcte = 1 << 7 | 1,
     EditorZep = 1 << 7 | 2,
-    Text = 1 << 8,
-    Input = 1 << 8 | 1,
-    Output = 1 << 8 | 2,
+
+    DebuggerRelatedPlugin = 1 << 8,
+    ProgramAnalyzer = 1 << 8 | 1,
+    DebuggerControl = 1 << 8 | 2,
+    DebuggerVariableViewer = 1 << 8 | 3,
 };
 
 inline bool isPluginEditor(PluginType type) { return (int)type & (int)PluginType::Editor; }
