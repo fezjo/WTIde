@@ -277,6 +277,12 @@ void FileTreePlugin::show() {
         if (ImGui::MenuItem(u8"")) {
             files_changed = true;
         }
+
+        std::string editor_icon = std::get<std::string>(callbacks["get_editor_icon"](0));
+        if (ImGui::MenuItem(editor_icon.c_str())) {
+            callbacks["switch_default_editor_type"](0);
+        }
+
         ImGui::EndMenuBar();
     }
 

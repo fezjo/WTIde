@@ -24,6 +24,7 @@ public:
 protected:
     bool initialized = false;
     ImGuiWindowFlags flags;
+    PluginType default_editor_plugin_type = PluginType::EditorIcte;
 
     Debugger *debugger;
 
@@ -59,8 +60,17 @@ public:
 
         filetree_plugin = new FileTreePlugin();
         filetree_plugin->setCallback("open_file", [&](CallbackData data) {
-            openEditor(std::get<std::string>(data), true);
+            openEditor(std::get<std::string>(data), true, default_editor_plugin_type);
             return true;
+        });
+        filetree_plugin->setCallback("get_editor_icon", [&](CallbackData data) {
+            return default_editor_plugin_type == PluginType::EditorIcte ? "ICTE" : "ZEP";
+        });
+        filetree_plugin->setCallback("switch_default_editor_type", [&](CallbackData data) {
+            default_editor_plugin_type = default_editor_plugin_type == PluginType::EditorIcte
+                                             ? PluginType::EditorZep
+                                             : PluginType::EditorIcte;
+            return (int)default_editor_plugin_type;
         });
         filetree_plugin->displaySize = ImVec2(120, 640);
         filetree_plugin->setPath(fs::path("."));
