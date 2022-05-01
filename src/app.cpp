@@ -185,11 +185,14 @@ public:
 
         showDebugWindow();
 
+        std::vector<IPlugin*> plugins_to_delete;
         for (auto p : plugins) {
             p->show();
             if (!p->alive)
-                delete_plugin(p);
+                plugins_to_delete.push_back(p);
         }
+        for (auto p : plugins_to_delete)
+            delete_plugin(p);
         ImGui::PopStyleColor();
 
         // Render toasts on top of everything, at the end of your code!
