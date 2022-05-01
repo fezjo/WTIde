@@ -98,4 +98,5 @@ protected:
     std::vector<Breakpoint> breakpoints = {};
 
     friend class ProgramAnalyzerPlugin;
+    friend class DebuggerVariableViewerPlugin;
 };

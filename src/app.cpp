@@ -14,6 +14,7 @@
 #include "plugins/text/text_plugin.h"
 
 #include "plugins/debugger/debugger_control_plugin.h" // TODO why does it need to be after zep
+#include "plugins/debugger/debugger_variable_viewer_plugin.h"
 
 #include "debugger/debugger.h"
 
@@ -38,6 +39,7 @@ protected:
     OutputPlugin *compiler_output_plugin;
     DebuggerControlPlugin *debugger_control_plugin;
     ProgramAnalyzerPlugin *program_analyzer_plugin;
+    DebuggerVariableViewerPlugin *debugger_variable_viewer_plugin;
 
 public:
     App() = default;
@@ -113,6 +115,9 @@ public:
 
         program_analyzer_plugin = new ProgramAnalyzerPlugin(debugger);
         add_plugin(program_analyzer_plugin, "Program Analyzer");
+
+        debugger_variable_viewer_plugin = new DebuggerVariableViewerPlugin(debugger);
+        add_plugin(debugger_variable_viewer_plugin, "Variable Viewer");
     }
 
     void update() {
