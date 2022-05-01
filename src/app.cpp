@@ -57,9 +57,12 @@ public:
         reinterpret_cast<EditorZepPlugin *>(editor_plugins[0])
             ->GetEditor()
             .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
+
         openEditor(fs::path("test.wt"), false);
 
         filetree_plugin = new FileTreePlugin();
+        filetree_plugin->setPath(fs::path("."));
+        add_plugin(filetree_plugin, "FileTree", ImVec2(120, 640));
         filetree_plugin->setCallback("open_file", [&](CallbackData data) {
             openEditor(std::get<std::string>(data), true, default_editor_plugin_type);
             return true;
@@ -73,39 +76,22 @@ public:
                                              : PluginType::EditorIcte;
             return (int)default_editor_plugin_type;
         });
-        filetree_plugin->displaySize = ImVec2(120, 640);
-        filetree_plugin->setPath(fs::path("."));
-        plugins.push_back(filetree_plugin);
 
         plugin_control_plugin = new PluginControlPlugin(&plugins);
-        plugin_control_plugin->displaySize = ImVec2(300, 300);
-        plugin_control_plugin->title = "Plugins";
-        plugins.push_back(plugin_control_plugin);
-
-        TextPlugin *op = new TextPlugin();
-        op->displaySize = ImVec2(300, 300);
-        op->title = "testing text plugin";
-        plugins.push_back(op);
+        add_plugin(plugin_control_plugin, "Plugins");
 
         input_plugin = new InputPlugin();
-        input_plugin->displaySize = ImVec2(300, 300);
-        input_plugin->title = "Input";
         input_plugin->write("5\n[1 2 3 4 5]\n"); // TODO testing
-        plugins.push_back(input_plugin);
+        add_plugin(input_plugin, "Input");
 
         output_plugin = new OutputPlugin();
-        output_plugin->displaySize = ImVec2(300, 300);
-        output_plugin->title = "Output";
-        plugins.push_back(output_plugin);
+        add_plugin(output_plugin, "Output");
 
         compiler_output_plugin = new OutputPlugin();
-        compiler_output_plugin->displaySize = ImVec2(300, 300);
-        compiler_output_plugin->title = "Compiler output";
-        plugins.push_back(compiler_output_plugin);
+        add_plugin(compiler_output_plugin, "Compiler output");
 
         debugger_control_plugin = new DebuggerControlPlugin(debugger);
-        debugger_control_plugin->displaySize = ImVec2(250, 100);
-        debugger_control_plugin->title = "Debug Control";
+        add_plugin(debugger_control_plugin, "Debug Control", ImVec2(250, 100));
         debugger_control_plugin->setCallback("set_input", [&](CallbackData data) {
             debugger_control_plugin->setInput(input_plugin->read());
             return true;
@@ -124,12 +110,9 @@ public:
             program_analyzer_plugin->refresh();
             return true;
         });
-        plugins.push_back(debugger_control_plugin);
 
         program_analyzer_plugin = new ProgramAnalyzerPlugin(debugger);
-        program_analyzer_plugin->displaySize = ImVec2(400, 600);
-        program_analyzer_plugin->title = "Program Analyzer";
-        plugins.push_back(program_analyzer_plugin);
+        add_plugin(program_analyzer_plugin, "Program Analyzer");
     }
 
     void update() {
@@ -220,6 +203,13 @@ public:
         }
     }
 
+    void add_plugin(IPlugin *plugin, const std::string &title = "",
+                    const ImVec2 &size = ImVec2(300, 400)) {
+        plugin->title = title;
+        plugin->displaySize = size;
+        plugins.push_back(plugin);
+    }
+
     void delete_plugin(IPlugin *plugin) {
         if (isPluginEditor(plugin->getPluginType()))
             editor_plugins.erase(find(editor_plugins.begin(), editor_plugins.end(), plugin));
@@ -237,11 +227,10 @@ public:
             reinterpret_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
                 Zep::ZepMode_Standard::StaticName());
         }
-        ep->displaySize = ImVec2(640, 480);
         if (!path.empty())
             ep->loadFile(path);
+        add_plugin(ep, ep->title, ImVec2(640, 480));
         editor_plugins.push_back(ep);
-        plugins.push_back(ep);
 
         if (mimickLastFocused && !editor_plugins.empty()) {
             std::pair<timepoint, IEditorPlugin *> latest = {editor_plugins[0]->lastFocusedTime,
