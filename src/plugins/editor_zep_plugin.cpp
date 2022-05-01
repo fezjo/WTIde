@@ -2,46 +2,33 @@
 #define ZEP_SINGLE_HEADER_BUILD
 #endif
 
-#include "editor_plugin.h"
-#include "config_app.h"
-#include "wt_syntax.h"
 #include <clip.h>
+
+#include "config_app.h"
+#include "editor_zep_plugin.h"
+#include "wt_syntax.h"
 
 using namespace Zep;
 
-using cmdFunc = std::function<void(const std::vector<std::string> &)>;
-class ZepCmd : public ZepExCommand {
-public:
-    ZepCmd(ZepEditor &editor, const std::string name, cmdFunc fn)
-        : ZepExCommand(editor), m_name(name), m_func(fn) {}
-
-    virtual void Run(const std::vector<std::string> &args) override { m_func(args); }
-
-    virtual const char *ExCommandName() const override { return m_name.c_str(); }
-
-private:
-    std::string m_name;
-    cmdFunc m_func;
-};
-
-EditorPlugin::EditorPlugin(const fs::path &rootPath, const Zep::NVec2f &pixelScale,
-                           std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB)
-    : zepEditor(Zep::ZepPath(rootPath), pixelScale), Callback(fnCommandCB), dockId(0) {
-    zepEditor.RegisterCallback(this);
-    zepEditor.RegisterSyntaxFactory(
-        {".wt"}, SyntaxProvider{"wt", Zep::tSyntaxFactory([](ZepBuffer *pBuffer) {
-                                    return std::make_shared<ZepSyntax>(*pBuffer, wt_keywords,
-                                                                       wt_identifiers);
-                                })});
+EditorZepPlugin::EditorZepPlugin(const fs::path &rootPath, const Zep::NVec2f &pixelScale,
+                                 std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB)
+    : editor(Zep::ZepPath(rootPath), pixelScale), Callback(fnCommandCB) {
+    editor.RegisterCallback(this);
+    editor.RegisterSyntaxFactory({".wt"},
+                                 SyntaxProvider{"wt", Zep::tSyntaxFactory([](ZepBuffer *pBuffer) {
+                                                    return std::make_shared<ZepSyntax>(
+                                                        *pBuffer, wt_keywords, wt_identifiers);
+                                                })});
     pluginType = PluginType::Editor;
     immortal = false;
+    dockId = 0;
 }
 
-Zep::ZepEditor &EditorPlugin::GetEditor() const {
-    return static_cast<Zep::ZepEditor &>(const_cast<Zep::ZepEditor_ImGui &>(zepEditor));
+Zep::ZepEditor &EditorZepPlugin::GetEditor() const {
+    return static_cast<Zep::ZepEditor &>(const_cast<Zep::ZepEditor_ImGui &>(editor));
 }
 
-void EditorPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message) {
+void EditorZepPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message) {
     if (message->messageId == Msg::GetClipBoard) {
         clip::get_text(message->str);
         message->handled = true;
@@ -77,12 +64,12 @@ void EditorPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message) {
         Callback(message);
 }
 
-void EditorPlugin::HandleInput() { zepEditor.HandleInput(); }
+void EditorZepPlugin::HandleInput() { editor.HandleInput(); }
 
-EditorPlugin *EditorPlugin::init(const Zep::NVec2f &pixelScale, std::string rootPath) {
-    EditorPlugin *ep = new EditorPlugin(rootPath.empty() ? APP_ROOT : rootPath,
-                                        Zep::NVec2f(pixelScale.x, pixelScale.y),
-                                        [](std::shared_ptr<ZepMessage> spMessage) -> void {});
+EditorZepPlugin *EditorZepPlugin::init(const Zep::NVec2f &pixelScale, std::string rootPath) {
+    EditorZepPlugin *ep = new EditorZepPlugin(rootPath.empty() ? APP_ROOT : rootPath,
+                                              Zep::NVec2f(pixelScale.x, pixelScale.y),
+                                              [](std::shared_ptr<ZepMessage> spMessage) -> void {});
 
     auto &display = ep->GetEditor().GetDisplay();
     auto pImFont = ImGui::GetIO().Fonts[0].Fonts[0];
@@ -100,11 +87,9 @@ EditorPlugin *EditorPlugin::init(const Zep::NVec2f &pixelScale, std::string root
     return ep;
 }
 
-void EditorPlugin::update() { GetEditor().RefreshRequired(); }
+void EditorZepPlugin::update() { GetEditor().RefreshRequired(); }
 
-void EditorPlugin::load(const Zep::ZepPath &file) { GetEditor().InitWithFileOrDir(file); }
-
-void EditorPlugin::show() {
+void EditorZepPlugin::show() {
     if (!shown)
         return;
 
@@ -113,7 +98,7 @@ void EditorPlugin::show() {
     windowClass.DockingAlwaysTabBar = true;
     ImGui::SetNextWindowClass(&windowClass);
 
-    auto &zepBuffer = zepEditor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
+    auto &zepBuffer = editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
     title = zepBuffer.GetFilePath().filename();
     if (title.empty())
         title = "Untitled";
@@ -140,12 +125,12 @@ void EditorPlugin::show() {
     max.x = min.x + max.x;
     max.y = min.y + max.y;
 
-    zepEditor.SetDisplayRegion(Zep::NVec2f(min.x, min.y), Zep::NVec2f(max.x, max.y));
-    zepEditor.isFocused = ImGui::IsWindowFocused();
-    zepEditor.Display();
-    if (zepEditor.isFocused) {
+    editor.SetDisplayRegion(Zep::NVec2f(min.x, min.y), Zep::NVec2f(max.x, max.y));
+    editor.isFocused = ImGui::IsWindowFocused();
+    editor.Display();
+    if (editor.isFocused) {
         lastFocusedTime = get_time();
-        zepEditor.HandleInput();
+        editor.HandleInput();
     }
 
     // // TODO: A Better solution for this; I think the audio graph is creating a new window and
@@ -154,4 +139,24 @@ void EditorPlugin::show() {
     //     ImGui::SetWindowFocus();
     // }
     ImGui::End();
+}
+
+bool EditorZepPlugin::loadFile(const std::string &filename) {
+    fn = filename;
+    GetEditor().InitWithFileOrDir(fn);
+    return true;
+}
+
+bool EditorZepPlugin::saveFile(std::string filename) {
+    if (filename.empty())
+        filename = fn;
+    if (fn.empty())
+        fn = filename;
+    if (filename.empty())
+        return false;
+    auto &buffer = editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
+    buffer.SetFilePath(filename);
+    editor.SaveBuffer(buffer);
+    buffer.SetFilePath(fn);
+    return true;
 }

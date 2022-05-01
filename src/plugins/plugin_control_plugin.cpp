@@ -24,10 +24,10 @@ void PluginControlPlugin::show() {
         return;
     }
     for (auto plugin : *plugins)
-        if (plugin->getPluginType() == PluginType::Editor)
+        if (isPluginEditor(plugin->getPluginType()))
             showLine(plugin);
     for (auto plugin : *plugins)
-        if (plugin->getPluginType() != PluginType::Editor && plugin != this)
+        if (!isPluginEditor(plugin->getPluginType()) && plugin != this)
             showLine(plugin);
     ImGui::End();
 }

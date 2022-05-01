@@ -3,12 +3,12 @@
 EditorIctePlugin::EditorIctePlugin() {
     pluginType = PluginType::EditorIcte;
     immortal = false;
+    dockId = 0;
 
     auto lang = TextEditor::LanguageDefinition::CPlusPlus();
 
     // set your own known preprocessor symbols...
-    static const char *ppnames[] = {"NULL",
-                                    "assert"};
+    static const char *ppnames[] = {"NULL", "assert"};
     // ... and their corresponding values
     static const char *ppvalues[] = {
         "#define NULL ((void*)0)",
@@ -46,34 +46,36 @@ EditorIctePlugin::EditorIctePlugin() {
     // bpts.insert(24);
     // bpts.insert(47);
     // editor.SetBreakpoints(bpts);
-
-    fn = "ImGuiColorTextEdit/TextEditor.cpp";
-    // fn = "test.cpp";
-    //	static const char* fn = "test.cpp";
-
-    {
-        std::ifstream t(fn);
-        if (t.good()) {
-            std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-            editor.SetText(str);
-        }
-    }
 }
 
 void EditorIctePlugin::show() {
     if (!shown)
         return;
+
+    ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
+    auto windowClass = ImGuiWindowClass();
+    windowClass.DockingAlwaysTabBar = true;
+    ImGui::SetNextWindowClass(&windowClass);
+
+    title = fs::path(editor.GetPath()).filename();
+    if (title.empty())
+        title = "Untitled";
+    bool dirty = editor.IsTextChanged();
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar |
+        ImGuiWindowFlags_UnsavedDocument * dirty; // TODO | ImGuiWindowFlags_NoSavedSettings
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(),
-                      immortal ? nullptr : &alive, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar)) {
+                      immortal ? nullptr : &alive, flags)) {
         ImGui::End();
         return;
     }
+    dockId = ImGui::GetWindowDockID();
+
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Save")) {
-                auto textToSave = editor.GetText();
-                /// save text....
+            if (ImGui::MenuItem("Save", "Ctrl-S")) {
+                saveFile();
             }
             if (ImGui::MenuItem("Quit", "Alt-F4"))
                 alive = false;
@@ -104,7 +106,7 @@ void EditorIctePlugin::show() {
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Select all", nullptr, nullptr))
+            if (ImGui::MenuItem("Select all", "Ctrl-A", nullptr))
                 editor.SetSelection(TextEditor::Coordinates(),
                                     TextEditor::Coordinates(editor.GetTotalLines(), 0));
 
@@ -129,9 +131,34 @@ void EditorIctePlugin::show() {
                 editor.CanUndo() ? "*" : " ", editor.GetLanguageDefinition().mName.c_str(),
                 fn.c_str());
 
-	ImGui::PushFont(ImGui::GetFont());
+    ImGui::PushFont(ImGui::GetFont());
     editor.Render("TextEditor");
     ImGui::PopFont();
-    
+
     ImGui::End();
+}
+
+bool EditorIctePlugin::loadFile(const std::string &filename) {
+    std::ifstream t(filename);
+    if (!t.good())
+        return false;
+    std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+    editor.SetText(str);
+    editor.SetPath(filename);
+    editor.ResetTextChanged();
+    fn = filename;
+    return true;
+}
+
+bool EditorIctePlugin::saveFile(std::string filename) {
+    if (filename.empty())
+        filename = fn;
+    std::ofstream t(filename, std::ios::out);
+    if (!t.good())
+        return false;
+    t << editor.GetText();
+    bool ok = t.good();
+    if (ok)
+        editor.ResetTextChanged();
+    return ok;
 }

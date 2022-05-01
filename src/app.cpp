@@ -2,7 +2,7 @@
 #include <zep.h>
 
 #include "plugins/editor_icte_plugin.h"
-#include "plugins/editor_plugin.h"
+#include "plugins/editor_zep_plugin.h"
 #include "plugins/filetree_plugin.h"
 #include "plugins/input_plugin.h"
 #include "plugins/output_plugin.h"
@@ -27,8 +27,7 @@ protected:
 
     Debugger *debugger;
 
-    std::vector<EditorPlugin *> editor_plugins;
-    EditorIctePlugin *editor_icte_plugin;
+    std::vector<IEditorPlugin *> editor_plugins;
     FileTreePlugin *filetree_plugin;
     InputPlugin *input_plugin;
     OutputPlugin *output_plugin;
@@ -52,9 +51,10 @@ public:
         debugger = new Debugger();
 
         // Called once the fonts/device is guaranteed setup
-        openEditor(fs::path("..") / "src" / "main.cpp", false);
-        editor_plugins[0]->GetEditor().SetGlobalMode(Zep::ZepMode_Vim::StaticName());
-        openEditor(fs::path("nonexistent.cpp"), false);
+        openEditor(fs::path("..") / "src" / "main.cpp", false, PluginType::EditorZep);
+        reinterpret_cast<EditorZepPlugin *>(editor_plugins[0])
+            ->GetEditor()
+            .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
         openEditor(fs::path("test.wt"), false);
 
         filetree_plugin = new FileTreePlugin();
@@ -119,11 +119,6 @@ public:
         plugin_control_plugin->displaySize = ImVec2(300, 300);
         plugin_control_plugin->title = "Plugins";
         plugins.push_back(plugin_control_plugin);
-
-        editor_icte_plugin = new EditorIctePlugin();
-        editor_icte_plugin->displaySize = ImVec2(400, 600);
-        editor_icte_plugin->title = "ICTE Editor";
-        plugins.push_back(editor_icte_plugin);
     }
 
     void update() {
@@ -185,7 +180,7 @@ public:
 
         showDebugWindow();
 
-        std::vector<IPlugin*> plugins_to_delete;
+        std::vector<IPlugin *> plugins_to_delete;
         for (auto p : plugins) {
             p->show();
             if (!p->alive)
@@ -215,25 +210,32 @@ public:
     }
 
     void delete_plugin(IPlugin *plugin) {
-        if (plugin->getPluginType() == PluginType::Editor)
+        if (isPluginEditor(plugin->getPluginType()))
             editor_plugins.erase(find(editor_plugins.begin(), editor_plugins.end(), plugin));
         plugins.erase(find(plugins.begin(), plugins.end(), plugin));
         delete plugin;
     }
 
-    void openEditor(fs::path path = "", bool mimickLastFocused = true) {
-        EditorPlugin *ep = EditorPlugin::init(Zep::NVec2f(1.0f, 1.0f));
+    void openEditor(fs::path path = "", bool mimickLastFocused = true,
+                    PluginType type = PluginType::EditorIcte) {
+        IEditorPlugin *ep = nullptr;
+        if (type == PluginType::EditorIcte) {
+            ep = new EditorIctePlugin();
+        } else {
+            ep = EditorZepPlugin::init(Zep::NVec2f(1.0f, 1.0f));
+            reinterpret_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
+                Zep::ZepMode_Standard::StaticName());
+        }
         ep->displaySize = ImVec2(640, 480);
-        ep->GetEditor().SetGlobalMode(Zep::ZepMode_Standard::StaticName());
         if (!path.empty())
-            ep->load(Zep::ZepPath(path));
+            ep->loadFile(path);
         editor_plugins.push_back(ep);
         plugins.push_back(ep);
 
         if (mimickLastFocused && !editor_plugins.empty()) {
-            std::pair<timepoint, EditorPlugin *> latest = {editor_plugins[0]->lastFocusedTime,
-                                                           nullptr};
-            for (EditorPlugin *epi : editor_plugins) {
+            std::pair<timepoint, IEditorPlugin *> latest = {editor_plugins[0]->lastFocusedTime,
+                                                            nullptr};
+            for (IEditorPlugin *epi : editor_plugins) {
                 if (epi->lastFocusedTime >= latest.first)
                     latest = {epi->lastFocusedTime, epi};
             }

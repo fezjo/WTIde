@@ -1,26 +1,29 @@
 #pragma once
 
 #include <imgui.h>
-#include <imgui_stdlib.h>
 #include <imgui_notify.h>
+#include <imgui_stdlib.h>
+
 #include "../imgui/imgui_my.h"
 
 #include "../utils.h"
 
 enum class PluginType {
     Unknown = 0,
-    Editor,
-    Search,
-    FileTree,
-    Terminal,
-    Text,
-    Input,
-    Output,
-    PluginControl,
-    ProgramAnalyzer,
-    DebuggerControl,
-    EditorIcte
+    FileTree = 1,
+    Terminal = 2,
+    PluginControl = 3,
+    ProgramAnalyzer = 4,
+    DebuggerControl = 5,
+    Editor = 1 << 7,
+    EditorIcte = 1 << 7 | 1,
+    EditorZep = 1 << 7 | 2,
+    Text = 1 << 8,
+    Input = 1 << 8 | 1,
+    Output = 1 << 8 | 2,
 };
+
+inline bool isPluginEditor(PluginType type) { return (int)type & (int)PluginType::Editor; }
 
 using CallbackData = std::variant<bool, int, std::string>;
 using CallbackFunction = std::function<CallbackData(CallbackData)>;

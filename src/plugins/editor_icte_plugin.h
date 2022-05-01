@@ -2,19 +2,15 @@
 
 #include "TextEditor.h"
 
-#include "../utils.h"
-#include "plugin.h"
+#include "editor_plugin.h"
 
-class EditorIctePlugin : public IPlugin {
+class EditorIctePlugin : public IEditorPlugin {
 public:
     EditorIctePlugin();
     virtual void show() override;
-
-public:
-    timepoint lastFocusedTime;
-    int dockId;
+    bool loadFile(const std::string &filename) override;
+    bool saveFile(std::string filename = "") override;
 
 protected:
-	TextEditor editor;
-    std::string fn;
+    TextEditor editor;
 };
