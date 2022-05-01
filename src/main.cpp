@@ -18,7 +18,7 @@
 
 #include "app.cpp"
 #include "utils.h"
-#include "themes.h"
+#include "imgui/themes.h"
 
 Uint32 minimum_refresh_rate_callback(Uint32 interval, void *param) {
     SDL_Event event;

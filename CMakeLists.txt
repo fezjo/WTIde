@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_definitions(-g)   
-add_definitions(-DIMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/my_imconfig.h")
+add_definitions(-DIMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/imgui/my_imconfig.h")
 add_definitions(-DZEP_USE_SDL)
 add_definitions(-DZEP_FEATURE_CPP_FILE_SYSTEM)
 
