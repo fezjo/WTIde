@@ -16,8 +16,7 @@ target_include_directories("ImGui"
     SYSTEM PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${IMGUI_PATH}
-        ${IMGUI_PATH}/backends
-        ${IMGUI_PATH}/misc/cpp)
+)
 
 
 set(IMGUI_NOTIFY_PATH ${CMAKE_CURRENT_SOURCE_DIR}/imgui-notify/example/src)

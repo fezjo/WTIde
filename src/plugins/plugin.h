@@ -1,8 +1,8 @@
 #pragma once
 
-#include <imgui.h>
+#include <imgui/imgui.h>
+#include <imgui/misc/cpp/imgui_stdlib.h>
 #include <imgui_notify.h>
-#include <imgui_stdlib.h>
 
 #include "../imgui/imgui_my.h"
 

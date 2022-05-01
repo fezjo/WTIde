@@ -4,10 +4,6 @@
 // documentation from the docs/ folder + read the top of imgui.cpp. Read online:
 // https://github.com/ocornut/imgui/tree/master/docs
 
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_sdl.h"
-#include "imgui_notify.h"
 #include <SDL.h>
 #include <stdio.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -16,9 +12,14 @@
 #include <SDL_opengl.h>
 #endif
 
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_sdl.h>
+#include <imgui/imgui.h>
+#include <imgui_notify.h>
+
 #include "app.cpp"
-#include "utils.h"
 #include "imgui/themes.h"
+#include "utils.h"
 
 Uint32 minimum_refresh_rate_callback(Uint32 interval, void *param) {
     SDL_Event event;

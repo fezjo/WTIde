@@ -1,5 +1,5 @@
 #include "imgui_my.h"
-#include "imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
 namespace ImGui {
 bool IsItemHovered(ImGuiHoveredFlags flags, float timer) {
