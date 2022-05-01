@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../utils.h"
-#include "plugin.h"
+#include "../../utils.h"
+#include "../plugin.h"
 
 struct FileTreeNode {
     bool initialized;

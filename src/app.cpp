@@ -1,18 +1,19 @@
 #include <imgui.h>
 #include <zep.h>
 
-#include "plugins/editor_icte_plugin.h"
-#include "plugins/editor_zep_plugin.h"
-#include "plugins/filetree_plugin.h"
-#include "plugins/input_plugin.h"
-#include "plugins/output_plugin.h"
 #include "plugins/plugin.h"
-#include "plugins/plugin_control_plugin.h"
-#include "plugins/program_analyzer_plugin.h"
-#include "plugins/text_plugin.h"
 #include "utils.h"
 
-#include "plugins/debugger_control_plugin.h" // TODO why does it need to be after zep
+#include "plugins/debugger/program_analyzer_plugin.h"
+#include "plugins/editor/editor_icte_plugin.h"
+#include "plugins/editor/editor_zep_plugin.h"
+#include "plugins/ide/filetree_plugin.h"
+#include "plugins/ide/plugin_control_plugin.h"
+#include "plugins/text/input_plugin.h"
+#include "plugins/text/output_plugin.h"
+#include "plugins/text/text_plugin.h"
+
+#include "plugins/debugger/debugger_control_plugin.h" // TODO why does it need to be after zep
 
 #include "debugger/debugger.h"
 
