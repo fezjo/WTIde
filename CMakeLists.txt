@@ -38,6 +38,7 @@ target_link_libraries(
         OpenGL::OpenGL
         ImGui
         ImGui-Notify
+        ICTE
         Zep::Zep
         WTStar
         clip

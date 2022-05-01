@@ -14,6 +14,7 @@ target_link_libraries(
 )
 target_include_directories("ImGui"
     SYSTEM PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
         ${IMGUI_PATH}
         ${IMGUI_PATH}/backends
         ${IMGUI_PATH}/misc/cpp)
@@ -21,7 +22,7 @@ target_include_directories("ImGui"
 
 set(IMGUI_NOTIFY_PATH ${CMAKE_CURRENT_SOURCE_DIR}/imgui-notify/example/src)
 file(GLOB IMGUI_NOTIFY_SOURCES
-    ${IMGUI_PATH}/*.h
+    ${IMGUI_NOTIFY_PATH}/*.h
 )
 add_library("ImGui-Notify" STATIC ${IMGUI_NOTIFY_SOURCES})
 target_link_libraries(
@@ -31,6 +32,20 @@ target_link_libraries(
 )
 set_target_properties("ImGui-Notify" PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories("ImGui-Notify" SYSTEM PUBLIC ${IMGUI_NOTIFY_PATH})
+
+set(ICTE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ImGuiColorTextEdit)
+file(GLOB ICTE_SOURCES
+    ${ICTE_PATH}/*.cpp
+    ${ICTE_PATH}/*.h
+)
+add_library("ICTE" STATIC ${ICTE_SOURCES})
+target_link_libraries(
+    "ICTE"
+    PRIVATE
+        ImGui
+)
+set_target_properties("ICTE" PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories("ICTE" SYSTEM PUBLIC ${ICTE_PATH})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zep/src)
 set(APP_ROOT ${CMAKE_SOURCE_DIR})

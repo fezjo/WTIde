@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include <zep.h>
 
+#include "plugins/editor_icte_plugin.h"
 #include "plugins/editor_plugin.h"
 #include "plugins/filetree_plugin.h"
 #include "plugins/input_plugin.h"
@@ -27,6 +28,7 @@ protected:
     Debugger *debugger;
 
     std::vector<EditorPlugin *> editor_plugins;
+    EditorIctePlugin *editor_icte_plugin;
     FileTreePlugin *filetree_plugin;
     InputPlugin *input_plugin;
     OutputPlugin *output_plugin;
@@ -117,6 +119,11 @@ public:
         plugin_control_plugin->displaySize = ImVec2(300, 300);
         plugin_control_plugin->title = "Plugins";
         plugins.push_back(plugin_control_plugin);
+
+        editor_icte_plugin = new EditorIctePlugin();
+        editor_icte_plugin->displaySize = ImVec2(400, 600);
+        editor_icte_plugin->title = "ICTE Editor";
+        plugins.push_back(editor_icte_plugin);
     }
 
     void update() {

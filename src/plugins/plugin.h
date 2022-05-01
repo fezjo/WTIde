@@ -18,7 +18,8 @@ enum class PluginType {
     Output,
     PluginControl,
     ProgramAnalyzer,
-    DebuggerControl
+    DebuggerControl,
+    EditorIcte
 };
 
 using CallbackData = std::variant<bool, int, std::string>;

@@ -19,3 +19,6 @@
 [submodule "lib/imgui-notify"]
 	path = lib/imgui-notify
 	url = https://github.com/patrickcjk/imgui-notify.git
+[submodule "lib/ImGuiColorTextEdit"]
+	path = lib/ImGuiColorTextEdit
+	url = https://github.com/dfranx/ImGuiColorTextEdit.git
