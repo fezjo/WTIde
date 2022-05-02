@@ -56,7 +56,7 @@ public:
 
         // Called once the fonts/device is guaranteed setup
         openEditor(fs::path("..") / "src" / "main.cpp", false, PluginType::EditorZep);
-        reinterpret_cast<EditorZepPlugin *>(editor_plugins[0])
+        static_cast<EditorZepPlugin *>(editor_plugins[0])
             ->GetEditor()
             .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
 
@@ -229,7 +229,7 @@ public:
             ep = new EditorIctePlugin();
         } else {
             ep = EditorZepPlugin::init(Zep::NVec2f(1.0f, 1.0f));
-            reinterpret_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
+            static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
                 Zep::ZepMode_Standard::StaticName());
         }
         if (!path.empty())

@@ -12,16 +12,15 @@ Writer::Writer(const std::string &fn, const std::string &mode) {
     }
 }
 
-Writer::Writer(Writer &&writer) {
-    w = writer.w;
-    writer.w = nullptr;
-}
+Writer::Writer(Writer &&other) { *this = std::move(other); }
 
-Writer &Writer::operator=(Writer &&writer) {
+Writer &Writer::operator=(Writer &&other) {
+    if (this == &other)
+        return *this;
     if (w)
         WTStar::writer_t_delete(w);
-    w = writer.w;
-    writer.w = nullptr;
+    w = other.w;
+    other.w = nullptr;
     return *this;
 }
 
@@ -35,7 +34,7 @@ void Writer::clear() {
 }
 
 void Writer::write(const std::string &s) {
-    WTStar::out_raw(w, reinterpret_cast<const void*>(s.data()), s.size());
+    WTStar::out_raw(w, static_cast<const void *>(s.data()), static_cast<int>(s.size()));
 }
 
 std::string Writer::read(size_t pos, size_t len) {
