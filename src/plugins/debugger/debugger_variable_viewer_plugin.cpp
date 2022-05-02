@@ -199,8 +199,7 @@ void DebuggerVariableViewerPlugin::show() {
         return;
     }
 
-    Writer outw;
-    ImGui::TextWrapped("yaay\n");
+    ImGui::TextWrapped("W=%9d T=%9d W/T=%5.2f", env->W, env->T, double(env->W) / env->T);
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     if (ImGui::TreeNode("Globals")) {
@@ -260,9 +259,9 @@ void DebuggerVariableViewerPlugin::show() {
 
 /*
     Work Time
-    local
-    parent -> parent -> parent
-    global
+    **local
+    **parent -> parent -> parent
+    **global
     parameters
     return value
 */
