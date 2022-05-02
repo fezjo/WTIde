@@ -198,8 +198,12 @@ std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::str
     ast_scope_and_node scope_and_node = findAstScopeAndNode(ast, [&](WTStar::ast_node_t *node) {
         return node->code_from <= (int)bp_pos && node->code_to >= (int)bp_pos;
     });
-    std::cerr << "found scope and node id " << scope_and_node.first->items->id << " "
-              << scope_and_node.second->id << std::endl;
+    if (!scope_and_node.first) {
+        std::cerr << "Could not find scope for breakpoint" << std::endl;
+        return {false, "Could not find corresponding scope"};
+    } else
+        std::cerr << "found scope and node id " << scope_and_node.first->items->id << " "
+                  << scope_and_node.second->id << std::endl;
     auto [code, compile_msg] = compileConditionInAst(ast, condition, scope_and_node.first);
     bool compilation_successful = compile_msg.empty();
     std::cerr << "setBreakpointWithCondition added breakpoint at " << bp_pos << std::endl;
