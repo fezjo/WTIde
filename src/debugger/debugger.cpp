@@ -167,6 +167,8 @@ std::string Debugger::getSource() const { return source_fn; }
 
 bool Debugger::isCompiled() const { return compiled; }
 
+bool Debugger::isRunning() const { return env && env->state == WTStar::virtual_machine_t::VM_RUNNING; }
+
 bool Debugger::canRun() const { return compiled && env; }
 
 std::pair<size_t, SourcePosition> Debugger::getSourcePosition() const {

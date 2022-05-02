@@ -53,6 +53,7 @@ public:
     std::string getSource() const;
     std::pair<size_t, SourcePosition> getSourcePosition() const;
     bool isCompiled() const;
+    bool isRunning() const;
     bool canRun() const;
 
     int runExecution();
