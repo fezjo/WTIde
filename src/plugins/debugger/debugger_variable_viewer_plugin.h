@@ -9,6 +9,7 @@ struct Variable {
     WTStar::input_layout_item_t layout;
     uint addr;
     uint n_dims;
+    uint from_code;
     std::string stype;
     std::string sname;
 
@@ -37,7 +38,8 @@ public:
     std::vector<uint64_t> getThreadIds();
     std::string getThreadIndexVariableName();
     int getThreadIndexVariableValue(uint64_t tid);
-    std::vector<std::vector<Variable>> getVariables();
+    std::vector<Variable> getVariablesInScope(uint sid);
+    std::vector<std::vector<Variable>> getVisibleVariables();
 
 protected:
     Debugger *debugger;
