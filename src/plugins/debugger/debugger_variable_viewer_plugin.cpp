@@ -182,6 +182,8 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
     return var_layers;
 }
 
+ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+
 bool showTableHeader(const std::string &title) {
     const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
     ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Hideable |
@@ -234,7 +236,8 @@ void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, WTSt
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     std::string title =
         std::string() + (layer_i ? "parent" : "locals") + "##" + std::to_string(layer_i);
-    if (!ImGui::TreeNode(title.c_str()))
+    if (!ImGui::TreeNodeEx(title.c_str(),
+                           default_treenode_flags))
         return;
     for (auto &var : var_layer) {
         actionRow(var);
@@ -245,7 +248,6 @@ void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, WTSt
         //                    var.svalue.c_str());
     }
     showTableVariableLayer(var_layers, thr, layer_i + 1, actionRow);
-    ImGui::TreePop();
 };
 
 void DebuggerVariableViewerPlugin::show() {
@@ -268,7 +270,7 @@ void DebuggerVariableViewerPlugin::show() {
     ImGui::TextWrapped("W=%9d T=%9d W/T=%5.2f", env->W, env->T, double(env->W) / env->T);
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNodeEx("Globals", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+    if (ImGui::TreeNodeEx("Globals", default_treenode_flags)) {
         if (showTableHeader("globals")) {
             for (auto &var : getVariablesInScope(0)) {
                 var.fillThreadInfo(env, nullptr);
@@ -276,12 +278,11 @@ void DebuggerVariableViewerPlugin::show() {
             }
             ImGui::EndTable();
         }
-        ImGui::TreePop();
     }
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     auto var_layers = getVisibleVariables();
-    if (ImGui::TreeNodeEx("Threads", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+    if (ImGui::TreeNodeEx("Threads", default_treenode_flags)) {
         auto index_name = getThreadIndexVariableName();
         for (auto tid : getThreadIds()) {
             auto *thr = WTStar::get_thread(tid);
@@ -299,7 +300,6 @@ void DebuggerVariableViewerPlugin::show() {
                 ImGui::EndTable();
             }
         }
-        ImGui::TreePop();
     }
 
     ImGui::End();
