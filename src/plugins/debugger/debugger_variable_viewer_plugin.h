@@ -18,11 +18,11 @@ struct Variable {
 
     int level;
 
-    ~Variable() {
-        if (layout.elems)
-            free(layout.elems);
-    }
-    Variable(WTStar::variable_info_t *info, WTStar::virtual_machine_t *env, WTStar::thread_t *thr);
+    ~Variable();
+    Variable(Variable &&other);
+    Variable &operator=(Variable &&other);
+    Variable(WTStar::variable_info_t *info, WTStar::virtual_machine_t *env,
+             WTStar::thread_t *thr = nullptr);
     void fillThreadInfo(WTStar::virtual_machine_t *env, WTStar::thread_t *thr);
 };
 
@@ -37,6 +37,7 @@ public:
     std::vector<uint64_t> getThreadIds();
     std::string getThreadIndexVariableName();
     int getThreadIndexVariableValue(uint64_t tid);
+    std::vector<std::vector<Variable>> getVariables();
 
 protected:
     Debugger *debugger;
