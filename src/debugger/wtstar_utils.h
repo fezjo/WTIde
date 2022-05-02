@@ -20,6 +20,7 @@ public:
     Writer &operator=(Writer &&writer);
     ~Writer();
     void clear();
+    void write(const std::string &s);
     std::string read(size_t pos = 0, size_t len = -1u);
 
     WTStar::writer_t *w;
@@ -43,3 +44,7 @@ public:
 
     std::stringstream ss;
 };
+
+namespace WTStar {
+debug_info_t *getDebugInfo(virtual_machine_t *env);
+} // namespace WTStar

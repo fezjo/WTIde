@@ -34,6 +34,10 @@ void Writer::clear() {
     w->str.ptr = 0;
 }
 
+void Writer::write(const std::string &s) {
+    WTStar::out_raw(w, reinterpret_cast<const void*>(s.data()), s.size());
+}
+
 std::string Writer::read(size_t pos, size_t len) {
     if (w->type == WTStar::WRITER_FILE)
         throw std::logic_error("Read from file-based writer is not yet supported");
@@ -67,3 +71,11 @@ void ErrorHandler::write(const std::string &msg) { ss << msg; }
 void ErrorHandler::handle(WTStar::error_t *error) { ss << error->msg->str.base << "\n"; }
 
 std::string ErrorHandler::read() const { return ss.str(); }
+
+namespace WTStar {
+debug_info_t *getDebugInfo(virtual_machine_t *env) {
+    if (!env || !env->debug_info)
+        return nullptr;
+    return env->debug_info;
+}
+} // namespace WTStar
