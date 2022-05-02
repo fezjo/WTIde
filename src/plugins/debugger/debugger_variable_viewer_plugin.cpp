@@ -182,6 +182,72 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
     return var_layers;
 }
 
+bool showTableHeader(const std::string &title) {
+    const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
+    ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Hideable |
+                            ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH |
+                            ImGuiTableFlags_RowBg;
+    if (!ImGui::BeginTable(title.c_str(), 5, flags))
+        return false;
+    // The first column will use the default _WidthStretch when ScrollX is Off and
+    // _WidthFixed when ScrollX is On
+    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableSetupColumn("Lvl",
+                            ImGuiTableColumnFlags_DefaultHide | ImGuiTableColumnFlags_WidthFixed,
+                            3 * TEXT_BASE_WIDTH);
+    ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 15 * TEXT_BASE_WIDTH);
+    ImGui::TableSetupColumn("Addr", ImGuiTableColumnFlags_DefaultHide);
+    ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
+    return true;
+}
+
+void showTableVariableRow(const Variable &var) {
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    ImGui::TextWrapped("%s", var.sname.c_str());
+    ImGui::TableNextColumn();
+    ImGui::TextWrapped("%d", var.level);
+    ImGui::TableNextColumn();
+    ImGui::TextWrapped("%s", var.stype.c_str());
+    if (var.n_dims) {
+        ImGui::TextWrapped("[#%u:%s]", var.n_dims, var.sdims.c_str());
+    }
+    ImGui::TableNextColumn();
+    ImGui::TextWrapped("%u", var.addr);
+    ImGui::TableNextColumn();
+    ImGui::TextWrapped("%s", var.svalue.c_str());
+}
+
+void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, WTStar::thread_t *thr,
+                            uint layer_i, std::function<void(Variable &var)> actionRow) {
+    if (layer_i >= var_layers.size())
+        return;
+    auto &var_layer = var_layers[layer_i];
+    if (layer_i && var_layer.empty()) {
+        showTableVariableLayer(var_layers, thr, layer_i + 1, actionRow);
+        return;
+    }
+
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+    std::string title =
+        std::string() + (layer_i ? "parent" : "locals") + "##" + std::to_string(layer_i);
+    if (!ImGui::TreeNode(title.c_str()))
+        return;
+    for (auto &var : var_layer) {
+        actionRow(var);
+        // ImGui::TextWrapped("lvl=%d addr=%u type=%s ndim=%u%s name=%s val=%s",
+        //                    var.level, var.addr, var.stype.c_str(),
+        //                    var.n_dims, (var.sdims.empty() ? "" : " dims=" +
+        //                    var.sdims).c_str(), var.sname.c_str(),
+        //                    var.svalue.c_str());
+    }
+    showTableVariableLayer(var_layers, thr, layer_i + 1, actionRow);
+    ImGui::TreePop();
+};
+
 void DebuggerVariableViewerPlugin::show() {
     if (!shown)
         return;
@@ -202,20 +268,20 @@ void DebuggerVariableViewerPlugin::show() {
     ImGui::TextWrapped("W=%9d T=%9d W/T=%5.2f", env->W, env->T, double(env->W) / env->T);
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNode("Globals")) {
-        for (auto &var : getVariablesInScope(0)) {
-            var.fillThreadInfo(env, nullptr);
-            ImGui::TextWrapped("addr=%u type=%s ndim=%u%s name=%s val=%s", var.addr,
-                               var.stype.c_str(), var.n_dims,
-                               (var.sdims.empty() ? "" : " dims=" + var.sdims).c_str(),
-                               var.sname.c_str(), var.svalue.c_str());
+    if (ImGui::TreeNodeEx("Globals", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        if (showTableHeader("globals")) {
+            for (auto &var : getVariablesInScope(0)) {
+                var.fillThreadInfo(env, nullptr);
+                showTableVariableRow(var);
+            }
+            ImGui::EndTable();
         }
         ImGui::TreePop();
     }
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     auto var_layers = getVisibleVariables();
-    if (ImGui::TreeNode("Threads")) {
+    if (ImGui::TreeNodeEx("Threads", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         auto index_name = getThreadIndexVariableName();
         for (auto tid : getThreadIds()) {
             auto *thr = WTStar::get_thread(tid);
@@ -225,30 +291,12 @@ void DebuggerVariableViewerPlugin::show() {
                 ImGui::TextWrapped(" | %s=%d", index_name.c_str(),
                                    getThreadIndexVariableValue(tid));
             }
-            ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-            if (ImGui::TreeNode(("locals##" + std::to_string(tid)).c_str())) {
-                uint close = 1;
-                for (uint layer_i = 0; layer_i < var_layers.size(); layer_i++) {
-                    auto &var_layer = var_layers[layer_i];
-                    if (var_layer.empty())
-                        continue;
-                    if (layer_i) {
-                        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-                        std::string title = "parent##" + std::to_string(layer_i);
-                        if (!ImGui::TreeNode(title.c_str()))
-                            break;
-                        close++;
-                    }
-                    for (auto &var : var_layer) {
-                        var.fillThreadInfo(env, thr);
-                        ImGui::TextWrapped("lvl=%d addr=%u type=%s ndim=%u%s name=%s val=%s",
-                                           var.level, var.addr, var.stype.c_str(), var.n_dims,
-                                           (var.sdims.empty() ? "" : " dims=" + var.sdims).c_str(),
-                                           var.sname.c_str(), var.svalue.c_str());
-                    }
-                }
-                for (uint i = 0; i < close; i++)
-                    ImGui::TreePop();
+            if (showTableHeader("thread variables")) {
+                showTableVariableLayer(var_layers, thr, 0, [&](Variable &var) {
+                    var.fillThreadInfo(env, thr);
+                    showTableVariableRow(var);
+                });
+                ImGui::EndTable();
             }
         }
         ImGui::TreePop();
