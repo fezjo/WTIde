@@ -5,36 +5,38 @@ SourcePosition::SourcePosition(WTStar::item_info_t *info, WTStar::virtual_machin
       file(env->debug_info->files[info->fileid]), line(info->fl), valid(true) {}
 
 SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instruction_number) {
-    if (!env->debug_info)
+    auto debug_info = WTStar::getDebugInfo(env);
+    if (!debug_info)
         return SourcePosition();
-    int i = code_map_find(env->debug_info->source_items_map, env->pc);
+    int i = WTStar::code_map_find(debug_info->source_items_map, env->stored_pc);
     if (i < 0)
         return SourcePosition();
-    int it = env->debug_info->source_items_map->val[i];
+    int it = debug_info->source_items_map->val[i];
     if (it < 0)
         return SourcePosition();
 
-    WTStar::item_info_t *item = &env->debug_info->items[it];
+    WTStar::item_info_t *item = &debug_info->items[it];
     SourcePosition res(item, env);
     return res;
 }
 
 uint Debugger::findInstructionNumber(const std::string &file, uint line) {
     std::cerr << "findInstructionNumber " << file << " " << line << std::endl;
-    if (!env)
+    auto debug_info = WTStar::getDebugInfo(env);
+    if (!debug_info)
         return -1u;
     std::cerr << "debug_info?" << std::endl;
-    if (!env->debug_info)
+    if (!debug_info)
         return -1u;
-    for (uint i = 0; i < env->debug_info->source_items_map->n; i++) {
-        uint instr_i = env->debug_info->source_items_map->bp[i];
-        int item_i = env->debug_info->source_items_map->val[i];
+    for (uint i = 0; i < debug_info->source_items_map->n; i++) {
+        uint instr_i = debug_info->source_items_map->bp[i];
+        int item_i = debug_info->source_items_map->val[i];
         if (item_i < 0)
             continue;
-        WTStar::item_info_t *item = &env->debug_info->items[item_i];
+        WTStar::item_info_t *item = &debug_info->items[item_i];
         std::cerr << "item: " << item->fileid << " " << item->fl << " " << item->fc << " "
                   << item->ll << " " << item->lc << std::endl;
-        std::string i_file(env->debug_info->files[item->fileid]);
+        std::string i_file(debug_info->files[item->fileid]);
         if (i_file == file && item->fl == line) {
             return instr_i;
         }
