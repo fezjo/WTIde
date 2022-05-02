@@ -8,6 +8,7 @@ ProgramAnalyzerPlugin::ProgramAnalyzerPlugin(Debugger *debugger) : debugger(debu
 void ProgramAnalyzerPlugin::refresh() {}
 
 void ProgramAnalyzerPlugin::show() {
+    static ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
     if (!shown)
         return;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
@@ -62,7 +63,7 @@ void ProgramAnalyzerPlugin::show() {
             bool has_debug = env->debug_info;
             if (has_debug) {
                 ImGui::SetNextItemOpen(has_debug, ImGuiCond_Once);
-                if (ImGui::TreeNode("Debug info")) {
+                if (ImGui::TreeNodeEx("Debug info", default_treenode_flags)) {
                     WTStar::out_text(outw.w, "source files:\n\t");
                     for (uint32_t i = 0; i < env->debug_info->n_files; ++i)
                         WTStar::out_text(outw.w, "%s ", env->debug_info->files[i]);
@@ -79,19 +80,19 @@ void ProgramAnalyzerPlugin::show() {
         if (ImGui::BeginTabItem("Variables")) {
             ImGui::BeginChild("##child");
             ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-            if (ImGui::TreeNode("Input")) {
+            if (ImGui::TreeNodeEx("Input", default_treenode_flags)) {
                 WTStar::print_io_vars(outw.w, env, env->n_in_vars, env->in_vars);
                 writeTextWrappedAndClear(outw);
                 ImGui::TreePop();
             }
             ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-            if (ImGui::TreeNode("Output")) {
+            if (ImGui::TreeNodeEx("Output", default_treenode_flags)) {
                 WTStar::print_io_vars(outw.w, env, env->n_out_vars, env->out_vars);
                 writeTextWrappedAndClear(outw);
                 ImGui::TreePop();
             }
             ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-            if (ImGui::TreeNode("Root")) {
+            if (ImGui::TreeNodeEx("Root", default_treenode_flags)) {
                 WTStar::print_root_vars(outw.w, env);
                 writeTextWrappedAndClear(outw);
                 ImGui::TreePop();
@@ -127,8 +128,8 @@ void ProgramAnalyzerPlugin::show() {
                 ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_ReadOnly * !is_editing;
 
                 ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-                if (ImGui::TreeNode(std::to_string(bp.bp_pos).c_str(), "%s:%d", bp.file.c_str(),
-                                    bp.line)) {
+                if (ImGui::TreeNodeEx(std::to_string(bp.bp_pos).c_str(), default_treenode_flags,
+                                      "%s:%d", bp.file.c_str(), bp.line)) {
                     // TODO compilation error
                     ImGui::Checkbox("Enabled", &enabled);
                     ImGui::SameLine();
@@ -156,14 +157,14 @@ void ProgramAnalyzerPlugin::show() {
                     ImGui::InputInt("##line", &line, 1, 10,
                                     input_flags | ImGuiInputTextFlags_CharsDecimal);
 
-                    if (ImGui::TreeNode("Condition:")) {
+                    if (ImGui::TreeNodeEx("Condition:", default_treenode_flags)) {
                         ImGui::InputTextMultiline("##condition", &condition, ImVec2(-1, 0),
                                                   input_flags);
                         ImGui::TreePop();
                     }
 
                     ImGui::SetNextItemOpen(true, ImGuiCond_Once); // TODO testing hide
-                    if (ImGui::TreeNode("VM")) {
+                    if (ImGui::TreeNodeEx("VM", default_treenode_flags)) {
                         if (!bp.vm_bp)
                             ImGui::Text("No VM breakpoint");
                         else {
@@ -171,7 +172,7 @@ void ProgramAnalyzerPlugin::show() {
                             ImGui::TextWrapped("BREAK position: %5d", bp.vm_bp->bp_pos);
                             ImGui::TextWrapped("Code  position: %5d", bp.vm_bp->code_pos);
                             ImGui::TextWrapped("Code  size: %5d", bp.vm_bp->code_size);
-                            if (ImGui::TreeNode("Instructions")) {
+                            if (ImGui::TreeNodeEx("Instructions", default_treenode_flags)) {
                                 outw.clear();
                                 WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos,
                                                    static_cast<int>(bp.vm_bp->code_size));
@@ -184,7 +185,7 @@ void ProgramAnalyzerPlugin::show() {
 
                     if (!bp.error.empty()) {
                         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-                        if (ImGui::TreeNode("Compilation error")) {
+                        if (ImGui::TreeNodeEx("Compilation error", default_treenode_flags)) {
                             ImGui::TextWrapped("%s", bp.error.c_str());
                             ImGui::TreePop();
                         }
