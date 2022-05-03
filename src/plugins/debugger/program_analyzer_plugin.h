@@ -11,7 +11,8 @@ public:
     void show() override;
 
     void refresh();
+
 protected:
     Debugger *debugger;
-    Breakpoint edit_bp;
+    Breakpoint edit_bp{};
 };
