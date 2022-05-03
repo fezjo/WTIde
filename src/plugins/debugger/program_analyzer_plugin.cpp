@@ -44,6 +44,7 @@ void ProgramAnalyzerPlugin::show() {
         }
     }
 
+    auto *debug_info = WTStar::getDebugInfo(env);
     Writer outw;
     static auto writeTextWrappedAndClear = [](Writer &outw) {
         ImGui::TextWrapped("%s", outw.read().c_str());
@@ -60,13 +61,12 @@ void ProgramAnalyzerPlugin::show() {
             WTStar::dump_header(outw.w, env);
             writeTextWrappedAndClear(outw);
 
-            bool has_debug = env->debug_info;
-            if (has_debug) {
-                ImGui::SetNextItemOpen(has_debug, ImGuiCond_Once);
+            if (debug_info) {
+                ImGui::SetNextItemOpen(true, ImGuiCond_Once);
                 if (ImGui::TreeNodeEx("Debug info", default_treenode_flags)) {
                     WTStar::out_text(outw.w, "source files:\n\t");
-                    for (uint32_t i = 0; i < env->debug_info->n_files; ++i)
-                        WTStar::out_text(outw.w, "%s ", env->debug_info->files[i]);
+                    for (uint32_t i = 0; i < debug_info->n_files; ++i)
+                        WTStar::out_text(outw.w, "%s ", debug_info->files[i]);
                     WTStar::out_text(outw.w, "\n");
                     WTStar::print_types(outw.w, env);
                     writeTextWrappedAndClear(outw);
@@ -102,7 +102,16 @@ void ProgramAnalyzerPlugin::show() {
         }
         if (ImGui::BeginTabItem("Functions")) {
             ImGui::BeginChild("##child");
-            ImGui::TextWrapped("TODO");
+            if (!debug_info)
+                ImGui::TextWrapped("No debug info");
+            else {
+                for (uint fi = 0; fi < debug_info->n_fn; ++fi) {
+                    std::string f_name = debug_info->fn_names[fi];
+                    auto *f_info = &debug_info->items[debug_info->fn_items[fi]];
+                    ImGui::TextWrapped("%s (%s:%d.%d)", f_name.c_str(),
+                                       debug_info->files[f_info->fileid], f_info->fl, f_info->fc);
+                }
+            }
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
