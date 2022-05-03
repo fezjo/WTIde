@@ -71,6 +71,8 @@ void EditorIctePlugin::show() {
         return;
     }
     dockId = ImGui::GetWindowDockID();
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
+        lastFocusedTime = get_time();
 
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("File")) {

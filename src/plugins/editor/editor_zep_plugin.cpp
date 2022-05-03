@@ -112,6 +112,11 @@ void EditorZepPlugin::show() {
         return;
     }
     dockId = ImGui::GetWindowDockID();
+    editor.isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows);
+    if (editor.isFocused) {
+        lastFocusedTime = get_time();
+        editor.HandleInput();
+    }
 
     auto min = ImGui::GetCursorScreenPos();
     auto max = ImGui::GetContentRegionAvail();
@@ -126,18 +131,8 @@ void EditorZepPlugin::show() {
     max.y = min.y + max.y;
 
     editor.SetDisplayRegion(Zep::NVec2f(min.x, min.y), Zep::NVec2f(max.x, max.y));
-    editor.isFocused = ImGui::IsWindowFocused();
     editor.Display();
-    if (editor.isFocused) {
-        lastFocusedTime = get_time();
-        editor.HandleInput();
-    }
 
-    // // TODO: A Better solution for this; I think the audio graph is creating a new window and
-    // stealing focus static int focus_count = 0; if (focus_count++ < 2)
-    // {
-    //     ImGui::SetWindowFocus();
-    // }
     ImGui::End();
 }
 
