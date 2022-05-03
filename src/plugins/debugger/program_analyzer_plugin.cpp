@@ -116,10 +116,11 @@ void ProgramAnalyzerPlugin::show() {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Code")) {
-            ImGui::BeginChild("##child");
+            ImGui::BeginChild("##child", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
             ImGui::TextWrapped("Code size: %d", env->code_size);
             print_code(outw.w, env->code, env->code_size);
-            writeTextWrappedAndClear(outw);
+            ImGui::TextUnformatted(outw.read().c_str());
+            outw.clear();
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
