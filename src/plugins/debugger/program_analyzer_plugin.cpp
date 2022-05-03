@@ -169,7 +169,7 @@ void ProgramAnalyzerPlugin::show() {
 
                     if (ImGui::TreeNodeEx("Condition:", default_treenode_flags)) {
                         ImGui::InputTextMultiline("##condition", &condition, ImVec2(-1, 0),
-                                                  input_flags);
+                                                  input_flags | ImGuiInputTextFlags_AllowTabInput);
                         ImGui::TreePop();
                     }
 

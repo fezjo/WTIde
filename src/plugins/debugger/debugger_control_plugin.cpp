@@ -131,8 +131,14 @@ void DebuggerControlPlugin::show() {
 
     {
         static std::string fileBuffer = "test.wt";
-        static std::string condition = "sum % 2 == 0;";
-        static int lineBuffer = 50;
+        static std::string condition =
+"int bn = A.size;\n\
+pardo(bi: bn)\n\
+	A[bi] = (bi + 1) * (bi + 2) * (bi + 3);\n\
+for (int bi = 0; bi < bn; ++bi)\n\
+	sum += A[bi];\n\
+bn;";
+        static int lineBuffer = 92;
 
         ImGui::Text("Breakpoint:");
         ImGui::SameLine();
@@ -145,7 +151,8 @@ void DebuggerControlPlugin::show() {
         if (ImGui::BeginPopup("Add Breakpoint")) {
             ImGui::InputText("File", &fileBuffer);
             ImGui::InputInt("Line", &lineBuffer);
-            ImGui::InputTextMultiline("Condition", &condition);
+            ImGui::InputTextMultiline("Condition", &condition, ImVec2(0, 0),
+                                      ImGuiInputTextFlags_AllowTabInput);
             if (ImGui::Button("Add")) {
                 auto res = debugger->setBreakpointWithCondition(fileBuffer, lineBuffer, condition);
                 if (!res.first) {
