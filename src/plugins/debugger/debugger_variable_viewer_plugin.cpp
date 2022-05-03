@@ -131,7 +131,7 @@ std::vector<Variable> DebuggerVariableViewerPlugin::getVariablesInScope(uint sid
     std::vector<Variable> variables;
     auto *env = debugger->env;
     auto debug_info = WTStar::getDebugInfo(env);
-    if (!debugger->isRunning() || !debug_info)
+    if (!debug_info)
         return variables;
 
     auto *scope_info = &env->debug_info->scopes[sid];
@@ -268,6 +268,12 @@ void DebuggerVariableViewerPlugin::show() {
     }
 
     ImGui::TextWrapped("W=%9d T=%9d W/T=%5.2f", env->W, env->T, double(env->W) / env->T);
+
+
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+    if (ImGui::TreeNodeEx("Call stack", default_treenode_flags)) {
+        ImGui::TextWrapped("%d", STACK_SIZE(env->frames, WTStar::frame_t *));
+    }
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     if (ImGui::TreeNodeEx("Globals", default_treenode_flags)) {
