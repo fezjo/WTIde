@@ -83,6 +83,8 @@ ast_scope_and_node findAstScopeAndNode(WTStar::ast_t *ast,
     } else if (node->node_type == WTStar::AST_NODE_STATEMENT) {
         for (int pi = 0; pi < 2; ++pi) {
             WTStar::ast_node_t *p = node->val.s->par[pi];
+            if (!p)
+                continue;
             ast_scope_and_node res;
             if (p->node_type == WTStar::AST_NODE_SCOPE)
                 res = findAstScopeAndNode(ast, predicate, p->val.sc, nullptr, false);
@@ -93,7 +95,9 @@ ast_scope_and_node findAstScopeAndNode(WTStar::ast_t *ast,
             if (res.second)             // if we found node but it does not have scope, then we have
                 return {nullptr, node}; // also don't have scope so we return ourselves
         }
-        assert(!(bool)"unreachable");
+        // assert(!(bool)"unreachable");
+        std::cerr << "could not find scope for statement" << std::endl;
+        return {};
     } else {
         return {nullptr, node};
     }
