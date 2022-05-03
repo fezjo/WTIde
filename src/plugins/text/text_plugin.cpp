@@ -17,8 +17,8 @@ void TextPlugin::show() {
     float font_size = ImGui::GetFontSize();
     float max_width = 0;
     {
-        auto line_begin = data.begin();
         data.push_back('\n');
+        auto line_begin = data.begin();
         for (auto it = data.begin(); it != data.end(); ++it) {
             if (*it == '\n') {
                 float line_width =
