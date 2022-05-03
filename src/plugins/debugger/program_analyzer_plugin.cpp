@@ -38,11 +38,14 @@ void ProgramAnalyzerPlugin::show() {
 
         env = WTStar::virtual_machine_t_new(code.data(), static_cast<int>(code.size()));
         if (!env) {
-            ImGui::TextWrapped("Failed to create virtual machine, corrupted binary?");
+            ImGui::TextWrapped(
+                "Failed to create virtual machine, corrupted binary? Read %lu bytes from %s",
+                code.size(), fn.c_str());
             ImGui::End();
             return;
         }
     }
+    assert(env);
 
     auto *debug_info = WTStar::getDebugInfo(env);
     Writer outw;
