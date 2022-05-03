@@ -67,7 +67,11 @@ void ErrorHandler::clear() { ss.str(""); }
 
 void ErrorHandler::write(const std::string &msg) { ss << msg; }
 
-void ErrorHandler::handle(WTStar::error_t *error) { ss << error->msg->str.base << "\n"; }
+void ErrorHandler::handle(WTStar::error_t *error) {
+    if (to_cerr)
+        std::cerr << error->msg->str.base << std::endl;
+    ss << error->msg->str.base << "\n";
+}
 
 std::string ErrorHandler::read() const { return ss.str(); }
 

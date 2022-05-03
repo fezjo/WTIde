@@ -1,5 +1,9 @@
 #include "debugger.h"
 
+Debugger::Debugger() {
+    error_handler.to_cerr = false;
+}
+
 Debugger::~Debugger() { destroy(); }
 
 void Debugger::destroy() {

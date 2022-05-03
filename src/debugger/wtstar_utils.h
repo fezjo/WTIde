@@ -42,6 +42,7 @@ public:
     void write(const std::string &msg);
     std::string read() const;
 
+    bool to_cerr = false;
     std::stringstream ss;
 };
 

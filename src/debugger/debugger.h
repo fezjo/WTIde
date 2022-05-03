@@ -38,7 +38,7 @@ void error_handler_callback(WTStar::error_t *error, void *data);
 
 class Debugger {
 public:
-    Debugger() = default;
+    Debugger();
     ~Debugger();
 
     bool setSource(const std::string &source_fn);
@@ -86,17 +86,18 @@ public:
     bool stop_on_bp = true;
 
 protected:
-    bool compiled = false;
     std::string source_fn = "";
     std::string binary_fn = "";
-    code_t binary = {};
     std::string input = "";
+    std::vector<Breakpoint> breakpoints = {};
 
     ErrorHandler error_handler;
-    WTStar::virtual_machine_t *env = nullptr;
-    WTStar::ast_t *ast = nullptr;
+
+    bool compiled = false;
     WTStar::include_project_t *ip = nullptr;
-    std::vector<Breakpoint> breakpoints = {};
+    WTStar::ast_t *ast = nullptr;
+    WTStar::virtual_machine_t *env = nullptr;
+    code_t binary = {};
 
     friend class ProgramAnalyzerPlugin;
     friend class DebuggerVariableViewerPlugin;
