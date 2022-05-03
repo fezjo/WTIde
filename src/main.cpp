@@ -21,23 +21,6 @@
 #include "imgui/themes.h"
 #include "utils.h"
 
-Uint32 minimum_refresh_rate_callback(Uint32 interval, void *param) {
-    SDL_Event event;
-    SDL_UserEvent userevent;
-
-    userevent.type = SDL_USEREVENT;
-    // userevent.code = 0;
-    // userevent.data1 = NULL;
-    // userevent.data2 = NULL;
-
-    event.type = SDL_USEREVENT;
-    event.user = userevent;
-
-    SDL_PushEvent(&event);
-    // return interval causes callback to be called again at the same interval
-    return (interval);
-}
-
 // Main code
 int main(int, char **) {
     // Setup SDL
@@ -85,8 +68,6 @@ int main(int, char **) {
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
-
-    SDL_AddTimer(1000 / 10, minimum_refresh_rate_callback, NULL);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -139,7 +120,7 @@ int main(int, char **) {
     // Main loop
     bool alive = true;
     while (alive) {
-        SDL_WaitEvent(NULL);
+        SDL_WaitEventTimeout(NULL, 1000 / 10);
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui
