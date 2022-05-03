@@ -120,14 +120,18 @@ std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t *ast,
 
     auto original_error_handler = ast->error_handler;
     auto original_error_handler_data = ast->error_handler_data;
+    auto cleanup = [&]() {
+        ast->error_handler = original_error_handler;
+        ast->error_handler_data = original_error_handler_data;
+        ast->current_scope = ast->root_scope;
+        ast->error_occured = 0;
+    };
+    
     ErrorHandler error_handler;
     ast->error_handler = error_handler_callback;
     ast->error_handler_data = &error_handler;
     ast->current_scope = bp_scope_node->val.sc;
     ast = WTStar::driver_parse_from(ast, ip, cond_fn.c_str());
-    ast->current_scope = ast->root_scope;
-    ast->error_handler = original_error_handler;
-    ast->error_handler_data = original_error_handler_data;
 
     Writer dout;
     WTStar::ast_debug_set_writer(dout.w);
@@ -135,7 +139,7 @@ std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t *ast,
     std::cerr << dout.read() << std::endl;
 
     if (ast->error_occured) {
-        ast->error_occured = 0;
+        cleanup();
         std::cerr << "Error occured while parsing condition" << std::endl;
         WTStar::driver_destroy(ip);
         WTStar::ast_node_t_delete(bp_scope_node);
@@ -149,6 +153,7 @@ std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t *ast,
     WTStar::ast_node_t_delete(bp_scope_node);
 
     if (resp) {
+        cleanup();
         error_handler.write("Error occured while compiling condition: emitting code failed\n");
         return {{}, error_handler.read()};
     }
