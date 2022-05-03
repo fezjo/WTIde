@@ -149,9 +149,9 @@ public:
             ImGui::Text("counter = %d", counter);
 
             ImGui::Text("average of 120 frames\n"
-                        "%7.3f ms/fr (%5.1f FPS)\n"
+                        "%5.1fms=%5.1f FPS\n"
                         "last frame\n"
-                        "%7.3fms/fr (%5.1f FPS)",
+                        "%5.1fms=%5.1f FPS",
                         1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
                         1000 * ImGui::GetIO().DeltaTime, 1.0f / ImGui::GetIO().DeltaTime);
             ImGui::End();
