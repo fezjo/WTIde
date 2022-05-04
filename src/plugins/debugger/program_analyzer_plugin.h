@@ -13,6 +13,9 @@ public:
     void refresh();
 
 protected:
+    void showBreakpoints(WTStar::virtual_machine_t *env);
+
+protected:
     Debugger *debugger;
     Breakpoint edit_bp{};
 };

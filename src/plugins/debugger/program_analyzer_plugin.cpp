@@ -7,8 +7,115 @@ ProgramAnalyzerPlugin::ProgramAnalyzerPlugin(Debugger *debugger) : debugger(debu
 
 void ProgramAnalyzerPlugin::refresh() {}
 
+ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+
+void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
+    ImGui::TextWrapped("Breakpoints: %ld", debugger->breakpoints.size());
+    ImGui::TextWrapped("VM Breakpoints: %d", env->bps->full);
+    for (auto &bp : debugger->breakpoints) {
+        bool is_editing = edit_bp.bp_pos == bp.bp_pos;
+        bool action_update = false, action_remove = false;
+        bool enabled = bp.enabled;
+
+        std::string &file = is_editing ? edit_bp.file : bp.file;
+        int line = static_cast<int>(is_editing ? edit_bp.line : bp.line);
+        std::string &condition = is_editing ? edit_bp.condition : bp.condition;
+        ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_ReadOnly * !is_editing;
+
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        if (ImGui::TreeNodeEx(std::to_string(bp.bp_pos).c_str(), default_treenode_flags, "%s:%d",
+                              bp.file.c_str(), bp.line)) {
+            // TODO compilation error
+            ImGui::Checkbox("Enabled", &enabled);
+            ImGui::SameLine();
+            if (ImGui::Button("Edit")) {
+                if (!is_editing)
+                    edit_bp = bp;
+                else
+                    edit_bp = {};
+            }
+            ImGui::SameLine();
+            ImGui::BeginDisabled(!is_editing);
+            if (ImGui::Button("Update"))
+                action_update = is_editing;
+            ImGui::EndDisabled();
+            ImGui::SameLine();
+            if (ImGui::Button("Remove"))
+                action_remove = true;
+
+            ImGui::Text("File:");
+            ImGui::SameLine();
+            ImGui::InputText("##file", &file, input_flags);
+
+            ImGui::Text("Line:");
+            ImGui::SameLine();
+            ImGui::InputInt("##line", &line, 1, 10, input_flags | ImGuiInputTextFlags_CharsDecimal);
+
+            if (ImGui::TreeNodeEx("Condition:", default_treenode_flags)) {
+                ImGui::InputTextMultiline("##condition", &condition, ImVec2(-1, 0),
+                                          input_flags | ImGuiInputTextFlags_AllowTabInput);
+                ImGui::TreePop();
+            }
+
+            ImGui::SetNextItemOpen(true, ImGuiCond_Once); // TODO testing hide
+            if (ImGui::TreeNodeEx("VM", default_treenode_flags)) {
+                if (!bp.vm_bp)
+                    ImGui::Text("No VM breakpoint");
+                else {
+                    ImGui::TextWrapped("ID: %d", bp.vm_bp->id);
+                    ImGui::TextWrapped("BREAK position: %5d", bp.vm_bp->bp_pos);
+                    ImGui::TextWrapped("Code  position: %5d", bp.vm_bp->code_pos);
+                    ImGui::TextWrapped("Code  size: %5d", bp.vm_bp->code_size);
+
+                    Writer outw;
+                    if (ImGui::TreeNodeEx("Instructions", default_treenode_flags)) {
+                        outw.clear();
+                        WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos,
+                                           static_cast<int>(bp.vm_bp->code_size));
+                        ImGui::TextWrapped("%s", outw.read().c_str());
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::TreePop();
+            }
+
+            if (!bp.error.empty()) {
+                ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+                if (ImGui::TreeNodeEx("Compilation error", default_treenode_flags)) {
+                    ImGui::TextWrapped("%s", bp.error.c_str());
+                    ImGui::TreePop();
+                }
+            }
+
+            ImGui::TreePop();
+        }
+
+        if (is_editing)
+            bp.line = static_cast<uint>(line);
+
+        if (enabled != bp.enabled)
+            debugger->setBreakpointEnabled(bp.file, bp.line, enabled);
+        if (action_update || action_remove)
+            debugger->removeBreakpoint(bp.file, bp.line);
+        if (action_update) {
+            auto res =
+                debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line, edit_bp.condition);
+            if (!res.first) {
+                ImGui::InsertNotification(
+                    {ImGuiToastType_Error, 5000,
+                     "Failed to set breakpoint\nSee breakpoint info for details"});
+            }
+            edit_bp = {};
+        }
+    }
+
+    if (std::find_if(debugger->breakpoints.begin(), debugger->breakpoints.end(),
+                     [&](const Breakpoint &bp) { return bp.bp_pos == edit_bp.bp_pos; }) ==
+        debugger->breakpoints.end())
+        edit_bp = {};
+}
+
 void ProgramAnalyzerPlugin::show() {
-    static ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
     if (!shown)
         return;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
@@ -38,9 +145,9 @@ void ProgramAnalyzerPlugin::show() {
 
         env = WTStar::virtual_machine_t_new(code.data(), static_cast<int>(code.size()));
         if (!env) {
-            ImGui::TextWrapped(
-                "Failed to create virtual machine, corrupted binary? Read %lu bytes from %s",
-                code.size(), fn.c_str());
+            ImGui::TextWrapped("Failed to create virtual machine, corrupted "
+                               "binary? Read %lu bytes from %s",
+                               code.size(), fn.c_str());
             ImGui::End();
             return;
         }
@@ -129,102 +236,7 @@ void ProgramAnalyzerPlugin::show() {
         }
         if (ImGui::BeginTabItem("Breakpoints")) {
             ImGui::BeginChild("##child");
-            ImGui::TextWrapped("Breakpoints: %ld", debugger->breakpoints.size());
-            for (auto &bp : debugger->breakpoints) {
-                bool is_editing = edit_bp.bp_pos == bp.bp_pos;
-                bool action_update = false, action_remove = false;
-                bool enabled = bp.enabled;
-
-                std::string &file = is_editing ? edit_bp.file : bp.file;
-                int line = static_cast<int>(is_editing ? edit_bp.line : bp.line);
-                std::string &condition = is_editing ? edit_bp.condition : bp.condition;
-                ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_ReadOnly * !is_editing;
-
-                ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-                if (ImGui::TreeNodeEx(std::to_string(bp.bp_pos).c_str(), default_treenode_flags,
-                                      "%s:%d", bp.file.c_str(), bp.line)) {
-                    // TODO compilation error
-                    ImGui::Checkbox("Enabled", &enabled);
-                    ImGui::SameLine();
-                    if (ImGui::Button("Edit")) {
-                        if (!is_editing)
-                            edit_bp = bp;
-                        else
-                            edit_bp = {};
-                    }
-                    ImGui::SameLine();
-                    ImGui::BeginDisabled(!is_editing);
-                    if (ImGui::Button("Update"))
-                        action_update = is_editing;
-                    ImGui::EndDisabled();
-                    ImGui::SameLine();
-                    if (ImGui::Button("Remove"))
-                        action_remove = true;
-
-                    ImGui::Text("File:");
-                    ImGui::SameLine();
-                    ImGui::InputText("##file", &file, input_flags);
-
-                    ImGui::Text("Line:");
-                    ImGui::SameLine();
-                    ImGui::InputInt("##line", &line, 1, 10,
-                                    input_flags | ImGuiInputTextFlags_CharsDecimal);
-
-                    if (ImGui::TreeNodeEx("Condition:", default_treenode_flags)) {
-                        ImGui::InputTextMultiline("##condition", &condition, ImVec2(-1, 0),
-                                                  input_flags | ImGuiInputTextFlags_AllowTabInput);
-                        ImGui::TreePop();
-                    }
-
-                    ImGui::SetNextItemOpen(true, ImGuiCond_Once); // TODO testing hide
-                    if (ImGui::TreeNodeEx("VM", default_treenode_flags)) {
-                        if (!bp.vm_bp)
-                            ImGui::Text("No VM breakpoint");
-                        else {
-                            ImGui::TextWrapped("ID: %d", bp.vm_bp->id);
-                            ImGui::TextWrapped("BREAK position: %5d", bp.vm_bp->bp_pos);
-                            ImGui::TextWrapped("Code  position: %5d", bp.vm_bp->code_pos);
-                            ImGui::TextWrapped("Code  size: %5d", bp.vm_bp->code_size);
-                            if (ImGui::TreeNodeEx("Instructions", default_treenode_flags)) {
-                                outw.clear();
-                                WTStar::print_code(outw.w, env->code + bp.vm_bp->code_pos,
-                                                   static_cast<int>(bp.vm_bp->code_size));
-                                ImGui::TextWrapped("%s", outw.read().c_str());
-                                ImGui::TreePop();
-                            }
-                        }
-                        ImGui::TreePop();
-                    }
-
-                    if (!bp.error.empty()) {
-                        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-                        if (ImGui::TreeNodeEx("Compilation error", default_treenode_flags)) {
-                            ImGui::TextWrapped("%s", bp.error.c_str());
-                            ImGui::TreePop();
-                        }
-                    }
-
-                    ImGui::TreePop();
-                }
-
-                if (is_editing)
-                    bp.line = static_cast<uint>(line);
-
-                if (enabled != bp.enabled)
-                    debugger->setBreakpointEnabled(bp.file, bp.line, enabled);
-                if (action_update || action_remove)
-                    debugger->removeBreakpoint(bp.file, bp.line);
-                if (action_update) {
-                    auto res = debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line,
-                                                                    edit_bp.condition);
-                    if (!res.first) {
-                        ImGui::InsertNotification(
-                            {ImGuiToastType_Error, 5000,
-                             "Failed to set breakpoint\nSee breakpoint info for details"});
-                    }
-                    edit_bp = {};
-                }
-            }
+            showBreakpoints(env);
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
