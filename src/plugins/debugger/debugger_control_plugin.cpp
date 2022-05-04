@@ -68,9 +68,12 @@ void DebuggerControlPlugin::show() {
         ImGui::End();
         return;
     }
+    debugger->trace_on = true;
+    static std::string fileBuffer = source_fn;
 
     if (ImGui::Button("Set source")) {
         setSourceAction(source_fn);
+        fileBuffer = source_fn;
     }
     ImGui::SameLine();
     ImGui::PushStyleColor(ImGuiCol_FrameBg, source_fn_color);
@@ -79,6 +82,7 @@ void DebuggerControlPlugin::show() {
                          ImGuiInputTextFlags_EnterReturnsTrue |
                              ImGuiInputTextFlags_AutoSelectAll)) {
         setSourceAction(source_fn);
+        fileBuffer = source_fn;
     }
     ImGui::PopStyleColor();
     if (ImGui::IsItemEdited() || !seen)
@@ -130,15 +134,11 @@ void DebuggerControlPlugin::show() {
     }
 
     {
-        static std::string fileBuffer = "test.wt";
+        static int lineBuffer = 13;
         static std::string condition =
 "int bn = A.size;\n\
-pardo(bi: bn)\n\
-	A[bi] = (bi + 1) * (bi + 2) * (bi + 3);\n\
-for (int bi = 0; bi < bn; ++bi)\n\
-	sum += A[bi];\n\
-bn;";
-        static int lineBuffer = 92;
+sum = bn + 1;\n\
+return bn;";
 
         ImGui::Text("Breakpoint:");
         ImGui::SameLine();
