@@ -1,8 +1,6 @@
 #include "debugger.h"
 
-Debugger::Debugger() {
-    error_handler.to_cerr = false;
-}
+Debugger::Debugger() { error_handler.to_cerr = true; }
 
 Debugger::~Debugger() { destroy(); }
 
@@ -171,7 +169,9 @@ std::string Debugger::getSource() const { return source_fn; }
 
 bool Debugger::isCompiled() const { return compiled; }
 
-bool Debugger::isRunning() const { return env && env->state == WTStar::virtual_machine_t::VM_RUNNING; }
+bool Debugger::isRunning() const {
+    return env && env->state == WTStar::virtual_machine_t::VM_RUNNING;
+}
 
 bool Debugger::canRun() const { return compiled && env; }
 
@@ -194,7 +194,7 @@ int Debugger::runExecution() {
 int Debugger::continueExecution() {
     if (!canRun())
         return -2;
-    int resp = WTStar::execute(env, -1, 0, stop_on_bp);
+    int resp = WTStar::execute(env, -1, trace_on, stop_on_bp);
     std::cerr << "continueExecution execute stopped with resp " << resp << std::endl;
     return resp;
 }
@@ -209,7 +209,7 @@ int Debugger::stepOver() {
     uint32_t initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
     int resp;
     while (true) {
-        resp = WTStar::execute(env, -1, 0, 2 | stop_on_bp);
+        resp = WTStar::execute(env, -1, trace_on, 2 | stop_on_bp);
         if (resp != -11)
             break;
         uint32_t current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
@@ -226,7 +226,7 @@ int Debugger::stepOver() {
 int Debugger::stepInto() {
     if (!canRun())
         return -2;
-    int resp = WTStar::execute(env, -1, 0, 2 | stop_on_bp);
+    int resp = WTStar::execute(env, -1, trace_on, 2 | stop_on_bp);
     uint32_t current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
     std::cerr << "stepInto execute stopped with resp " << resp << " on line " << env->pc
               << " with level " << current_level << std::endl;
@@ -239,7 +239,7 @@ int Debugger::stepOut() {
     uint32_t initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
     int resp;
     while (true) {
-        resp = WTStar::execute(env, -1, 0, 4 | stop_on_bp);
+        resp = WTStar::execute(env, -1, trace_on, 4 | stop_on_bp);
         if (resp != -11)
             break;
         uint32_t current_level = STACK_SIZE(env->frames, WTStar::frame_t *);

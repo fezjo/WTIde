@@ -83,6 +83,7 @@ protected:
     bool addBreakpointToVm(Breakpoint &bp);
 
 public:
+    bool trace_on = false;
     bool stop_on_bp = true;
 
 protected:
