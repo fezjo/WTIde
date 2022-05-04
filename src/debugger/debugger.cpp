@@ -21,6 +21,8 @@ void Debugger::destroyVm() {
     if (env)
         WTStar::virtual_machine_t_delete(env);
     env = nullptr;
+    for (auto &bp : breakpoints)
+        bp.vm_bp = nullptr;
 }
 
 bool Debugger::readBinary() {
