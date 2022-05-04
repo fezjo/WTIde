@@ -7,7 +7,7 @@ ProgramAnalyzerPlugin::ProgramAnalyzerPlugin(Debugger *debugger) : debugger(debu
 
 void ProgramAnalyzerPlugin::refresh() {}
 
-ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+static ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
 
 void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
     ImGui::TextWrapped("Breakpoints: %ld", debugger->breakpoints.size());
@@ -91,7 +91,7 @@ void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
         }
 
         if (is_editing)
-            bp.line = static_cast<uint>(line);
+            edit_bp.line = static_cast<uint>(line);
 
         if (enabled != bp.enabled)
             debugger->setBreakpointEnabled(bp.file, bp.line, enabled);

@@ -154,14 +154,6 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
     if (s == -1)
         return var_layers;
 
-    auto was_seen = [&](const std::string &var_name) {
-        for (auto &layer : var_layers)
-            for (auto &v : layer)
-                if (v.sname == var_name)
-                    return true;
-        return false;
-    };
-
     for (uint sid = env->debug_info->scope_map->val[s]; sid != MAP_SENTINEL;
          sid = env->debug_info->scopes[sid].parent) {
         var_layers.push_back({});
@@ -182,7 +174,7 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
     return var_layers;
 }
 
-ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+static ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
 bool showTableHeader(const std::string &title) {
     const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
@@ -272,7 +264,7 @@ void DebuggerVariableViewerPlugin::show() {
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     if (ImGui::TreeNodeEx("Call stack", default_treenode_flags)) {
-        ImGui::TextWrapped("%d", STACK_SIZE(env->frames, WTStar::frame_t *));
+        ImGui::TextWrapped("%lu", STACK_SIZE(env->frames, WTStar::frame_t *));
     }
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
