@@ -44,52 +44,33 @@ uint Debugger::findInstructionNumber(const std::string &file, uint line) {
     return -1u;
 }
 
-using ast_scope_and_node = std::pair<WTStar::scope_t *, WTStar::ast_node_t *>;
+using ast_scope_and_node = std::pair<WTStar::ast_node_t *, WTStar::ast_node_t *>;
 
 ast_scope_and_node findAstScopeAndNode(WTStar::ast_t *ast,
                                        std::function<bool(WTStar::ast_node_t *)> predicate,
-                                       WTStar::scope_t *scope = nullptr,
                                        WTStar::ast_node_t *node = nullptr,
                                        bool viable_scope = true) {
-    static auto maybe_add_scope = [](WTStar::scope_t *scope, ast_scope_and_node &pair) {
-        if (!pair.first)
-            pair.first = scope;
-        return pair;
-    };
-    std::cerr << "findAstScopeAndNode " << (void *)scope << " " << (void *)node << std::endl;
-    if (!node && !scope)
-        scope = ast->root_scope;
-    if (scope) {
-        for (WTStar::ast_node_t *node = scope->items; node; node = node->next) {
-            ast_scope_and_node res = findAstScopeAndNode(ast, predicate, nullptr, node);
-            if (res.second) {
-                if (viable_scope)
-                    return maybe_add_scope(scope, res);
-                else
-                    return res;
-            }
-        }
-        return {};
-    }
+    std::cerr << "findAstScopeAndNode " << (void *)node << std::endl;
+    if (!node)
+        node = ast->root_node;
     std::cerr << "node " << node->node_type << " [" << node->loc.fl << ":" << node->loc.fc << ":"
               << node->loc.ll << ":" << node->loc.lc << "] instr" << node->code_from << "-"
               << node->code_to << std::endl;
     if (!predicate(node))
         return {};
+
+    WTStar::scope_t *scope = nullptr;
     if (node->node_type == WTStar::AST_NODE_SCOPE) {
-        return findAstScopeAndNode(ast, predicate, node->val.sc, nullptr);
+        scope = node->val.sc;
     } else if (node->node_type == WTStar::AST_NODE_FUNCTION) {
-        return findAstScopeAndNode(ast, predicate, node->val.f->root_scope, nullptr);
+        scope = node->val.f->root_scope;
     } else if (node->node_type == WTStar::AST_NODE_STATEMENT) {
         for (int pi = 0; pi < 2; ++pi) {
             WTStar::ast_node_t *p = node->val.s->par[pi];
             if (!p)
                 continue;
-            ast_scope_and_node res;
-            if (p->node_type == WTStar::AST_NODE_SCOPE)
-                res = findAstScopeAndNode(ast, predicate, p->val.sc, nullptr, false);
-            else
-                res = findAstScopeAndNode(ast, predicate, nullptr, p);
+            ast_scope_and_node res =
+                findAstScopeAndNode(ast, predicate, p, p->node_type != WTStar::AST_NODE_SCOPE);
             if (res.first)
                 return res;
             if (res.second)             // if we found node but it does not have scope, then we have
@@ -98,14 +79,25 @@ ast_scope_and_node findAstScopeAndNode(WTStar::ast_t *ast,
         // assert(!(bool)"unreachable");
         std::cerr << "could not find scope for statement" << std::endl;
         return {};
-    } else {
+    } else
         return {nullptr, node};
+
+    if (scope) {
+        for (WTStar::ast_node_t *nex_node = scope->items; nex_node; nex_node = nex_node->next) {
+            ast_scope_and_node res = findAstScopeAndNode(ast, predicate, nex_node);
+            if (res.second) {
+                if (viable_scope && !res.first)
+                    res.first = node;
+                return res;
+            }
+        }
     }
+    return {};
 }
 
 std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t *ast,
                                                      const std::string &condition,
-                                                     WTStar::scope_t *scope_pos) {
+                                                     WTStar::ast_node_t *pos_scope_node) {
     if (condition.empty())
         return {};
 
@@ -116,17 +108,17 @@ std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t *ast,
     WTStar::driver_set_file(ip, cond_fn.c_str(), condition.c_str());
 
     WTStar::ast_node_t *bp_scope_node =
-        WTStar::ast_node_t_new(NULL, WTStar::AST_NODE_SCOPE, scope_pos);
+        WTStar::ast_node_t_new(NULL, WTStar::AST_NODE_SCOPE, pos_scope_node->val.sc);
 
     auto original_error_handler = ast->error_handler;
     auto original_error_handler_data = ast->error_handler_data;
     auto cleanup = [&]() {
         ast->error_handler = original_error_handler;
         ast->error_handler_data = original_error_handler_data;
-        ast->current_scope = ast->root_scope;
+        ast->current_scope = ast->root_node->val.sc;
         ast->error_occured = 0;
     };
-    
+
     ErrorHandler error_handler;
     ast->error_handler = error_handler_callback;
     ast->error_handler_data = &error_handler;
@@ -147,7 +139,10 @@ std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t *ast,
     }
 
     Writer out;
-    int resp = WTStar::emit_code_scope_section(ast, bp_scope_node->val.sc, out.w);
+    WTStar::generating_breakpoint = true;
+    int resp =
+        WTStar::emit_code_scope_section(ast, pos_scope_node->base_addr_max, bp_scope_node, out.w);
+    WTStar::generating_breakpoint = false;
 
     WTStar::driver_destroy(ip);
     WTStar::ast_node_t_delete(bp_scope_node);
@@ -211,7 +206,7 @@ std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::str
         std::cerr << "Could not find scope for breakpoint" << std::endl;
         return {false, "Could not find corresponding scope"};
     } else
-        std::cerr << "found scope and node id " << scope_and_node.first->items->id << " "
+        std::cerr << "found scope and node id " << scope_and_node.first->val.sc->items->id << " "
                   << scope_and_node.second->id << std::endl;
     auto [code, compile_msg] = compileConditionInAst(ast, condition, scope_and_node.first);
     bool compilation_successful = compile_msg.empty();
