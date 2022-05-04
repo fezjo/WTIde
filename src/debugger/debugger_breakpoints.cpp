@@ -229,7 +229,7 @@ bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool ena
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
-    if (WTStar::enable_breakpoint(env, bp->bp_pos, enabled) == -1)
+    if (env && WTStar::enable_breakpoint(env, bp->bp_pos, enabled) == -1)
         return false;
     bp->enabled = enabled;
     return true;
