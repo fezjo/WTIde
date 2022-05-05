@@ -108,6 +108,8 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Continue")) {
             resp = debugger->continueExecution();
         }
+        ImGui::SameLine();
+        ImGui::Checkbox("Trace", &debugger->trace_on);
 
         ImGui::Text("Step");
         ImGui::SameLine();
