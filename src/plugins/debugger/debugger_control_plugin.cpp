@@ -108,12 +108,6 @@ void DebuggerControlPlugin::show() {
         if (ImGui::Button("Continue")) {
             resp = debugger->continueExecution();
         }
-        ImGui::SameLine();
-        ImGui::BeginDisabled(true);
-        if (ImGui::Button("Pause")) {
-            debugger->pauseExecution();
-        }
-        ImGui::EndDisabled();
 
         ImGui::Text("Step");
         ImGui::SameLine();

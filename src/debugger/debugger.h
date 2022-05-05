@@ -58,7 +58,6 @@ public:
 
     int runExecution();
     int continueExecution();
-    void pauseExecution();
     void stopExecution();
 
     int stepOver();

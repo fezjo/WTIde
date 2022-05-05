@@ -203,8 +203,6 @@ int Debugger::continueExecution() {
     return resp;
 }
 
-void Debugger::pauseExecution() { std::cerr << "NOT IMPLEMENTED" << std::endl; }
-
 void Debugger::stopExecution() { destroyVm(); }
 
 int Debugger::stepOver() {
