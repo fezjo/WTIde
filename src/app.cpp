@@ -1,4 +1,5 @@
 #include <imgui/imgui.h>
+#include <nfd.hpp>
 #include <zep.h>
 
 #include "plugins/plugin.h"
@@ -24,6 +25,8 @@ public:
     ImVec4 clear_color = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 
 protected:
+    NFD::Guard nfd_guard;
+
     bool initialized = false;
     ImGuiWindowFlags flags;
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
@@ -203,8 +206,11 @@ public:
 
     void handleInput() {
         auto &io = ImGui::GetIO();
-        if (io.KeyMods == ImGuiKeyModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_N)) {
-            openEditor();
+        if (io.KeyMods == ImGuiKeyModFlags_Ctrl) {
+            if (ImGui::IsKeyPressed(ImGuiKey_N))
+                openEditor();
+            else if (ImGui::IsKeyPressed(ImGuiKey_O))
+                openFiles();
         }
     }
 
@@ -246,6 +252,26 @@ public:
             }
             ImGui::SetNextWindowDockID(latest.second->dockId);
             ep->show();
+        }
+    }
+
+    void openFiles() {
+        NFD::UniquePathSet outPaths;
+        nfdfilteritem_t filterItem[1] = {{"WT* source", "wt"}};
+        nfdresult_t result = NFD::OpenDialogMultiple(outPaths, filterItem, 1, ".");
+        if (result == NFD_OKAY) {
+            nfdpathsetsize_t numPaths;
+            NFD::PathSet::Count(outPaths, numPaths);
+
+            nfdpathsetsize_t i;
+            for (i = 0; i < numPaths; ++i) {
+                NFD::UniquePathSetPath path;
+                NFD::PathSet::GetPath(outPaths, i, path);
+                openEditor(path.get());
+            }
+        } else if (result == NFD_CANCEL) {
+        } else {
+            std::cerr << "Error: " << NFD::GetError() << std::endl;
         }
     }
 };

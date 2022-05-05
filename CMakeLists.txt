@@ -42,6 +42,7 @@ target_link_libraries(
         Zep::Zep
         WTStar
         clip
+        nfd
         stdc++fs
 )
 target_compile_options(

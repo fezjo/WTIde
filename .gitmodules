@@ -22,3 +22,6 @@
 [submodule "lib/ImGuiColorTextEdit"]
 	path = lib/ImGuiColorTextEdit
 	url = https://github.com/dfranx/ImGuiColorTextEdit.git
+[submodule "lib/nativefiledialog-extended"]
+	path = lib/nativefiledialog-extended
+	url = https://github.com/btzy/nativefiledialog-extended.git

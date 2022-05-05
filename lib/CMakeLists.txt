@@ -55,6 +55,9 @@ set(CLIP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/clip)
 add_subdirectory(${CLIP_PATH})
 target_include_directories("clip" SYSTEM PUBLIC ${CLIP_PATH})
 
+set(NFD_PATH ${CMAKE_CURRENT_SOURCE_DIR}/nativefiledialog-extended)
+add_subdirectory(${NFD_PATH})
+
 set(WTSTAR_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wtstar)
 file(GLOB WTSTAR_SOURCES ${WTSTAR_PATH}/src/*.c)
 list(REMOVE_ITEM WTSTAR_SOURCES 
