@@ -5,47 +5,8 @@ EditorIctePlugin::EditorIctePlugin() {
     immortal = false;
     dockId = 0;
 
-    auto lang = TextEditor::LanguageDefinition::CPlusPlus();
-
-    // set your own known preprocessor symbols...
-    static const char *ppnames[] = {"NULL", "assert"};
-    // ... and their corresponding values
-    static const char *ppvalues[] = {
-        "#define NULL ((void*)0)",
-        " #define assert(expression) (void)(                                                  \n"
-        "    (!!(expression)) ||                                                              \n"
-        "    (_wassert(_CRT_WIDE(#expression), _CRT_WIDE(__FILE__), (unsigned)(__LINE__)), 0) \n"
-        " )"};
-
-    for (uint i = 0; i < sizeof(ppnames) / sizeof(ppnames[0]); ++i) {
-        TextEditor::Identifier id;
-        id.mDeclaration = ppvalues[i];
-        lang.mPreprocIdentifiers.insert(std::make_pair(std::string(ppnames[i]), id));
-    }
-
-    // set your own identifiers
-    static const char *identifiers[] = {"TextEditor"};
-    static const char *idecls[] = {"class TextEditor"};
-    for (uint i = 0; i < sizeof(identifiers) / sizeof(identifiers[0]); ++i) {
-        TextEditor::Identifier id;
-        id.mDeclaration = std::string(idecls[i]);
-        lang.mIdentifiers.insert(std::make_pair(std::string(identifiers[i]), id));
-    }
+    auto lang = TextEditor_LanguageDefinition_WTStar();
     editor.SetLanguageDefinition(lang);
-    // editor.SetPalette(TextEditor::GetLightPalette());
-
-    // error markers
-    // TextEditor::ErrorMarkers markers;
-    // markers.insert(std::make_pair<int, std::string>(
-    //     6, "Example error here:\nInclude file not found: \"TextEditor.h\""));
-    // markers.insert(std::make_pair<int, std::string>(41, "Another example error"));
-    // editor.SetErrorMarkers(markers);
-
-    // "breakpoint" markers
-    // TextEditor::Breakpoints bpts;
-    // bpts.insert(24);
-    // bpts.insert(47);
-    // editor.SetBreakpoints(bpts);
 }
 
 void EditorIctePlugin::update() {

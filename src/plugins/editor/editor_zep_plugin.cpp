@@ -6,18 +6,19 @@
 
 #include "config_app.h"
 #include "editor_zep_plugin.h"
-#include "wt_syntax.h"
 
 using namespace Zep;
 
 EditorZepPlugin::EditorZepPlugin(const fs::path &rootPath, const Zep::NVec2f &pixelScale,
                                  std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB)
     : editor(Zep::ZepPath(rootPath), pixelScale), Callback(fnCommandCB) {
+    static std::unordered_set<std::string> keywords(wt_keywords.begin(), wt_keywords.end());
+    static std::unordered_set<std::string> identifiers(wt_identifiers.begin(), wt_identifiers.end());
     editor.RegisterCallback(this);
     editor.RegisterSyntaxFactory({".wt"},
-                                 SyntaxProvider{"wt", Zep::tSyntaxFactory([](ZepBuffer *pBuffer) {
+                                 SyntaxProvider{"wt", Zep::tSyntaxFactory([&](ZepBuffer *pBuffer) {
                                                     return std::make_shared<ZepSyntax>(
-                                                        *pBuffer, wt_keywords, wt_identifiers);
+                                                        *pBuffer, keywords, identifiers);
                                                 })});
     pluginType = PluginType::Editor;
     immortal = false;
