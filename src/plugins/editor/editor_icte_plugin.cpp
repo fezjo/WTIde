@@ -48,6 +48,13 @@ EditorIctePlugin::EditorIctePlugin() {
     // editor.SetBreakpoints(bpts);
 }
 
+void EditorIctePlugin::update() {
+    auto &io = ImGui::GetIO();
+    if (io.KeyMods == ImGuiKeyModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
+        saveFile();
+    }
+}
+
 void EditorIctePlugin::show() {
     if (!shown)
         return;
@@ -79,7 +86,7 @@ void EditorIctePlugin::show() {
             if (ImGui::MenuItem("Save", "Ctrl-S")) {
                 saveFile();
             }
-            if (ImGui::MenuItem("Quit", "Alt-F4"))
+            if (ImGui::MenuItem("Quit"))
                 alive = false;
             ImGui::EndMenu();
         }
@@ -89,22 +96,22 @@ void EditorIctePlugin::show() {
                 editor.SetReadOnly(ro);
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Undo", "ALT-Backspace", nullptr, !ro && editor.CanUndo()))
+            if (ImGui::MenuItem("Undo", "Ctrl-Z", nullptr, !ro && editor.CanUndo()))
                 editor.Undo();
-            if (ImGui::MenuItem("Redo", "Ctrl-Y", nullptr, !ro && editor.CanRedo()))
+            if (ImGui::MenuItem("Redo", "Ctrl-Shift-Z", nullptr, !ro && editor.CanRedo()))
                 editor.Redo();
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Copy", "Ctrl-C", nullptr, editor.HasSelection()))
-                editor.Copy();
             if (ImGui::MenuItem("Cut", "Ctrl-X", nullptr, !ro && editor.HasSelection()))
                 editor.Cut();
-            if (ImGui::MenuItem("Delete", "Del", nullptr, !ro && editor.HasSelection()))
-                editor.Delete();
+            if (ImGui::MenuItem("Copy", "Ctrl-C", nullptr, editor.HasSelection()))
+                editor.Copy();
             if (ImGui::MenuItem("Paste", "Ctrl-V", nullptr,
                                 !ro && ImGui::GetClipboardText() != nullptr))
                 editor.Paste();
+            if (ImGui::MenuItem("Delete", "Del", nullptr, !ro && editor.HasSelection()))
+                editor.Delete();
 
             ImGui::Separator();
 
