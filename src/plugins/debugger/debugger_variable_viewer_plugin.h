@@ -48,4 +48,5 @@ public:
 
 protected:
     Debugger *debugger;
+    int watching_thr_id = 0;
 };

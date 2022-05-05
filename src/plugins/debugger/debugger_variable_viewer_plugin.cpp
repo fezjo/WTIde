@@ -95,7 +95,7 @@ std::vector<uint64_t> DebuggerVariableViewerPlugin::getThreadIds() {
 
 // return name of pardo index variable
 std::string DebuggerVariableViewerPlugin::getThreadIndexVariableName() {
-    static std::string not_found_name = "nonlocal_index";
+    static const std::string not_found_name = "<index>";
     auto *env = debugger->env;
     auto debug_info = WTStar::getDebugInfo(env);
     if (!debugger->isRunning() || !env->n_thr || !env->thr[0]->parent)
@@ -174,7 +174,7 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
     return var_layers;
 }
 
-static ImGuiTreeNodeFlags default_treenode_flags =
+static const ImGuiTreeNodeFlags default_treenode_flags =
     ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
 bool showTableHeader(const std::string &title) {
@@ -228,7 +228,7 @@ void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, uint
     ImGui::TableNextColumn();
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     std::string title =
-        std::string() + (layer_i ? "parent" : "locals") + "##" + std::to_string(layer_i);
+        std::string() + (layer_i ? "parent" : "locals") + "##var_layer" + std::to_string(layer_i);
     if (!ImGui::TreeNodeEx(title.c_str(), default_treenode_flags))
         return;
     for (auto &var : var_layer) {
@@ -261,29 +261,7 @@ void DebuggerVariableViewerPlugin::show() {
 
     ImGui::TextWrapped("W=%9d T=%9d W/T=%5.2f", env->W, env->T, double(env->W) / env->T);
 
-    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::CollapsingHeader("Call stack")) {
-        int call_stack_size = STACK_SIZE(env->frames, WTStar::frame_t *);
-        ImGui::TextWrapped("Size: %d", call_stack_size);
-        int pc = env->stored_pc;
-        for (int i = call_stack_size - 1; i >= 0; --i) {
-            auto frame = STACK(env->frames, WTStar::frame_t *)[i];
-            ImGui::TextWrapped("%d: %s (base=%d ret=%d)", i, frame->func_name, frame->base, pc);
-
-            ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-            if (ImGui::TreeNodeEx("variables", default_treenode_flags)) {
-                auto var_layers = getVisibleVariables(pc);
-                if (showTableHeader("thread variables")) {
-                    showTableVariableLayer(var_layers, 0, [&](Variable &var) {
-                        var.fillThreadInfo(env, env->thr[0], frame->base);
-                        showTableVariableRow(var);
-                    });
-                    ImGui::EndTable();
-                }
-            }
-            pc = frame->ret_addr;
-        }
-    }
+    ImGui::Separator();
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     if (ImGui::CollapsingHeader("Globals")) {
@@ -296,24 +274,74 @@ void DebuggerVariableViewerPlugin::show() {
         }
     }
 
+    ImGui::NewLine();
+    ImGui::Separator();
+    ImGui::NewLine();
+
+    {
+        ImGui::Text("Thr:");
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(100);
+        ImGui::InputInt("##thr_id", &watching_thr_id);
+        watching_thr_id = std::max(0, std::min(env->n_thr - 1, watching_thr_id));
+
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        if (ImGui::CollapsingHeader("Call stack")) {
+            ulong call_stack_size = STACK_SIZE(env->frames, WTStar::frame_t *);
+            ImGui::TextWrapped("Size: %lu", call_stack_size);
+            int pc = env->stored_pc;
+            for (int i = static_cast<int>(call_stack_size) - 1; i >= 0; --i) {
+                auto frame = STACK(env->frames, WTStar::frame_t *)[i];
+                ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+                if (ImGui::TreeNodeEx(("var_layer" + std::to_string(i)).c_str(),
+                                      default_treenode_flags, "%d: %s (base=%d ret_ins=%d)", i,
+                                      frame->func_name, frame->base, pc)) {
+                    auto var_layers = getVisibleVariables(pc);
+                    if (showTableHeader("thread variables")) {
+                        showTableVariableLayer(var_layers, 0, [&](Variable &var) {
+                            var.fillThreadInfo(env, env->thr[watching_thr_id], frame->base);
+                            showTableVariableRow(var);
+                        });
+                        ImGui::EndTable();
+                    }
+                }
+                pc = frame->ret_addr;
+            }
+        }
+    }
+
+    ImGui::NewLine();
+    ImGui::Separator();
+    ImGui::NewLine();
+
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     auto var_layers = getVisibleVariables();
     if (ImGui::CollapsingHeader("Threads")) {
         auto index_name = getThreadIndexVariableName();
         for (auto tid : getThreadIds()) {
             auto *thr = WTStar::get_thread(tid);
-            ImGui::Text("tid=%lu | par=%lu", tid, getThreadParent(tid));
+
+            if (ImGui::Button(("Watch##" + std::to_string(tid)).c_str())) {
+                for (int t = 0; t < env->n_thr; t++)
+                    if (env->thr[t]->tid)
+                        watching_thr_id = t;
+            }
+            ImGui::SameLine();
+            bool open = ImGui::TreeNodeEx(("##thr_treenode" + std::to_string(tid)).c_str(),
+                                          default_treenode_flags, "tid=%lu | par=%lu", tid,
+                                          getThreadParent(tid));
             if (!index_name.empty()) {
                 ImGui::SameLine();
-                ImGui::TextWrapped(" | %s=%d", index_name.c_str(),
-                                   getThreadIndexVariableValue(tid));
+                ImGui::Text(" | %s=%d", index_name.c_str(), getThreadIndexVariableValue(tid));
             }
-            if (showTableHeader("thread variables")) {
-                showTableVariableLayer(var_layers, 0, [&](Variable &var) {
-                    var.fillThreadInfo(env, thr);
-                    showTableVariableRow(var);
-                });
-                ImGui::EndTable();
+            if (open) {
+                if (showTableHeader("thread variables")) {
+                    showTableVariableLayer(var_layers, 0, [&](Variable &var) {
+                        var.fillThreadInfo(env, thr);
+                        showTableVariableRow(var);
+                    });
+                    ImGui::EndTable();
+                }
             }
         }
     }
