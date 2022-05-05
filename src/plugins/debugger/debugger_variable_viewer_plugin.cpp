@@ -1,62 +1,59 @@
 #include "debugger_variable_viewer_plugin.h"
 
-Variable::Variable(WTStar::variable_info_t *info, WTStar::virtual_machine_t *env,
-                   WTStar::thread_t *thr) {
+Variable::Variable(WTStar::virtual_machine_t *env, WTStar::variable_info_t *info, bool global) {
     this->layout = WTStar::get_layout(info, env);
+    this->global = global;
     this->addr = info->addr;
     this->n_dims = info->num_dim;
     this->from_code = info->from_code;
     this->stype = env->debug_info->types[info->type].name;
     this->sname = info->name;
-    fillThreadInfo(env, thr);
 }
 
-Variable::~Variable() {
-    if (layout.elems)
-        free(layout.elems);
-}
+Variable::~Variable() { free(layout.elems); }
 
-Variable::Variable(Variable &&other) { *this = std::move(other); }
+Variable::Variable(Variable &&other) {
+    this->layout.elems = nullptr;
+    *this = std::move(other);
+}
 
 Variable &Variable::operator=(Variable &&other) {
     if (this == &other)
         return *this;
-    this->layout = other.layout;
-    this->addr = other.addr;
-    this->n_dims = other.n_dims;
-    this->from_code = other.from_code;
-    this->stype = std::move(other.stype);
-    this->sname = std::move(other.sname);
-    this->dims = std::move(other.dims);
-    this->sdims = std::move(other.sdims);
-    this->svalue = std::move(other.svalue);
-    this->level = other.level;
-    other.layout = {};
+    free(layout.elems);
+
+    auto l = std::exchange(other.layout, {});
+    *this = other;
+    this->layout = l;
     return *this;
 }
 
-void Variable::fillThreadInfo(WTStar::virtual_machine_t *env, WTStar::thread_t *thr) {
+Variable &Variable::fillThreadInfo(WTStar::virtual_machine_t *env, WTStar::thread_t *thr,
+                                   uint base_addr) {
     if (!env)
-        return;
+        return *this;
     if (!thr)
         thr = STACK(STACK(env->threads, WTStar::stack_t *)[0], WTStar::thread_t *)[0];
+    if (base_addr == -1u)
+        base_addr = env->frame->base;
 
-    this->level = this->addr < thr->mem_base;
+    this->raddr = !this->global * base_addr + this->addr;
+    this->level = this->raddr < thr->mem_base;
     if (this->n_dims > 0) {
         this->dims.resize(this->n_dims);
         for (uint d = 0; d < this->n_dims; d++)
-            this->dims[d] = WTStar::get_nth_dimension_size(thr, this->addr, d);
+            this->dims[d] = WTStar::get_nth_dimension_size(thr, this->raddr, d);
     }
 
     Writer out;
-    void *addr_data = WTStar::get_addr(thr, this->addr, 4);
+    void *addr_data = WTStar::get_addr(thr, this->raddr, 4);
     if (this->n_dims == 0)
         WTStar::print_var(out.w, static_cast<uint8_t *>(addr_data), &this->layout);
     else {
         out.write("[");
         for (uint d = 0; d < this->n_dims; d++) {
             out.write(d ? ", " : "");
-            out.write(std::to_string(WTStar::get_nth_dimension_size(thr, this->addr, d)));
+            out.write(std::to_string(WTStar::get_nth_dimension_size(thr, this->raddr, d)));
         }
         out.write("]");
         this->sdims = out.read();
@@ -65,6 +62,7 @@ void Variable::fillThreadInfo(WTStar::virtual_machine_t *env, WTStar::thread_t *
                             lval(addr_data, uint32_t), 0, 0);
     }
     this->svalue = out.read();
+    return *this;
 }
 
 DebuggerVariableViewerPlugin::DebuggerVariableViewerPlugin(Debugger *debugger)
@@ -135,22 +133,24 @@ std::vector<Variable> DebuggerVariableViewerPlugin::getVariablesInScope(uint sid
         return variables;
 
     auto *scope_info = &env->debug_info->scopes[sid];
+    bool is_global = scope_info->parent == MAP_SENTINEL;
     for (uint v = 0; v < env->debug_info->scopes[sid].n_vars; v++) {
         auto *var_info = &scope_info->vars[v];
-        variables.push_back(Variable(var_info, env));
+        variables.push_back(Variable(env, var_info, is_global));
     }
 
     return variables;
 }
 
-std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVariables() {
+std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVariables(int pc) {
     std::vector<std::vector<Variable>> var_layers;
     auto *env = debugger->env;
     auto debug_info = WTStar::getDebugInfo(env);
     if (!debugger->isRunning() || !debug_info)
         return var_layers;
 
-    int s = code_map_find(env->debug_info->scope_map, env->stored_pc);
+    pc = pc == -1 ? env->stored_pc : pc;
+    int s = code_map_find(env->debug_info->scope_map, pc);
     if (s == -1)
         return var_layers;
 
@@ -174,7 +174,8 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
     return var_layers;
 }
 
-static ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+static ImGuiTreeNodeFlags default_treenode_flags =
+    ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
 bool showTableHeader(const std::string &title) {
     const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
@@ -190,7 +191,7 @@ bool showTableHeader(const std::string &title) {
                             ImGuiTableColumnFlags_DefaultHide | ImGuiTableColumnFlags_WidthFixed,
                             3 * TEXT_BASE_WIDTH);
     ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 15 * TEXT_BASE_WIDTH);
-    ImGui::TableSetupColumn("Addr", ImGuiTableColumnFlags_DefaultHide);
+    ImGui::TableSetupColumn("Addr[Abs/Rel]", ImGuiTableColumnFlags_DefaultHide);
     ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
     ImGui::TableHeadersRow();
     return true;
@@ -208,18 +209,18 @@ void showTableVariableRow(const Variable &var) {
         ImGui::TextWrapped("[#%u:%s]", var.n_dims, var.sdims.c_str());
     }
     ImGui::TableNextColumn();
-    ImGui::TextWrapped("%u", var.addr);
+    ImGui::TextWrapped("%u/%u", var.raddr, var.addr);
     ImGui::TableNextColumn();
     ImGui::TextWrapped("%s", var.svalue.c_str());
 }
 
-void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, WTStar::thread_t *thr,
-                            uint layer_i, std::function<void(Variable &var)> actionRow) {
+void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, uint layer_i,
+                            std::function<void(Variable &var)> actionRow) {
     if (layer_i >= var_layers.size())
         return;
     auto &var_layer = var_layers[layer_i];
     if (layer_i && var_layer.empty()) {
-        showTableVariableLayer(var_layers, thr, layer_i + 1, actionRow);
+        showTableVariableLayer(var_layers, layer_i + 1, actionRow);
         return;
     }
 
@@ -228,8 +229,7 @@ void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, WTSt
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     std::string title =
         std::string() + (layer_i ? "parent" : "locals") + "##" + std::to_string(layer_i);
-    if (!ImGui::TreeNodeEx(title.c_str(),
-                           default_treenode_flags))
+    if (!ImGui::TreeNodeEx(title.c_str(), default_treenode_flags))
         return;
     for (auto &var : var_layer) {
         actionRow(var);
@@ -239,7 +239,7 @@ void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, WTSt
         //                    var.sdims).c_str(), var.sname.c_str(),
         //                    var.svalue.c_str());
     }
-    showTableVariableLayer(var_layers, thr, layer_i + 1, actionRow);
+    showTableVariableLayer(var_layers, layer_i + 1, actionRow);
 };
 
 void DebuggerVariableViewerPlugin::show() {
@@ -261,17 +261,35 @@ void DebuggerVariableViewerPlugin::show() {
 
     ImGui::TextWrapped("W=%9d T=%9d W/T=%5.2f", env->W, env->T, double(env->W) / env->T);
 
-
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNodeEx("Call stack", default_treenode_flags)) {
-        ImGui::TextWrapped("%lu", STACK_SIZE(env->frames, WTStar::frame_t *));
+    if (ImGui::CollapsingHeader("Call stack")) {
+        int call_stack_size = STACK_SIZE(env->frames, WTStar::frame_t *);
+        ImGui::TextWrapped("Size: %d", call_stack_size);
+        int pc = env->stored_pc;
+        for (int i = call_stack_size - 1; i >= 0; --i) {
+            auto frame = STACK(env->frames, WTStar::frame_t *)[i];
+            ImGui::TextWrapped("%d: %s (base=%d ret=%d)", i, frame->func_name, frame->base, pc);
+
+            ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+            if (ImGui::TreeNodeEx("variables", default_treenode_flags)) {
+                auto var_layers = getVisibleVariables(pc);
+                if (showTableHeader("thread variables")) {
+                    showTableVariableLayer(var_layers, 0, [&](Variable &var) {
+                        var.fillThreadInfo(env, env->thr[0], frame->base);
+                        showTableVariableRow(var);
+                    });
+                    ImGui::EndTable();
+                }
+            }
+            pc = frame->ret_addr;
+        }
     }
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    if (ImGui::TreeNodeEx("Globals", default_treenode_flags)) {
+    if (ImGui::CollapsingHeader("Globals")) {
         if (showTableHeader("globals")) {
             for (auto &var : getVariablesInScope(0)) {
-                var.fillThreadInfo(env, nullptr);
+                var.fillThreadInfo(env);
                 showTableVariableRow(var);
             }
             ImGui::EndTable();
@@ -280,7 +298,7 @@ void DebuggerVariableViewerPlugin::show() {
 
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     auto var_layers = getVisibleVariables();
-    if (ImGui::TreeNodeEx("Threads", default_treenode_flags)) {
+    if (ImGui::CollapsingHeader("Threads")) {
         auto index_name = getThreadIndexVariableName();
         for (auto tid : getThreadIds()) {
             auto *thr = WTStar::get_thread(tid);
@@ -291,7 +309,7 @@ void DebuggerVariableViewerPlugin::show() {
                                    getThreadIndexVariableValue(tid));
             }
             if (showTableHeader("thread variables")) {
-                showTableVariableLayer(var_layers, thr, 0, [&](Variable &var) {
+                showTableVariableLayer(var_layers, 0, [&](Variable &var) {
                     var.fillThreadInfo(env, thr);
                     showTableVariableRow(var);
                 });
