@@ -55,6 +55,7 @@ public:
     bool isCompiled() const;
     bool isRunning() const;
     bool canRun() const;
+    bool canAddBreakpoints() const;
 
     int runExecution();
     int continueExecution();

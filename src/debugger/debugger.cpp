@@ -179,6 +179,8 @@ bool Debugger::isRunning() const {
 
 bool Debugger::canRun() const { return compiled && env; }
 
+bool Debugger::canAddBreakpoints() const { return env; }
+
 std::pair<size_t, SourcePosition> Debugger::getSourcePosition() const {
     if (!canRun())
         return {-1, SourcePosition()};
@@ -208,13 +210,13 @@ void Debugger::stopExecution() { destroyVm(); }
 int Debugger::stepOver() {
     if (!canRun())
         return -2;
-    uint32_t initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+    auto initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
     int resp;
     while (true) {
         resp = WTStar::execute(env, -1, trace_on, 2 | stop_on_bp);
         if (resp != -11)
             break;
-        uint32_t current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+        auto current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
         std::cerr << "stepOver resp " << resp << " level " << current_level << "[" << initial_level
                   << "]" << std::endl;
         if (current_level <= initial_level)
@@ -229,7 +231,7 @@ int Debugger::stepInto() {
     if (!canRun())
         return -2;
     int resp = WTStar::execute(env, -1, trace_on, 2 | stop_on_bp);
-    uint32_t current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+    auto current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
     std::cerr << "stepInto execute stopped with resp " << resp << " on line " << env->pc
               << " with level " << current_level << std::endl;
     return resp;
@@ -238,13 +240,13 @@ int Debugger::stepInto() {
 int Debugger::stepOut() {
     if (!canRun())
         return -2;
-    uint32_t initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+    auto initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
     int resp;
     while (true) {
         resp = WTStar::execute(env, -1, trace_on, 4 | stop_on_bp);
         if (resp != -11)
             break;
-        uint32_t current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+        auto current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
         std::cerr << "stepOut resp " << resp << " level " << current_level << "[" << initial_level
                   << "]" << std::endl;
         if (current_level < initial_level)

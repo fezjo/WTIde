@@ -103,6 +103,7 @@ void DebuggerControlPlugin::show() {
         ImGui::SameLine();
         if (ImGui::Button("Destroy")) {
             debugger->stopExecution();
+            setSourceAction(source_fn);
         }
 
         if (ImGui::Button("Continue")) {
@@ -140,7 +141,7 @@ return bn;";
         ImGui::SameLine();
         ImGui::Checkbox("Stop on BP", &debugger->stop_on_bp);
 
-        ImGui::BeginDisabled(!debugger->canRun());
+        ImGui::BeginDisabled(!debugger->canAddBreakpoints());
         if (ImGui::Button("Add")) {
             ImGui::OpenPopup("Add Breakpoint");
         }
