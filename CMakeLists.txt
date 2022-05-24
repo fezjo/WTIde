@@ -12,10 +12,21 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_definitions(-g)   
+add_definitions(-g -O1)   
 add_definitions(-DIMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/imgui/my_imconfig.h")
 add_definitions(-DZEP_USE_SDL)
 add_definitions(-DZEP_FEATURE_CPP_FILE_SYSTEM)
+
+set(SANITIZE_FLAGS
+    -fsanitize=address
+    -fsanitize-address-use-after-scope
+    -fno-omit-frame-pointer
+    -fno-optimize-sibling-calls
+    -fsanitize=leak
+    # -fsanitize=memory
+    -fsanitize=undefined
+    -fsanitize=bounds
+)
 
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
@@ -52,6 +63,11 @@ target_compile_options(
         -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond
         -Wcast-qual -Wcast-align
         -Wno-unused-parameter -Wno-shadow
-) 
+        # ${SANITIZE_FLAGS}
+)
+target_link_options(
+    ${TARGET_NAME} PRIVATE
+        # ${SANITIZE_FLAGS}
+)
 
 configure_file(zep.cfg zep.cfg COPYONLY)
