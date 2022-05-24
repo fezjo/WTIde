@@ -195,34 +195,47 @@ std::pair<bool, std::string> Debugger::setBreakpoint(const std::string &file, ui
 std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::string &file,
                                                                   uint line,
                                                                   const std::string &condition) {
-    uint bp_pos = findInstructionNumber(file, line);
-    std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp_pos << std::endl;
-    if (bp_pos == -1u)
-        return {false, "Could not find corresponding instruction"};
-    ast_scope_and_node scope_and_node = findAstScopeAndNode(ast, [&](WTStar::ast_node_t *node) {
-        return node->code_from <= (int)bp_pos && node->code_to >= (int)bp_pos;
-    });
-    if (!scope_and_node.first) {
-        std::cerr << "Could not find scope for breakpoint" << std::endl;
-        return {false, "Could not find corresponding scope"};
-    } else
-        std::cerr << "found scope and node id " << scope_and_node.first->val.sc->items->id << " "
-                  << scope_and_node.second->id << std::endl;
-    auto [code, compile_msg] = compileConditionInAst(ast, condition, scope_and_node.first);
-    bool compilation_successful = compile_msg.empty();
-    std::cerr << "setBreakpointWithCondition added breakpoint at " << bp_pos << std::endl;
     breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
                        [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; }),
         breakpoints.end());
-    auto it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
+    auto it = std::upper_bound(breakpoints.begin(), breakpoints.end(), -1u,
                                [](uint pos, const Breakpoint &bp) { return pos < bp.bp_pos; });
-    std::cerr << "compile_msg " << compile_msg << std::endl;
-    Breakpoint &bp = *breakpoints.insert(
-        it, {file, line, condition, bp_pos, compile_msg, code, NULL, compilation_successful});
-    if (env && compilation_successful)
+    Breakpoint &bp =
+        *breakpoints.insert(it, {file, line, condition, -1u, "not compiled", {}, NULL, 0});
+
+    bp.bp_pos = findInstructionNumber(file, line);
+    std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp.bp_pos
+              << std::endl;
+    if (bp.bp_pos == -1u) {
+        bp.error = "Could not find corresponding instruction";
+        bp.enabled = false;
+        return {bp.enabled, bp.error};
+    }
+
+    if (!condition.empty()) {
+        ast_scope_and_node scope_and_node = findAstScopeAndNode(ast, [&](WTStar::ast_node_t *node) {
+            return node->code_from <= (int)bp.bp_pos && node->code_to >= (int)bp.bp_pos;
+        });
+        if (!scope_and_node.first) {
+            std::cerr << "Could not find scope for breakpoint" << std::endl;
+            bp.error = "Could not find corresponding scope";
+            bp.enabled = false;
+            return {bp.enabled, bp.error};
+        } else
+            std::cerr << "found scope and node id " << scope_and_node.first->val.sc->items->id
+                      << " " << scope_and_node.second->id << std::endl;
+
+        std::tie(bp.code, bp.error) = compileConditionInAst(ast, condition, scope_and_node.first);
+        bp.enabled = bp.error.empty();
+        std::cerr << "setBreakpointWithCondition added breakpoint at " << bp.bp_pos << std::endl;
+        std::cerr << "bp.error " << bp.error << std::endl;
+    } else
+        bp.enabled = true;
+
+    if (env && bp.enabled)
         addBreakpointToVm(bp);
-    return {compilation_successful, compile_msg};
+    return {bp.enabled, bp.error};
 }
 
 bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool enabled) {
