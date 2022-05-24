@@ -233,8 +233,7 @@ void FileTreePlugin::show() {
     if (!shown)
         return;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(), nullptr,
-                      ImGuiWindowFlags_MenuBar)) {
+    if (!imguiBegin(ImGuiWindowFlags_MenuBar)) {
         ImGui::End();
         return;
     }

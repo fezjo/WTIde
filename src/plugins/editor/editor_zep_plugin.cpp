@@ -107,8 +107,7 @@ void EditorZepPlugin::show() {
     ImGuiWindowFlags flags =
         ImGuiWindowFlags_UnsavedDocument * dirty; // TODO | ImGuiWindowFlags_NoSavedSettings
 
-    if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(),
-                      immortal ? nullptr : &alive, flags)) {
+    if (!imguiBegin(flags)) {
         ImGui::End();
         return;
     }

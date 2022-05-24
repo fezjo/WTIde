@@ -119,8 +119,7 @@ void ProgramAnalyzerPlugin::show() {
     if (!shown)
         return;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(),
-                      immortal ? nullptr : &alive, ImGuiWindowFlags_None)) {
+    if (!imguiBegin(ImGuiWindowFlags_None)) {
         ImGui::End();
         return;
     }

@@ -63,8 +63,7 @@ void DebuggerControlPlugin::show() {
     if (!shown)
         return;
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(),
-                      immortal ? nullptr : &alive, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (!imguiBegin(ImGuiWindowFlags_HorizontalScrollbar)) {
         ImGui::End();
         return;
     }

@@ -33,8 +33,7 @@ void EditorIctePlugin::show() {
         ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar |
         ImGuiWindowFlags_UnsavedDocument * dirty; // TODO | ImGuiWindowFlags_NoSavedSettings
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin((title + "###" + std::to_string(getId())).c_str(),
-                      immortal ? nullptr : &alive, flags)) {
+    if (!imguiBegin(flags)) {
         ImGui::End();
         return;
     }
