@@ -1,0 +1,26 @@
+From 0a99587ccbaa37ff685f628d008d7da0f6abde33 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Wed, 13 Apr 2022 19:13:28 +0200
+Subject: [PATCH] HAZARD Change default registers from +* to "
+
+---
+ src/mode.cpp | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/src/mode.cpp b/src/mode.cpp
+index dfb212c0..665e5201 100644
+--- a/src/mode.cpp
++++ b/src/mode.cpp
+@@ -113,8 +113,7 @@ void CommandContext::GetCommandRegisters()
+     // No specified register, so use the default
+     if (keymap.RegisterName() == 0)
+     {
+-        registers.push('*');
+-        registers.push('+');
++        registers.push('"');
+     }
+     else
+     {
+-- 
+2.36.0
+

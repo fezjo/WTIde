@@ -1,0 +1,24 @@
+From 6bc3b259e41ffc823e370323c0f339b2c47a61bd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Tue, 12 Apr 2022 22:35:14 +0200
+Subject: [PATCH] Add support for redo by ctrl+shift+z
+
+---
+ src/mode_standard.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/mode_standard.cpp b/src/mode_standard.cpp
+index 8fd451e1..3b33d99e 100644
+--- a/src/mode_standard.cpp
++++ b/src/mode_standard.cpp
+@@ -51,6 +51,7 @@ void ZepMode_Standard::Init()
+     keymap_add({ &m_insertMap }, { "<Tab>" }, id_InsertTab);
+     keymap_add({ &m_insertMap, &m_visualMap }, { "<Del>" }, id_Delete);
+     keymap_add({ &m_insertMap, &m_visualMap }, { "<C-y>" }, id_Redo);
++    keymap_add({ &m_insertMap, &m_visualMap }, { "<C-S-z>" }, id_Redo);
+     keymap_add({ &m_insertMap, &m_visualMap }, { "<C-z>" }, id_Undo);
+ 
+     keymap_add({ &m_insertMap, &m_visualMap }, { "<Left>" }, id_MotionStandardLeft);
+-- 
+2.36.0
+

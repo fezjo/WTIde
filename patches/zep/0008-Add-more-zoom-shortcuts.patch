@@ -1,0 +1,40 @@
+From c38adf2a2ecb329115e67da8846c85a869885b52 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Wed, 13 Apr 2022 18:08:20 +0200
+Subject: [PATCH] Add more zoom shortcuts
+
+---
+ src/mode.cpp          | 2 ++
+ src/mode_standard.cpp | 3 +++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/src/mode.cpp b/src/mode.cpp
+index 3bcc7ef9..c9220c15 100644
+--- a/src/mode.cpp
++++ b/src/mode.cpp
+@@ -2682,6 +2682,8 @@ void ZepMode::AddGlobalKeyMaps()
+     keymap_add({ &m_normalMap }, { "<C-i><C-o>" }, id_SwitchToAlternateFile);
+     keymap_add({ &m_normalMap }, { "+" }, id_FontBigger);
+     keymap_add({ &m_normalMap }, { "-" }, id_FontSmaller);
++    keymap_add({ &m_normalMap, &m_visualMap, &m_insertMap }, { "<C-=>" }, id_FontBigger);
++    keymap_add({ &m_normalMap, &m_visualMap, &m_insertMap }, { "<C-->" }, id_FontSmaller);
+ }
+ 
+ CursorType ZepMode::GetCursorType() const
+diff --git a/src/mode_standard.cpp b/src/mode_standard.cpp
+index 3b33d99e..62edee03 100644
+--- a/src/mode_standard.cpp
++++ b/src/mode_standard.cpp
+@@ -81,6 +81,9 @@ void ZepMode_Standard::Init()
+ 
+     keymap_add({ &m_normalMap, &m_visualMap, &m_insertMap }, { "<Escape>" }, id_InsertMode);
+     keymap_add({ &m_normalMap }, { "<Backspace>" }, id_MotionStandardLeft);
++
++    keymap_add({ &m_normalMap, &m_visualMap, &m_insertMap }, { "<C-=>" }, id_FontBigger);
++    keymap_add({ &m_normalMap, &m_visualMap, &m_insertMap }, { "<C-->" }, id_FontSmaller);
+ }
+ 
+ void ZepMode_Standard::Begin(ZepWindow* pWindow)
+-- 
+2.36.0
+

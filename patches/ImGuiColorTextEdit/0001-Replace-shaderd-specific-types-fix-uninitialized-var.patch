@@ -1,0 +1,212 @@
+From 65c8d4ff12fa9dc0ed7f1ef80a350519c2974971 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Sun, 1 May 2022 15:12:33 +0200
+Subject: [PATCH] Replace shaderd specific types, fix uninitialized variables
+
+---
+ TextEditor.cpp | 47 +++++++++++++++++++++++++++++++----------------
+ TextEditor.h   | 45 +++++++++++++++++++++++++++++++--------------
+ 2 files changed, 62 insertions(+), 30 deletions(-)
+
+diff --git a/TextEditor.cpp b/TextEditor.cpp
+index 7972156..25cd43d 100644
+--- a/TextEditor.cpp
++++ b/TextEditor.cpp
+@@ -224,7 +224,7 @@ void TextEditor::SetLanguageDefinition(const LanguageDefinition & aLanguageDef)
+ 
+ void TextEditor::SetPalette(const Palette & aValue)
+ {
+-	mPaletteBase = aValue;
++	mPalette = mPaletteBase = aValue;
+ }
+ 
+ std::string TextEditor::GetText(const Coordinates & aStart, const Coordinates & aEnd) const
+@@ -1625,6 +1625,7 @@ TextEditor::Breakpoint& TextEditor::GetBreakpoint(int line)
+ 	for (int i = 0; i < mBreakpoints.size(); i++)
+ 		if (mBreakpoints[i].mLine == line)
+ 			return mBreakpoints[i];
++	assert(!"Breakpoint not found");
+ }
+ 
+ void TextEditor::RenderInternal(const char* aTitle)
+@@ -2644,52 +2645,66 @@ std::string TextEditor::mBuildFunctionDef(const std::string& func, const std::st
+ 
+ 	return ret + ")";
+ }
+-std::string TextEditor::mBuildVariableType(const ed::SPIRVParser::Variable& var, const std::string& lang)
++std::string TextEditor::mBuildVariableType(const Variable& var, const std::string& lang)
+ {
+ 	switch (var.Type) {
+-		case ed::SPIRVParser::ValueType::Bool:
++		case ValueType::Bool:
+ 			return "bool";
+ 
+-		case ed::SPIRVParser::ValueType::Float:
++		case ValueType::Float:
+ 			return "float";
+ 
+-		case ed::SPIRVParser::ValueType::Int:
++		case ValueType::Int:
+ 			return "int";
+ 
+-		case ed::SPIRVParser::ValueType::Void:
++		case ValueType::Void:
+ 			return "void";
+ 
+-		case ed::SPIRVParser::ValueType::Struct:
++		case ValueType::Struct:
+ 			return var.TypeName;
+ 
+-		case ed::SPIRVParser::ValueType::Vector: {
++		case ValueType::Array: {
++			std::string count = std::to_string(var.TypeComponentCount);
++			switch (var.BaseType) {
++			case ValueType::Bool:
++				return "bool[" + count + "]";
++
++			case ValueType::Float:
++				return "float[" + count + "]";
++
++			case ValueType::Int:
++				return "int[" + count + "]";
++			}
++		} break;
++
++		case ValueType::Vector: {
+ 			std::string count = std::string(1, var.TypeComponentCount + '0');
+ 			if (lang == "HLSL") {
+ 				switch (var.BaseType) {
+-				case ed::SPIRVParser::ValueType::Bool:
++				case ValueType::Bool:
+ 					return "bool" + count;
+ 
+-				case ed::SPIRVParser::ValueType::Float:
++				case ValueType::Float:
+ 					return "float" + count;
+ 
+-				case ed::SPIRVParser::ValueType::Int:
++				case ValueType::Int:
+ 					return "int" + count;
+ 				}
+ 			} else {
+ 				switch (var.BaseType) {
+-				case ed::SPIRVParser::ValueType::Bool:
++				case ValueType::Bool:
+ 					return "bvec" + count;
+ 
+-				case ed::SPIRVParser::ValueType::Float:
++				case ValueType::Float:
+ 					return "vec" + count;
+ 
+-				case ed::SPIRVParser::ValueType::Int:
++				case ValueType::Int:
+ 					return "ivec" + count;
+ 				}
+ 			}
+ 		} break;
+ 
+-		case ed::SPIRVParser::ValueType::Matrix: {
++		case ValueType::Matrix: {
+ 			std::string count = std::string(1, var.TypeComponentCount + '0');
+ 			if (lang == "HLSL") {
+ 				return "float" + count + "x" + count;
+@@ -2934,7 +2949,7 @@ void TextEditor::m_buildMemberSuggestions(bool* keepACOpened)
+ 	auto curPos = GetCorrectCursorPosition();
+ 	std::string obj = GetWordAt(curPos);
+ 
+-	ed::SPIRVParser::Variable* var = nullptr;
++	Variable* var = nullptr;
+ 
+ 	for (auto& func : mACFunctions) {
+ 		// suggest arguments and locals
+diff --git a/TextEditor.h b/TextEditor.h
+index 55e5745..c61eb59 100644
+--- a/TextEditor.h
++++ b/TextEditor.h
+@@ -11,9 +11,26 @@
+ #include <map>
+ #include <regex>
+ #include <imgui/imgui.h>
+-#include <SHADERed/Objects/SPIRVParser.h>
+ 
+ class TextEditor {
++	enum class ValueType { Void, Bool, Int, Float, Array, Vector, Matrix, Struct, Unknown };
++
++	struct Variable {
++		std::string Name;
++		ValueType Type, BaseType;
++		int TypeComponentCount;
++		std::string TypeName;
++	};
++
++	struct Function {
++		int LineStart;
++		int LineEnd;
++		std::vector<Variable> Arguments;
++		std::vector<Variable> Locals;
++
++		Variable ReturnType;
++	};
++
+ public:
+ 	enum class PaletteIndex {
+ 		Default,
+@@ -450,23 +467,23 @@ public:
+ 		mACEntries.clear();
+ 		mACEntrySearch.clear();
+ 	}
+-	inline const std::unordered_map<std::string, ed::SPIRVParser::Function>& GetAutocompleteFunctions() { return mACFunctions; }
+-	inline const std::unordered_map<std::string, std::vector<ed::SPIRVParser::Variable>>& GetAutocompleteUserTypes() { return mACUserTypes; }
+-	inline const std::vector<ed::SPIRVParser::Variable>& GetAutocompleteUniforms() { return mACUniforms; }
+-	inline const std::vector<ed::SPIRVParser::Variable>& GetAutocompleteGlobals() { return mACGlobals; }
+-	inline void SetAutocompleteFunctions(const std::unordered_map<std::string, ed::SPIRVParser::Function>& funcs)
++	inline const std::unordered_map<std::string, Function>& GetAutocompleteFunctions() { return mACFunctions; }
++	inline const std::unordered_map<std::string, std::vector<Variable>>& GetAutocompleteUserTypes() { return mACUserTypes; }
++	inline const std::vector<Variable>& GetAutocompleteUniforms() { return mACUniforms; }
++	inline const std::vector<Variable>& GetAutocompleteGlobals() { return mACGlobals; }
++	inline void SetAutocompleteFunctions(const std::unordered_map<std::string, Function>& funcs)
+ 	{
+ 		mACFunctions = funcs;
+ 	}
+-	inline void SetAutocompleteUserTypes(const std::unordered_map<std::string, std::vector<ed::SPIRVParser::Variable>>& utypes)
++	inline void SetAutocompleteUserTypes(const std::unordered_map<std::string, std::vector<Variable>>& utypes)
+ 	{
+ 		mACUserTypes = utypes;
+ 	}
+-	inline void SetAutocompleteUniforms(const std::vector<ed::SPIRVParser::Variable>& unis)
++	inline void SetAutocompleteUniforms(const std::vector<Variable>& unis)
+ 	{
+ 		mACUniforms = unis;
+ 	}
+-	inline void SetAutocompleteGlobals(const std::vector<ed::SPIRVParser::Variable>& globs)
++	inline void SetAutocompleteGlobals(const std::vector<Variable>& globs)
+ 	{
+ 		mACGlobals = globs;
+ 	}
+@@ -610,7 +627,7 @@ private:
+ 	void mOpenFunctionDeclarationTooltip(const std::string& obj, TextEditor::Coordinates coord);
+ 
+ 	std::string mBuildFunctionDef(const std::string& func, const std::string& lang);
+-	std::string mBuildVariableType(const ed::SPIRVParser::Variable& var, const std::string& lang);
++	std::string mBuildVariableType(const Variable& var, const std::string& lang);
+ 
+ 	float mLineSpacing;
+ 	Lines mLines;
+@@ -656,10 +673,10 @@ private:
+ 	void m_buildSuggestions(bool* keepACOpened = nullptr);
+ 	bool mActiveAutocomplete;
+ 	bool mAutocomplete;
+-	std::unordered_map<std::string, ed::SPIRVParser::Function> mACFunctions;
+-	std::unordered_map<std::string, std::vector<ed::SPIRVParser::Variable>> mACUserTypes;
+-	std::vector<ed::SPIRVParser::Variable> mACUniforms;
+-	std::vector<ed::SPIRVParser::Variable> mACGlobals;
++	std::unordered_map<std::string, Function> mACFunctions;
++	std::unordered_map<std::string, std::vector<Variable>> mACUserTypes;
++	std::vector<Variable> mACUniforms;
++	std::vector<Variable> mACGlobals;
+ 	std::string mACWord;
+ 	std::vector<std::pair<std::string, std::string>> mACSuggestions;
+ 	int mACIndex;
+-- 
+2.36.0
+

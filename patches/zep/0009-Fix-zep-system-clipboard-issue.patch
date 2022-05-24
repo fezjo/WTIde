@@ -1,0 +1,39 @@
+From 48a32c56d0256da6b4f40c9ee53e55d3cce28ea3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Wed, 13 Apr 2022 18:55:49 +0200
+Subject: [PATCH] Fix zep system clipboard issue
+
+---
+ src/mode.cpp | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/mode.cpp b/src/mode.cpp
+index c9220c15..dfb212c0 100644
+--- a/src/mode.cpp
++++ b/src/mode.cpp
+@@ -1362,11 +1362,11 @@ bool ZepMode::GetCommand(CommandContext& context)
+     }
+     else if (mappedCommand == id_StandardPaste)
+     {
++        context.pRegister = &GetEditor().GetRegister('+');
+         if (context.currentMode == EditorMode::Visual)
+         {
+             context.replaceRangeMode = ReplaceRangeMode::Replace;
+             context.op = CommandOperation::Replace;
+-            context.pRegister = &GetEditor().GetRegister('"');
+             auto range = GetInclusiveVisualRange();
+             context.beginRange = range.first;
+             context.endRange = range.second.Peek(1);
+@@ -2684,6 +2684,9 @@ void ZepMode::AddGlobalKeyMaps()
+     keymap_add({ &m_normalMap }, { "-" }, id_FontSmaller);
+     keymap_add({ &m_normalMap, &m_visualMap, &m_insertMap }, { "<C-=>" }, id_FontBigger);
+     keymap_add({ &m_normalMap, &m_visualMap, &m_insertMap }, { "<C-->" }, id_FontSmaller);
++    keymap_add({ &m_insertMap }, { "<C-v>" }, id_StandardPaste);
++    keymap_add({ &m_normalMap, &m_visualMap }, { "<C-S-v>" }, id_StandardPaste);
++    keymap_add({ &m_normalMap, &m_visualMap }, { "<C-S-c>" }, id_StandardCopy);
+ }
+ 
+ CursorType ZepMode::GetCursorType() const
+-- 
+2.36.0
+

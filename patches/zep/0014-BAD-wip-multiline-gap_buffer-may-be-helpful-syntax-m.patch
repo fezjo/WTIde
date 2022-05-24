@@ -1,0 +1,77 @@
+From 817d1f95274e41c52a87b1e2611aa671f0e82976 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Thu, 14 Apr 2022 13:56:12 +0200
+Subject: [PATCH] BAD wip multiline, gap_buffer may be helpful, syntax maybe
+ discard
+
+---
+ include/zep/gap_buffer.h | 33 +++++++++++++++++++++++++++++++++
+ src/syntax.cpp           |  8 ++++++++
+ 2 files changed, 41 insertions(+)
+
+diff --git a/include/zep/gap_buffer.h b/include/zep/gap_buffer.h
+index 4e47ab98..44e431f8 100644
+--- a/include/zep/gap_buffer.h
++++ b/include/zep/gap_buffer.h
+@@ -639,6 +639,39 @@ public:
+         return itr;
+     }
+ 
++    template<class ForwardIt, class Titerator> // Titerator in {iterator, const_iterator}
++    Titerator find_first(Titerator first, Titerator last,
++                          ForwardIt s_first, ForwardIt s_last) const
++    {
++        assert(first <= last);
++        while (true)
++        {
++            T* pVal = find_first_of(GetGaplessPtr(first.p), GetGaplessPtr(last.p), s_first, s_first + 1);
++            assert(GetGaplessPtr(first.p) <= pVal);
++            auto it_found = Titerator(*this, GetGaplessOffset(pVal));
++            // Return invalid if we walked to end without finding
++            if (it_found == last)
++                break;
++
++            bool ok = true;
++            auto itr = it_found;
++            for(auto it = s_first; it != s_last; ++it, ++itr)
++            {
++                if (itr == end() || *it != *itr)
++                {
++                    ok = false;
++                    break;
++                }
++            }
++
++            if (ok)
++                return it_found;
++            else
++                first = it_found + 1;
++        }
++        return end();
++    }
++
+     template<class ForwardIt>
+     const_iterator find_first_not_of(const_iterator first, const_iterator last,
+                           ForwardIt s_first, ForwardIt s_last) const
+diff --git a/src/syntax.cpp b/src/syntax.cpp
+index c4665246..de4b2001 100644
+--- a/src/syntax.cpp
++++ b/src/syntax.cpp
+@@ -319,6 +319,14 @@ void ZepSyntax::UpdateSyntax()
+                         itrLast = buffer.find_first_of(itrCommentStart, buffer.end(), lineEnd.begin(), lineEnd.end());
+                         mark(itrCommentStart, itrLast, ThemeColor::Comment, ThemeColor::None);
+                     }
++                    // else if (*itrComment == '*')
++                    // {
++                    //     std::string multilineCommentEnd = "END";
++                    //     std::cerr << "multiline comment " << std::endl;
++                    //     itrLast = buffer.find_first(itrCommentStart, buffer.end(), multilineCommentEnd.begin(), multilineCommentEnd.end());
++                    //     std::cerr << "found at pos " << (itrLast - buffer.begin()) << std::endl;
++                    //     mark(itrCommentStart, itrLast, ThemeColor::Comment, ThemeColor::None);
++                    // }
+                 }
+             }
+         }
+-- 
+2.36.0
+

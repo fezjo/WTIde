@@ -1,0 +1,115 @@
+From 403cafd22b616bdffdd3343d60b00920574d926d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Thu, 14 Apr 2022 10:52:55 +0200
+Subject: [PATCH] Enable mouse scrolling
+
+---
+ include/zep/editor.h             | 9 +++++++++
+ include/zep/imgui/editor_imgui.h | 9 +++++++++
+ src/editor.cpp                   | 8 ++++++++
+ src/window.cpp                   | 9 ++++++++-
+ 4 files changed, 34 insertions(+), 1 deletion(-)
+
+diff --git a/include/zep/editor.h b/include/zep/editor.h
+index 382c307f..d2b3913b 100644
+--- a/include/zep/editor.h
++++ b/include/zep/editor.h
+@@ -89,6 +89,7 @@ enum class Msg
+     MouseMove,
+     MouseDown,
+     MouseUp,
++    MouseWheel,
+     Buffer,
+     ComponentChanged,
+     Tick,
+@@ -112,6 +113,13 @@ public:
+         , button(b)
+     {
+     }
++    
++    ZepMessage(Msg id, const NVec2f& p, std::string strIn)
++        : messageId(id)
++        , pos(p)
++        , str(strIn)
++    {
++    }
+ 
+     ZepMessage(Msg id, IZepComponent* pComp)
+         : messageId(id)
+@@ -366,6 +374,7 @@ public:
+     bool OnMouseMove(const NVec2f& mousePos);
+     bool OnMouseDown(const NVec2f& mousePos, ZepMouseButton button);
+     bool OnMouseUp(const NVec2f& mousePos, ZepMouseButton button);
++    bool OnMouseWheel(const NVec2f& mousePos, float scrollDistance);
+     const NVec2f GetMousePos() const;
+ 
+     void SetBufferSyntax(ZepBuffer& buffer) const;
+diff --git a/include/zep/imgui/editor_imgui.h b/include/zep/imgui/editor_imgui.h
+index af2e6a27..3afe2b5e 100644
+--- a/include/zep/imgui/editor_imgui.h
++++ b/include/zep/imgui/editor_imgui.h
+@@ -115,6 +115,15 @@ public:
+                 io.MouseClicked[0] = false;
+             }
+         }
++        if (io.MouseWheel)
++        {
++            if (OnMouseWheel(toNVec2f(io.MousePos), io.MouseWheel))
++            {
++                // Hide the mouse scroll from imgui if we handled it
++                io.MouseWheel = 0;
++            }
++        }
++
+ 
+         if (io.KeyCtrl)
+         {
+diff --git a/src/editor.cpp b/src/editor.cpp
+index 80edb1ba..b0cd15f7 100644
+--- a/src/editor.cpp
++++ b/src/editor.cpp
+@@ -1256,6 +1256,14 @@ bool ZepEditor::OnMouseUp(const NVec2f& mousePos, ZepMouseButton button)
+     return handled;
+ }
+ 
++bool ZepEditor::OnMouseWheel(const NVec2f& mousePos, float scrollDistance)
++{
++    m_mousePos = mousePos;
++    bool handled = Broadcast(std::make_shared<ZepMessage>(Msg::MouseWheel, mousePos, std::to_string(scrollDistance)));
++    m_bPendingRefresh = true;
++    return handled;
++}
++
+ const NVec2f ZepEditor::GetMousePos() const
+ {
+     return m_mousePos;
+diff --git a/src/window.cpp b/src/window.cpp
+index 71b259c2..5c13024c 100644
+--- a/src/window.cpp
++++ b/src/window.cpp
+@@ -205,7 +205,7 @@ void ZepWindow::Notify(std::shared_ptr<ZepMessage> payload)
+             auto pScroller = dynamic_cast<Scroller*>(payload->pComponent);
+             m_textOffsetPx = pScroller->vScrollPosition * m_textSizePx.y;
+             UpdateVisibleLineRange();
+-            EnsureCursorVisible();
++            // EnsureCursorVisible();
+             DisableToolTipTillMove();
+         }
+     }
+@@ -240,6 +240,13 @@ void ZepWindow::Notify(std::shared_ptr<ZepMessage> payload)
+             SetBufferCursor(m_mouseIterator);
+         }
+     }
++    else if (payload->messageId == Msg::MouseWheel)
++    {
++        m_textOffsetPx = std::min(m_textSizePx.y, std::max(0.0f, 
++            m_textOffsetPx - 5 * stof(payload->str) * GetEditor().GetDisplay().GetFont(ZepTextType::Text).GetPixelHeight()));
++        UpdateVisibleLineRange();
++        DisableToolTipTillMove();
++    } 
+ }
+ 
+ void ZepWindow::SetDisplayRegion(const NRectf& region)
+-- 
+2.36.0
+
