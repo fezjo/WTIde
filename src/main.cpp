@@ -109,8 +109,9 @@ int main(int, char **) {
 
     auto fontPath = fs::path("..") / "resources/fonts" / "Roboto Mono Nerd Font Complete Mono.ttf";
     ImWchar glyph_ranges[] = {1, 0x10FFFF, 0};
-    io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16.0, NULL, glyph_ranges);
-    ImGui::MergeIconsWithLatestFont(16.f, false);
+    float fontSize = 16.0f;
+    io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, NULL, glyph_ranges);
+    ImGui::MergeIconsWithLatestFont(fontSize, false);
 
     theme_YetAnotherDarkTheme();
 
@@ -120,7 +121,7 @@ int main(int, char **) {
     // Main loop
     bool alive = true;
     while (alive) {
-        SDL_WaitEventTimeout(NULL, 1000 / 10);
+        auto start_frame = SDL_GetTicks64();
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui
@@ -159,6 +160,10 @@ int main(int, char **) {
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
+
+        auto end_frame = SDL_GetTicks64();
+        auto delta_time = static_cast<int>(end_frame - start_frame);
+        SDL_WaitEventTimeout(NULL, std::max(0, 1000 / 10 - delta_time));
     }
 
     ImGui_ImplOpenGL3_Shutdown();
