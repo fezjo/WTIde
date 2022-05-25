@@ -1,6 +1,9 @@
 #!/bin/bash
 
 case $1 in
+status)
+    project_func=repo_status
+    ;;
 create)
     project_func=create_patches
     ;;
@@ -14,7 +17,7 @@ restore)
     project_func=restore_to_origin
     ;;
 *)
-    echo "Usage: $0 [create|apply|restore|abort-broken]"
+    echo "Usage: $0 [status|create|apply|restore|abort-broken]"
     exit 1
     ;;
 esac
@@ -27,50 +30,62 @@ is_git() {
     return 0
 }
 
-get_branch() {
-    echo $(git branch --show-current)
+get_patch_dir() {
+    echo ../../patches/$1
+}
+
+get_origin_head() {
+    cat $(get_patch_dir $1)/info
 }
 
 get_ahead_count() {
-    echo $(git rev-list --count origin/$1..)
+    git rev-list --count $1..
+}
+
+repo_status() {
+    project=$1
+    cd lib/$project
+    is_git || return 1
+    origin_commit=$(get_origin_head $project)
+    ahead=$(get_ahead_count $origin_commit)
+    echo "Project: $project ($origin_commit..) - $ahead patches ahead"
 }
 
 create_patches() {
     project=$1
+    patch_dir=$(get_patch_dir $project)
     cd lib/$project
     is_git || return 1
-    patch_dir=../../patches/$project
+    origin_commit=$(get_origin_head $project)
+    ahead=$(get_ahead_count $origin_commit)
     mkdir -p $patch_dir
-    branch=$(get_branch)
-    count=$(get_ahead_count $branch)
-    git format-patch -N -$count -o $patch_dir
+    git format-patch -N -$ahead -o $patch_dir
     rmdir $patch_dir
 }
 
 apply_patches() {
     project=$1
-    cd lib/$project
-    git am --keep-cr --ignore-date ../../patches/$project/*
+    patch_dir=$(get_patch_dir $project)
+    restore_to_origin $project || return 1
+    git am --keep-cr --ignore-date $patch_dir/*.patch
 }
 
 abort_broken_patches() {
     project=$1
     cd lib/$project
+    is_git || return 1
     git am --abort
 }
 
 restore_to_origin() {
     project=$1
+    patch_dir=$(get_patch_dir $project)
     cd lib/$project
     is_git || return 1
-    branch=$(git branch --show-current)
-    count=$(get_ahead_count $branch)
-    [[ $count -eq 0 ]] && return 0
-    git checkout origin/$branch
-    cd ..
-    git add $project
-    cd $project
-    git checkout $branch
+    origin_commit=$(cat $patch_dir/info)
+    git fetch
+    git checkout $origin_commit
+    return 0
 }
 
 root_path=$(pwd)
@@ -78,7 +93,6 @@ projects=$(cd lib; ls -d */)
 echo $projects
 for project in $projects; do
     echo "Processing $project"
-    echo $(pwd)
     ( $project_func $project )
     cd $root_path
 done
