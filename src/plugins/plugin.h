@@ -28,6 +28,26 @@ enum class PluginType {
     DebuggerVariableViewer = 1 << 8 | 3,
 };
 
+static std::map<PluginType, std::string> pluginTypeNames = {
+    {PluginType::Unknown, "Unknown"},
+    {PluginType::FileTree, "FileTree"},
+    {PluginType::Terminal, "Terminal"},
+    {PluginType::PluginControl, "PluginControl"},
+
+    {PluginType::Text, "Text"},
+    {PluginType::Input, "Input"},
+    {PluginType::Output, "Output"},
+
+    {PluginType::Editor, "Editor"},
+    {PluginType::EditorIcte, "EditorIcte"},
+    {PluginType::EditorZep, "EditorZep"},
+
+    {PluginType::DebuggerRelatedPlugin, "DebuggerRelatedPlugin"},
+    {PluginType::ProgramAnalyzer, "ProgramAnalyzer"},
+    {PluginType::DebuggerControl, "DebuggerControl"},
+    {PluginType::DebuggerVariableViewer, "DebuggerVariableViewer"},
+};
+
 inline bool isPluginEditor(PluginType type) { return (int)type & (int)PluginType::Editor; }
 
 using CallbackData = std::variant<bool, int, std::string>;
@@ -44,8 +64,9 @@ public:
     virtual void unsetCallback(const std::string &name) { callbacks.erase(name); }
 
     virtual bool imguiBegin(ImGuiWindowFlags flags = ImGuiWindowFlags_None) {
-        return ImGui::Begin((title + "###plugin" + std::to_string(getId())).c_str(),
-                            immortal ? nullptr : &alive, flags);
+        return ImGui::Begin(
+            (title + "###plugin_" + pluginTypeNames[getPluginType()] + "_" + std::to_string(getId())).c_str(),
+            immortal ? nullptr : &alive, flags);
     }
 
     imid_t getId() { return id; }

@@ -57,14 +57,6 @@ public:
 
         debugger = new Debugger();
 
-        // Called once the fonts/device is guaranteed setup
-        openEditor(fs::path("..") / "src" / "main.cpp", false, PluginType::EditorZep);
-        static_cast<EditorZepPlugin *>(editor_plugins[0])
-            ->GetEditor()
-            .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
-
-        openEditor(fs::path("test.wt"), false);
-
         filetree_plugin = new FileTreePlugin();
         filetree_plugin->setPath(fs::path("."));
         add_plugin(filetree_plugin, "FileTree", ImVec2(120, 640));
@@ -121,6 +113,14 @@ public:
 
         debugger_variable_viewer_plugin = new DebuggerVariableViewerPlugin(debugger);
         add_plugin(debugger_variable_viewer_plugin, "Variable Viewer");
+
+        // Called once the fonts/device is guaranteed setup
+        openEditor(fs::path("..") / "src" / "main.cpp", false, PluginType::EditorZep);
+        static_cast<EditorZepPlugin *>(editor_plugins[0])
+            ->GetEditor()
+            .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
+
+        openEditor(fs::path("test.wt"), false);
     }
 
     void update() {
