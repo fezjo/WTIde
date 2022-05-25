@@ -238,8 +238,10 @@ public:
             static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
                 Zep::ZepMode_Standard::StaticName());
         }
-        if (!path.empty())
-            ep->loadFile(path);
+        if (!path.empty()) {
+            if(!ep->loadFile(path))
+                ep->setFile(path); // set anyway
+        }
         add_plugin(ep, ep->title, ImVec2(640, 480));
         editor_plugins.push_back(ep);
 

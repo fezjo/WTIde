@@ -107,15 +107,19 @@ void EditorIctePlugin::show() {
     ImGui::End();
 }
 
+void EditorIctePlugin::setFile(const std::string &filename) {
+    editor.SetPath(filename);
+    fn = filename;
+}
+
 bool EditorIctePlugin::loadFile(const std::string &filename) {
     std::ifstream t(filename);
     if (!t.good())
         return false;
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     editor.SetText(str);
-    editor.SetPath(filename);
     editor.ResetTextChanged();
-    fn = filename;
+    setFile(filename);
     return true;
 }
 

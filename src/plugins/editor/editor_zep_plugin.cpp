@@ -136,9 +136,14 @@ void EditorZepPlugin::show() {
     ImGui::End();
 }
 
-bool EditorZepPlugin::loadFile(const std::string &filename) {
+void EditorZepPlugin::setFile(const std::string &filename) {
+    getCurrentBuffer().SetFilePath(filename);
     fn = filename;
+}
+
+bool EditorZepPlugin::loadFile(const std::string &filename) {
     GetEditor().InitWithFileOrDir(fn);
+    setFile(filename);
     return true;
 }
 
@@ -149,9 +154,13 @@ bool EditorZepPlugin::saveFile(std::string filename) {
         fn = filename;
     if (filename.empty())
         return false;
-    auto &buffer = editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
+    auto &buffer = getCurrentBuffer();
     buffer.SetFilePath(filename);
     editor.SaveBuffer(buffer);
     buffer.SetFilePath(fn);
     return true;
+}
+
+ZepBuffer &EditorZepPlugin::getCurrentBuffer() {
+    return editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
 }

@@ -9,6 +9,7 @@ public:
     EditorIctePlugin();
     virtual void show() override;
     virtual void update() override;
+    void setFile(const std::string &filename) override;
     bool loadFile(const std::string &filename) override;
     bool saveFile(std::string filename = "") override;
 
