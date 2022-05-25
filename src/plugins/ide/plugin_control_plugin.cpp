@@ -5,7 +5,8 @@ PluginControlPlugin::PluginControlPlugin(std::vector<IPlugin *> *plugins) : plug
 }
 
 void PluginControlPlugin::showLine(IPlugin *plugin) {
-    ImGui::Checkbox(plugin->title.c_str(), &plugin->shown);
+    ImGui::Checkbox((plugin->title + "##" + std::to_string(plugin->getId())).c_str(),
+                    &plugin->shown);
     if (!plugin->immortal) {
         ImGui::SameLine();
         if (ImGui::Button(("X##" + std::to_string(plugin->getId())).c_str())) {

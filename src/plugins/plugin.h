@@ -28,25 +28,7 @@ enum class PluginType {
     DebuggerVariableViewer = 1 << 8 | 3,
 };
 
-static std::map<PluginType, std::string> pluginTypeNames = {
-    {PluginType::Unknown, "Unknown"},
-    {PluginType::FileTree, "FileTree"},
-    {PluginType::Terminal, "Terminal"},
-    {PluginType::PluginControl, "PluginControl"},
-
-    {PluginType::Text, "Text"},
-    {PluginType::Input, "Input"},
-    {PluginType::Output, "Output"},
-
-    {PluginType::Editor, "Editor"},
-    {PluginType::EditorIcte, "EditorIcte"},
-    {PluginType::EditorZep, "EditorZep"},
-
-    {PluginType::DebuggerRelatedPlugin, "DebuggerRelatedPlugin"},
-    {PluginType::ProgramAnalyzer, "ProgramAnalyzer"},
-    {PluginType::DebuggerControl, "DebuggerControl"},
-    {PluginType::DebuggerVariableViewer, "DebuggerVariableViewer"},
-};
+extern std::map<PluginType, std::string> pluginTypeNames;
 
 inline bool isPluginEditor(PluginType type) { return (int)type & (int)PluginType::Editor; }
 
