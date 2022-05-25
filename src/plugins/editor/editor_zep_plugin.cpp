@@ -68,7 +68,7 @@ void EditorZepPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message) {
 void EditorZepPlugin::HandleInput() { editor.HandleInput(); }
 
 EditorZepPlugin *EditorZepPlugin::init(const Zep::NVec2f &pixelScale, std::string rootPath) {
-    EditorZepPlugin *ep = new EditorZepPlugin(rootPath.empty() ? APP_ROOT : rootPath,
+    EditorZepPlugin *ep = new EditorZepPlugin(rootPath.empty() ? "." : rootPath,
                                               Zep::NVec2f(pixelScale.x, pixelScale.y),
                                               [](std::shared_ptr<ZepMessage> spMessage) -> void {});
 
