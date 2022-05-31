@@ -1,35 +1,25 @@
 cmake_minimum_required(VERSION 3.22)
 
-# set(CMAKE_TOOLCHAIN_FILE
-#     ${CMAKE_CURRENT_SOURCE_DIR}/lib/vcpkg/scripts/buildsystems/vcpkg.cmake
-#     CACHE STRING "Vcpkg toolchain file"
-# )
-
-project(WTIde LANGUAGES C CXX VERSION 0.0)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+project(WTIde
+    LANGUAGES C CXX
+    VERSION 0.2
+)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_definitions(-g -O1)   
-add_definitions(-DIMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/imgui/my_imconfig.h")
-add_definitions(-DZEP_USE_SDL)
-add_definitions(-DZEP_FEATURE_CPP_FILE_SYSTEM)
+set(CMAKE_RELEASE_POSTFIX "-release")
+set(CMAKE_DEBUG_POSTFIX "-debug")
+set(CMAKE_RELWITHDEBINFO_POSTFIX "-reldbg")
 
-set(SANITIZE_FLAGS
-    -fsanitize=address
-    -fsanitize-address-use-after-scope
-    -fno-omit-frame-pointer
-    -fno-optimize-sibling-calls
-    -fsanitize=leak
-    # -fsanitize=memory
-    -fsanitize=undefined
-    -fsanitize=bounds
-)
+# Set all compiler flags 
+include(cmake/compiler.cmake)
 
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
+
+add_definitions(-DIMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/imgui/my_imconfig.h")
 
 set(TARGET_NAME ${CMAKE_PROJECT_NAME})
 add_executable(${TARGET_NAME} "")
@@ -63,11 +53,6 @@ target_compile_options(
         -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond
         -Wcast-qual -Wcast-align
         -Wno-unused-parameter -Wno-shadow
-        # ${SANITIZE_FLAGS}
-)
-target_link_options(
-    ${TARGET_NAME} PRIVATE
-        # ${SANITIZE_FLAGS}
 )
 
 configure_file(zep.cfg zep.cfg COPYONLY)

@@ -7,7 +7,16 @@ git submodule update --init --recursive
 bash patches/patch.sh apply
 ```
 
+
 # Build
+
+## Dependencies:
+```
+clang
+cmake
+```
+
+## Process
 
 ```
 cd lib/wtstar/src
@@ -17,7 +26,15 @@ cd ../../..
 
 mkdir build
 cd build
-cmake ..
+cmake .. -DCMAKE_C_COMPILER=$(which clang) -DCMAKE_CXX_COMPILER=$(which clang++)
 cmake --build .
 # run aplication with ./WTIde
+```
+
+# Update
+
+```
+git pull
+git submodule update --init --recursive
+bash patches/patch.sh apply
 ```
