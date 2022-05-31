@@ -12,6 +12,10 @@
 #include <SDL_opengl.h>
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include <imgui/backends/imgui_impl_opengl3.h>
 #include <imgui/backends/imgui_impl_sdl.h>
 #include <imgui/imgui.h>
@@ -20,6 +24,12 @@
 #include "app.cpp"
 #include "imgui/themes.h"
 #include "utils.h"
+
+#ifdef __EMSCRIPTEN__
+#include <functional>
+static std::function<void()> loop;
+static void main_loop() { loop(); }
+#endif
 
 // Main code
 int main(int, char **) {
@@ -63,11 +73,12 @@ int main(int, char **) {
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags =
         (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window *window = SDL_CreateWindow("WTIde", SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window *window = SDL_CreateWindow("WTIde", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                          1280, 720, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
+    if (SDL_GL_SetSwapInterval(-1) == -1) // Enable adaptive sync
+        SDL_GL_SetSwapInterval(1);        // Enable vsync
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -77,6 +88,10 @@ int main(int, char **) {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    // For an Emscripten build we are disabling file-system access, so let's not attempt to do a
+    // fopen() of the imgui.ini file. You may manually call LoadIniSettingsFromMemory() to load
+    // settings from your own storage. io.IniFilename = NULL; // TODO
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -120,7 +135,13 @@ int main(int, char **) {
 
     // Main loop
     bool alive = true;
-    while (alive) {
+#ifdef __EMSCRIPTEN__
+    loop =
+        [&]()
+#else
+    while (alive)
+#endif
+    {
         auto start_frame = SDL_GetTicks64();
 
         // Poll and handle events (inputs, window resize, etc.)
@@ -165,6 +186,10 @@ int main(int, char **) {
         auto delta_time = static_cast<int>(end_frame - start_frame);
         SDL_WaitEventTimeout(NULL, std::max(0, 1000 / 10 - delta_time));
     }
+
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(main_loop, 0, true);
+#endif
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
