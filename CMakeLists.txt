@@ -48,11 +48,12 @@ target_link_libraries(
 )
 target_compile_options(
     ${TARGET_NAME} PRIVATE
-        -Wall -Wextra -pedantic
+        -Wall -Wextra -Wpedantic
         -Wshadow -Wformat=2 -Wfloat-equal -Wconversion
-        -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond
+        # -Wlogical-op -Wduplicated-cond
         -Wcast-qual -Wcast-align
         -Wno-unused-parameter -Wno-shadow
+        # -Weverything -Wno-c++98-compat-pedantic
 )
 
 configure_file(zep.cfg zep.cfg COPYONLY)

@@ -94,8 +94,10 @@ int main(int, char **) {
     // settings from your own storage. io.IniFilename = NULL; // TODO
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsLight();
+    theme_YetAnotherDarkTheme();
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
@@ -127,8 +129,6 @@ int main(int, char **) {
     float fontSize = 16.0f;
     io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, NULL, glyph_ranges);
     ImGui::MergeIconsWithLatestFont(fontSize, false);
-
-    theme_YetAnotherDarkTheme();
 
     App app;
     app.show_demo_window = true;

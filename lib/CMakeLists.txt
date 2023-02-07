@@ -32,6 +32,7 @@ target_link_libraries(
 set_target_properties("ImGui-Notify" PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories("ImGui-Notify" SYSTEM PUBLIC ${IMGUI_NOTIFY_PATH})
 
+
 set(ICTE_PATH ${CMAKE_CURRENT_LIST_DIR}/ImGuiColorTextEdit)
 file(GLOB ICTE_SOURCES
     ${ICTE_PATH}/*.cpp
@@ -46,6 +47,7 @@ target_link_libraries(
 set_target_properties("ICTE" PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories("ICTE" SYSTEM PUBLIC ${ICTE_PATH})
 
+
 add_definitions(-DZEP_USE_SDL)
 add_definitions(-DZEP_FEATURE_CPP_FILE_SYSTEM)
 set(ZEP_PATH ${CMAKE_CURRENT_LIST_DIR}/zep)
@@ -54,12 +56,16 @@ configure_file(${ZEP_PATH}/cmake/config_app.h.cmake ${CMAKE_BINARY_DIR}/config_a
 add_subdirectory(${ZEP_PATH}/src)
 target_include_directories(Zep SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/zep/include)
 
+
 set(CLIP_PATH ${CMAKE_CURRENT_LIST_DIR}/clip)
 add_subdirectory(${CLIP_PATH})
 target_include_directories("clip" SYSTEM PUBLIC ${CLIP_PATH})
 
+
 set(NFD_PATH ${CMAKE_CURRENT_LIST_DIR}/nativefiledialog-extended)
 add_subdirectory(${NFD_PATH})
+target_include_directories("nfd" SYSTEM PUBLIC ${NFD_PATH}/src/include)
+
 
 set(WTSTAR_PATH ${CMAKE_CURRENT_LIST_DIR}/wtstar)
 file(GLOB WTSTAR_SOURCES ${WTSTAR_PATH}/src/*.c)
@@ -72,4 +78,4 @@ list(REMOVE_ITEM WTSTAR_SOURCES
     ${WTSTAR_PATH}/src/wtdump.c
 )
 add_library("WTStar" SHARED ${WTSTAR_SOURCES})
-target_include_directories("WTStar" PUBLIC ${WTSTAR_PATH}/src)
+target_include_directories("WTStar" SYSTEM PUBLIC ${WTSTAR_PATH}/src)
