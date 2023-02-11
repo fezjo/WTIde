@@ -236,10 +236,8 @@ public:
         } else {
             ep = EditorZepPlugin::init(Zep::NVec2f(1.0f, 1.0f));
         }
-        if (!path.empty()) {
-            if(!ep->loadFile(path))
-                ep->setFile(path); // set anyway
-        }
+        if(!ep->loadFile(path))
+            ep->setFile(path); // set anyway
         if (type == PluginType::EditorZep) // we can do this only after loadFile which initializes a zep window
             static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
                 Zep::ZepMode_Standard::StaticName());

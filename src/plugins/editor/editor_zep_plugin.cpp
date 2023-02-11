@@ -142,7 +142,7 @@ void EditorZepPlugin::setFile(const std::string &filename) {
 }
 
 bool EditorZepPlugin::loadFile(const std::string &filename) {
-    GetEditor().InitWithFileOrDir(fn);
+    editor.InitWithFile(filename);
     setFile(filename);
     return true;
 }
