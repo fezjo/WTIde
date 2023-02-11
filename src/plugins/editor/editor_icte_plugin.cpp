@@ -11,7 +11,7 @@ EditorIctePlugin::EditorIctePlugin() {
 
 void EditorIctePlugin::update() {
     auto &io = ImGui::GetIO();
-    if (io.KeyMods == ImGuiKeyModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
+    if (io.KeyMods == ImGuiModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
         saveFile();
     }
 }

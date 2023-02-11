@@ -206,7 +206,7 @@ public:
 
     void handleInput() {
         auto &io = ImGui::GetIO();
-        if (io.KeyMods == ImGuiKeyModFlags_Ctrl) {
+        if (io.KeyMods == ImGuiModFlags_Ctrl) {
             if (ImGui::IsKeyPressed(ImGuiKey_N))
                 openEditor();
             else if (ImGui::IsKeyPressed(ImGuiKey_O))
@@ -235,13 +235,14 @@ public:
             ep = new EditorIctePlugin();
         } else {
             ep = EditorZepPlugin::init(Zep::NVec2f(1.0f, 1.0f));
-            static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
-                Zep::ZepMode_Standard::StaticName());
         }
         if (!path.empty()) {
             if(!ep->loadFile(path))
                 ep->setFile(path); // set anyway
         }
+        if (type == PluginType::EditorZep) // we can do this only after loadFile which initializes a zep window
+            static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
+                Zep::ZepMode_Standard::StaticName());
         add_plugin(ep, ep->title, ImVec2(640, 480));
         editor_plugins.push_back(ep);
 

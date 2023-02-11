@@ -38,12 +38,11 @@ endif()
 
 if(ENABLE_ASAN)
     string(APPEND CMAKE_CXX_FLAGS " -O1")
+    string(APPEND CMAKE_CXX_FLAGS " -fsanitize=address")
     string(APPEND CMAKE_CXX_FLAGS
-        " -fsanitize=address"
         " -fno-omit-frame-pointer"
         " -fno-optimize-sibling-calls"
     )
-    string(APPEND CMAKE_CXX_FLAGS " -fsanitize=address")
 endif()
 
 if(ENABLE_LSAN)
@@ -52,11 +51,11 @@ endif()
 
 if(ENABLE_MSAN)
     string(APPEND CMAKE_CXX_FLAGS " -O1")
+    string(APPEND CMAKE_CXX_FLAGS " -fsanitize=memory")
     string(APPEND CMAKE_CXX_FLAGS
         " -fno-omit-frame-pointer"
         " -fno-optimize-sibling-calls"
     )
-    string(APPEND CMAKE_CXX_FLAGS " -fsanitize=memory")
 endif()
 
 if(ENABLE_UBSAN)
