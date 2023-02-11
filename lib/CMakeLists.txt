@@ -47,14 +47,12 @@ target_link_libraries(
 set_target_properties("ICTE" PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories("ICTE" SYSTEM PUBLIC ${ICTE_PATH})
 
-
-add_definitions(-DZEP_USE_SDL)
-add_definitions(-DZEP_FEATURE_CPP_FILE_SYSTEM)
 set(ZEP_PATH ${CMAKE_CURRENT_LIST_DIR}/zep)
 # set(APP_ROOT ${CMAKE_SOURCE_DIR})
 configure_file(${ZEP_PATH}/cmake/config_app.h.cmake ${CMAKE_BINARY_DIR}/config_app.h)
 add_subdirectory(${ZEP_PATH}/src)
 target_include_directories(Zep SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/zep/include)
+target_compile_definitions(Zep PUBLIC ZEP_USE_SDL ZEP_FEATURE_CPP_FILE_SYSTEM)
 
 
 set(CLIP_PATH ${CMAKE_CURRENT_LIST_DIR}/clip)
