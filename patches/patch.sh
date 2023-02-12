@@ -1,6 +1,12 @@
 #!/bin/bash
 
+PATCH_DIR=patches
+LIB_DIR=lib
+
 case $1 in
+log)
+    project_func=git_log
+    ;;
 status)
     project_func=repo_status
     ;;
@@ -16,8 +22,12 @@ abort-broken)
 restore)
     project_func=restore_to_origin
     ;;
+custom)
+    project_func=exec_custom
+    custom_func=${@:2}
+    ;;
 *)
-    echo "Usage: $0 [status|create|apply|restore|abort-broken]"
+    echo "Usage: $0 [log|status|create|apply|restore|abort-broken|custom...]"
     exit 1
     ;;
 esac
@@ -31,7 +41,7 @@ is_git() {
 }
 
 get_patch_dir() {
-    echo ../../patches/$1
+    echo ../../$PATCH_DIR/$1
 }
 
 get_origin_head() {
@@ -42,9 +52,15 @@ get_ahead_count() {
     git rev-list --count $1..
 }
 
+git_log() {
+    project=$1
+    cd $LIB_DIR/$project
+    git log --pretty=oneline --abbrev-commit --graph
+}
+
 repo_status() {
     project=$1
-    cd lib/$project
+    cd $LIB_DIR/$project
     is_git || return 1
     origin_commit=$(get_origin_head $project)
     ahead=$(get_ahead_count $origin_commit)
@@ -54,7 +70,7 @@ repo_status() {
 create_patches() {
     project=$1
     patch_dir=$(get_patch_dir $project)
-    cd lib/$project
+    cd $LIB_DIR/$project
     is_git || return 1
     origin_commit=$(get_origin_head $project)
     ahead=$(get_ahead_count $origin_commit)
@@ -72,7 +88,7 @@ apply_patches() {
 
 abort_broken_patches() {
     project=$1
-    cd lib/$project
+    cd $LIB_DIR/$project
     is_git || return 1
     git am --abort
 }
@@ -80,19 +96,26 @@ abort_broken_patches() {
 restore_to_origin() {
     project=$1
     patch_dir=$(get_patch_dir $project)
-    cd lib/$project
+    cd $LIB_DIR/$project
     is_git || return 1
     origin_commit=$(cat $patch_dir/info)
     git fetch
     git checkout $origin_commit
-    return 0
+}
+
+exec_custom() {
+    project=$1
+    cd $LIB_DIR/$project
+    eval "$custom_func"
 }
 
 root_path=$(pwd)
-projects=$(cd lib; ls -d */)
+# projects=$(cd $LIB_DIR; ls -d */)
+projects=$(cd $PATCH_DIR; ls -d */)
 echo $projects
 for project in $projects; do
     echo "Processing $project"
     ( $project_func $project )
+    echo --------------------
     cd $root_path
 done
