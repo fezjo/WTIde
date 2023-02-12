@@ -1,27 +1,32 @@
 [submodule "lib/imgui"]
 	path = lib/imgui
 	url = https://github.com/ocornut/imgui
+    ignore = all
 [submodule "lib/zep"]
 	path = lib/zep
 	url = https://github.com/Rezonality/zep
-[submodule "lib/mutils"]
-	path = lib/mutils
-	url = https://github.com/Rezonality/mutils
+    ignore = all
 [submodule "lib/zep_imgui"]
 	path = lib/zep_imgui
 	url = https://github.com/cmaughan/zep_imgui.git
+    ignore = all
 [submodule "lib/clip"]
 	path = lib/clip
 	url = https://github.com/dacap/clip.git
+    ignore = all
 [submodule "lib/wtstar"]
 	path = lib/wtstar
 	url = https://github.com/pocestny/wtstar.git
+    ignore = all
 [submodule "lib/imgui-notify"]
 	path = lib/imgui-notify
 	url = https://github.com/patrickcjk/imgui-notify.git
+    ignore = all
 [submodule "lib/ImGuiColorTextEdit"]
 	path = lib/ImGuiColorTextEdit
 	url = https://github.com/dfranx/ImGuiColorTextEdit.git
+ignore = all    
 [submodule "lib/nativefiledialog-extended"]
 	path = lib/nativefiledialog-extended
 	url = https://github.com/btzy/nativefiledialog-extended.git
+ignore = all    
