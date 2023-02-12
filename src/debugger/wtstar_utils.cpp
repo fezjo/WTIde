@@ -41,7 +41,7 @@ std::string Writer::read(size_t pos, size_t len) {
     if (w->type == WTStar::WRITER_FILE)
         throw std::logic_error("Read from file-based writer is not yet supported");
     pos = std::min(pos, static_cast<size_t>(w->str.ptr));
-    len = std::min(len, w->str.ptr - pos);
+    len = std::min(len, (size_t)w->str.ptr - pos);
     return std::string(w->str.base + pos, len);
 }
 
@@ -51,9 +51,9 @@ code_t readCode(const std::string &fn) {
         throw std::runtime_error("Failed to open file " + fn);
     code_t code;
     ifs.seekg(0, std::ios::end);
-    code.resize(ifs.tellg());
+    code.resize((size_t)ifs.tellg());
     ifs.seekg(0, std::ios::beg);
-    ifs.read(reinterpret_cast<char *>(code.data()), code.size());
+    ifs.read(reinterpret_cast<char *>(code.data()), (ssize_t)code.size());
     return code;
 }
 

@@ -21,7 +21,7 @@ public:
     ~Writer();
     void clear();
     void write(const std::string &s);
-    std::string read(size_t pos = 0, size_t len = -1u);
+    std::string read(size_t pos = 0, size_t len = -1ul);
 
     WTStar::writer_t *w;
 };

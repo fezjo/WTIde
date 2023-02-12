@@ -15,7 +15,7 @@ public:
 
 public:
     timepoint lastFocusedTime;
-    int dockId;
+    ImGuiID dockId;
 
 protected:
     std::string fn;
