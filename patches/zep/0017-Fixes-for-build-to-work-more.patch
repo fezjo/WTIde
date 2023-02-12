@@ -1,0 +1,153 @@
+From afcdc97a18c696dfc783f2770ce9d9d8eb3c17be Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Sun, 12 Feb 2023 11:35:28 +0100
+Subject: [PATCH] Fixes for build to work more
+
+---
+ .gitignore                       | 1 +
+ config.sh                        | 0
+ config_imgui.sh                  | 0
+ demos/demo_imgui/janet_utils.cpp | 2 +-
+ demos/demo_imgui/main.cpp        | 6 +++---
+ demos/demo_qt/mainwindow.cpp     | 1 -
+ include/zep/buffer.h             | 2 +-
+ include/zep/qt/zepwidget_qt.h    | 6 +++---
+ src/buffer.cpp                   | 2 +-
+ 9 files changed, 10 insertions(+), 10 deletions(-)
+ mode change 100644 => 100755 config.sh
+ mode change 100644 => 100755 config_imgui.sh
+
+diff --git a/.gitignore b/.gitignore
+index 98f687a8..fe779126 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -11,6 +11,7 @@ tags
+ **/build/*
+ indexdb
+ cmake-build*
++.cache/*
+ # User-specific files (MonoDevelop/Xamarin Studio)
+ *.userprefs
+ **/*.DS_Store
+diff --git a/config.sh b/config.sh
+old mode 100644
+new mode 100755
+diff --git a/config_imgui.sh b/config_imgui.sh
+old mode 100644
+new mode 100755
+diff --git a/demos/demo_imgui/janet_utils.cpp b/demos/demo_imgui/janet_utils.cpp
+index 584df534..9d519ac3 100644
+--- a/demos/demo_imgui/janet_utils.cpp
++++ b/demos/demo_imgui/janet_utils.cpp
+@@ -68,7 +68,7 @@ static Janet io_printf(int32_t argc, Janet* argv)
+     return janet_wrap_nil();
+ }
+ 
+-std::string janet_run(const std::string& strText, std::string& strPath, Janet* out)
++std::string janet_run(const std::string& strText, std::string strPath, Janet* out)
+ {
+     JanetParser parser;
+     int errflags = 0, done = 0;
+diff --git a/demos/demo_imgui/main.cpp b/demos/demo_imgui/main.cpp
+index 2be73bca..72768f05 100644
+--- a/demos/demo_imgui/main.cpp
++++ b/demos/demo_imgui/main.cpp
+@@ -63,7 +63,7 @@ namespace Zep
+ // API
+ void janet_init(const std::string& basePath);
+ JanetTable* janet_get();
+-std::string janet_run(const std::string& strText, std::string& strPath, Janet* out);
++std::string janet_run(const std::string& strText, std::string strPath, Janet* out);
+ } // namespace Zep
+ 
+ namespace
+@@ -238,7 +238,7 @@ struct ZepContainerImGui : public IZepComponent, public IZepReplProvider
+         buffer.BeginFlash(time, flashType, range);
+ 
+         Janet out;
+-        auto ret = janet_run(eval, std::string("main"), &out);
++        auto ret = janet_run(eval, "main", &out);
+         ret = RTrim(ret);
+ 
+         GetEditor().SetCommandText(ret);
+@@ -248,7 +248,7 @@ struct ZepContainerImGui : public IZepComponent, public IZepReplProvider
+     virtual std::string ReplParse(const std::string& str) override
+     {
+         Janet out;
+-        auto ret = janet_run(str, std::string("main"), &out);
++        auto ret = janet_run(str, "main", &out);
+         ret = RTrim(ret);
+ 
+         return ret;
+diff --git a/demos/demo_qt/mainwindow.cpp b/demos/demo_qt/mainwindow.cpp
+index 9f45ba31..da733b1a 100644
+--- a/demos/demo_qt/mainwindow.cpp
++++ b/demos/demo_qt/mainwindow.cpp
+@@ -27,7 +27,6 @@
+ #include "demo_common.h"
+ 
+ using namespace Zep;
+-using namespace MUtils;
+ 
+ const std::string shader = R"R(
+ #version 330 core
+diff --git a/include/zep/buffer.h b/include/zep/buffer.h
+index 1ddf4418..57fe78b4 100644
+--- a/include/zep/buffer.h
++++ b/include/zep/buffer.h
+@@ -138,7 +138,7 @@ public:
+     bool SkipNot(fnMatch IsToken, GlyphIterator& start, Direction dir) const;
+ 
+     GlyphIterator Find(GlyphIterator start, const uint8_t* pBegin, const uint8_t* pEnd) const;
+-    GlyphIterator FindFirstCharOf(GlyphIterator& start, const std::string& chars, int32_t& foundIndex, Direction dir) const;
++    GlyphIterator FindFirstCharOf(GlyphIterator start, const std::string& chars, int32_t& foundIndex, Direction dir) const;
+     GlyphIterator FindOnLineMotion(GlyphIterator start, const uint8_t* pCh, Direction dir) const;
+     std::pair<GlyphIterator, GlyphIterator> FindMatchingPair(GlyphIterator start, const uint8_t ch) const;
+     GlyphIterator WordMotion(GlyphIterator start, uint32_t searchType, Direction dir) const;
+diff --git a/include/zep/qt/zepwidget_qt.h b/include/zep/qt/zepwidget_qt.h
+index 4891950a..0aac1f52 100644
+--- a/include/zep/qt/zepwidget_qt.h
++++ b/include/zep/qt/zepwidget_qt.h
+@@ -241,7 +241,7 @@ public:
+     {
+         if (m_spEditor)
+         {
+-            m_spEditor->OnMouseDown(toNVec2f(ev->localPos()), GetMouseButton(ev));
++            m_spEditor->OnMouseDown(toNVec2f(ev->position()), GetMouseButton(ev));
+         }
+     }
+     virtual void mouseReleaseEvent(QMouseEvent* ev) override
+@@ -249,7 +249,7 @@ public:
+         (void)ev;
+         if (m_spEditor)
+         {
+-            m_spEditor->OnMouseUp(toNVec2f(ev->localPos()), GetMouseButton(ev));
++            m_spEditor->OnMouseUp(toNVec2f(ev->position()), GetMouseButton(ev));
+         }
+     }
+ 
+@@ -262,7 +262,7 @@ public:
+     {
+         if (m_spEditor)
+         {
+-            m_spEditor->OnMouseMove(toNVec2f(ev->localPos()));
++            m_spEditor->OnMouseMove(toNVec2f(ev->position()));
+         }
+     }
+ 
+diff --git a/src/buffer.cpp b/src/buffer.cpp
+index 16431728..2e8b665d 100644
+--- a/src/buffer.cpp
++++ b/src/buffer.cpp
+@@ -510,7 +510,7 @@ std::pair<GlyphIterator, GlyphIterator> ZepBuffer::FindMatchingPair(GlyphIterato
+ 
+ // Only works on searches of ascii characters (but navigates unicode buffer); useful for some vim operations
+ // Returns the index of the first found char and its location
+-GlyphIterator ZepBuffer::FindFirstCharOf(GlyphIterator& start, const std::string& chars, int32_t& found_index, Direction dir) const
++GlyphIterator ZepBuffer::FindFirstCharOf(GlyphIterator start, const std::string& chars, int32_t& found_index, Direction dir) const
+ {
+     GlyphIterator itr = start;
+     if (!itr.Valid())
+-- 
+2.39.1
+

@@ -1,0 +1,56 @@
+From 58b331b5ce5a0913fc8938777df9229e8bf03b6a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Sun, 12 Feb 2023 13:14:54 +0100
+Subject: [PATCH] Fix keycodes after Imgui update, simplify keycode checks
+
+---
+ TextEditor.cpp | 18 +++++++-----------
+ 1 file changed, 7 insertions(+), 11 deletions(-)
+
+diff --git a/TextEditor.cpp b/TextEditor.cpp
+index 3ee620f..cef93b9 100644
+--- a/TextEditor.cpp
++++ b/TextEditor.cpp
+@@ -1187,8 +1187,8 @@ void TextEditor::HandleKeyboardInputs()
+ 
+ 			SDL_Scancode sc1 = SDL_GetScancodeFromKey(sct.Key1);
+ 
+-			if ((ImGui::IsKeyPressed(sc1) || (sc1 == SDL_SCANCODE_RETURN && ImGui::IsKeyPressed(SDL_SCANCODE_KP_ENTER))) &&
+-				((sct.Key2 != -1 && ImGui::IsKeyPressed(SDL_GetScancodeFromKey(sct.Key2))) || sct.Key2 == -1)
++			if ((ImGui::IsKeyPressed((ImGuiKey)sc1) || (sc1 == SDL_SCANCODE_RETURN && ImGui::IsKeyPressed((ImGuiKey)SDL_SCANCODE_KP_ENTER))) &&
++				(sct.Key2 == -1 || ImGui::IsKeyPressed((ImGuiKey)SDL_GetScancodeFromKey(sct.Key2)))
+ 			) {
+ 				if ((sct.Ctrl == ctrl) && (sct.Alt == alt) && (sct.Shift == shift)) {
+ 
+@@ -1460,7 +1460,7 @@ void TextEditor::HandleKeyboardInputs()
+ 
+ 		if ((mACOpened && !keepACOpened) || mFunctionDeclarationTooltip) {
+ 			for (size_t i = 0; i < ImGuiKey_COUNT; i++)
+-				keyCount += ImGui::IsKeyPressed(ImGui::GetKeyIndex(i));
++				keyCount += ImGui::IsKeyPressed(ImGui::GetKeyIndex((ImGuiKey)i));
+ 
+ 			if (keyCount != 0) {
+ 				if (functionTooltipState == mFunctionDeclarationTooltip)
+@@ -3312,15 +3312,11 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 
+ 			SDL_Scancode sc1 = SDL_GetScancodeFromKey(sct.Key1);
+ 
+-			if (ImGui::IsKeyPressed(sc1) && ((sct.Key2 != -1 && ImGui::IsKeyPressed(SDL_GetScancodeFromKey(sct.Key2))) || sct.Key2 == -1)) {
+-				if (((sct.Ctrl == 0 && !ctrl) || (sct.Ctrl == 1 && ctrl) || (sct.Ctrl == 2)) &&		// ctrl check
+-					((sct.Alt == 0 && !alt) || (sct.Alt == 1 && alt) || (sct.Alt == 2)) &&			// alt check
+-					((sct.Shift == 0 && !shift) || (sct.Shift == 1 && shift) || (sct.Shift == 2))) {// shift check
+-				
++			if (ImGui::IsKeyPressed((ImGuiKey)sc1) &&
++				(sct.Key2 == -1 || ImGui::IsKeyPressed((ImGuiKey)SDL_GetScancodeFromKey(sct.Key2))) &&
++				sct.Ctrl == ctrl && sct.Alt == alt && sct.Shift == shift)
+ 					curActionID = action.first;
+-				}
+-			}
+-		}
++        }
+ 		mFindNext = curActionID == TextEditor::ShortcutID::FindNext;
+ 
+ 		if (mFindJustOpened) {
+-- 
+2.39.1
+

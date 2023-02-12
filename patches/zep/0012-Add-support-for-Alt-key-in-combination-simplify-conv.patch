@@ -1,19 +1,22 @@
-From 63fbf5c9fb13b2042a7e733ad119719a6734078a Mon Sep 17 00:00:00 2001
+From 5b9c209bde2211ff9a0b6b41770ae62525f45353 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Sun, 17 Apr 2022 20:51:58 +0200
 Subject: [PATCH] Add support for Alt key in combination, simplify conversion
  to string
 
+Key combinations can now include Alt as modifier.
+Function for converting key combinations to string identifier was
+refactored to be simpler, better working and in general better.
 ---
  include/zep/imgui/editor_imgui.h |  4 +++
  src/mode.cpp                     | 52 ++++++++------------------------
  2 files changed, 17 insertions(+), 39 deletions(-)
 
 diff --git a/include/zep/imgui/editor_imgui.h b/include/zep/imgui/editor_imgui.h
-index 3afe2b5e..38bb2def 100644
+index 0e538157..913f8a78 100644
 --- a/include/zep/imgui/editor_imgui.h
 +++ b/include/zep/imgui/editor_imgui.h
-@@ -129,6 +129,10 @@ public:
+@@ -127,6 +127,10 @@ public:
          {
              mod |= ModifierKey::Ctrl;
          }
@@ -25,10 +28,10 @@ index 3afe2b5e..38bb2def 100644
          {
              mod |= ModifierKey::Shift;
 diff --git a/src/mode.cpp b/src/mode.cpp
-index 86ba7a2c..c822d851 100644
+index c862cfe1..6835eb78 100644
 --- a/src/mode.cpp
 +++ b/src/mode.cpp
-@@ -280,31 +280,17 @@ void ZepMode::SwitchMode(EditorMode currentMode)
+@@ -281,31 +281,17 @@ void ZepMode::SwitchMode(EditorMode currentMode)
  
  std::string ZepMode::ConvertInputToMapString(uint32_t key, uint32_t modifierKeys)
  {
@@ -69,7 +72,7 @@ index 86ba7a2c..c822d851 100644
  
      std::string mapped;
  
-@@ -340,27 +326,15 @@ std::string ZepMode::ConvertInputToMapString(uint32_t key, uint32_t modifierKeys
+@@ -341,27 +327,15 @@ std::string ZepMode::ConvertInputToMapString(uint32_t key, uint32_t modifierKeys
  
      if (!mapped.empty())
      {
@@ -102,5 +105,5 @@ index 86ba7a2c..c822d851 100644
  
  // Handle a key press, convert it to an input command and context, and return it.
 -- 
-2.36.0
+2.39.1
 

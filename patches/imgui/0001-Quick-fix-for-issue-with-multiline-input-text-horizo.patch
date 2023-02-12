@@ -1,4 +1,4 @@
-From c0559a0d73b60ebc8df0ed6ae3eb513be95664bb Mon Sep 17 00:00:00 2001
+From 2d4713f417d511a746e32f725d93e1bcc1b388b7 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Wed, 20 Apr 2022 11:21:16 +0200
 Subject: [PATCH] Quick fix for issue with multiline input text horizontal
@@ -9,10 +9,10 @@ Subject: [PATCH] Quick fix for issue with multiline input text horizontal
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/imgui_widgets.cpp b/imgui_widgets.cpp
-index f84d12a3..7e6edab9 100644
+index c5a7830a..f0c41b89 100644
 --- a/imgui_widgets.cpp
 +++ b/imgui_widgets.cpp
-@@ -4658,7 +4658,9 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
+@@ -4700,7 +4700,9 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
  
              // Store text height (note that we haven't calculated text width at all, see GitHub issues #383, #1224)
              if (is_multiline)
@@ -23,7 +23,7 @@ index f84d12a3..7e6edab9 100644
          }
  
          // Scroll
-@@ -4764,7 +4766,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
+@@ -4806,7 +4808,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
      {
          // Render text only (no selection, no cursor)
          if (is_multiline)
@@ -33,5 +33,5 @@ index f84d12a3..7e6edab9 100644
              buf_display_end = buf_display + state->CurLenA;
          else if (!is_displaying_hint)
 -- 
-2.36.0
+2.39.1
 

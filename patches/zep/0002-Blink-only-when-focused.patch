@@ -1,18 +1,21 @@
-From 03ae678ca56b9253ff3a98cd6b95dd533e0ad012 Mon Sep 17 00:00:00 2001
+From e816ed733b7458057fa7d501238eb7bf5ff4fb32 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Thu, 7 Apr 2022 10:31:41 +0200
 Subject: [PATCH] Blink only when focused
 
+When multiple zep windows are open, cursors blink in all of them
+simultaneously. This is distracting and it's not clear which window is
+active. Now only focused window has blinking cursor.
 ---
  include/zep/editor.h | 3 +++
  src/editor.cpp       | 1 +
  2 files changed, 4 insertions(+)
 
 diff --git a/include/zep/editor.h b/include/zep/editor.h
-index b7b188c6..382c307f 100644
+index 8233d845..307d223d 100644
 --- a/include/zep/editor.h
 +++ b/include/zep/editor.h
-@@ -397,6 +397,9 @@ private:
+@@ -406,6 +406,9 @@ private:
      // Ensure there is a valid tab window and return it
      ZepTabWindow* EnsureTab();
  
@@ -23,10 +26,10 @@ index b7b188c6..382c307f 100644
      ZepDisplay* m_pDisplay;
      IZepFileSystem* m_pFileSystem;
 diff --git a/src/editor.cpp b/src/editor.cpp
-index 074c6bbb..80edb1ba 100644
+index 99bc0d27..21300f22 100644
 --- a/src/editor.cpp
 +++ b/src/editor.cpp
-@@ -1058,6 +1058,7 @@ bool ZepEditor::RefreshRequired()
+@@ -1093,6 +1093,7 @@ bool ZepEditor::RefreshRequired()
  
  bool ZepEditor::GetCursorBlinkState() const
  {
@@ -35,5 +38,5 @@ index 074c6bbb..80edb1ba 100644
      return m_lastCursorBlink;
  }
 -- 
-2.36.0
+2.39.1
 

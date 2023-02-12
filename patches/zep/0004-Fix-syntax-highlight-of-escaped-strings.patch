@@ -1,0 +1,77 @@
+From 01941d6b1c547fc60649f0ed8e4cf45318a0aea4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Thu, 14 Apr 2022 12:56:19 +0200
+Subject: [PATCH] Fix syntax highlight of escaped strings
+
+Presence of \\ inside string literals was not accounted for. Therefore
+when strings like "ab\\" or "ab\\""cd" were present, they were not
+colored correctly.
+Also strings like "ab""cd" were not handled correctly. This is also
+fixed.
+Highlighting still has some issues related to only partial
+recomputation.
+---
+ src/syntax.cpp | 41 +++++++++++++----------------------------
+ 1 file changed, 13 insertions(+), 28 deletions(-)
+
+diff --git a/src/syntax.cpp b/src/syntax.cpp
+index 1b5b6694..85e7588c 100644
+--- a/src/syntax.cpp
++++ b/src/syntax.cpp
+@@ -259,40 +259,25 @@ void ZepSyntax::UpdateSyntax()
+             mark(itrFirst, itrLast, ThemeColor::Normal, ThemeColor::None);
+         }
+ 
+-        // Find String
+-        auto findString = [&](uint8_t ch) {
++        auto findStringLiteral = [&](uint8_t ch) {
+             auto itrString = itrFirst;
+-            if (*itrString == ch)
+-            {
+-                itrString++;
+-
+-                while (itrString < buffer.end())
+-                {
+-                    // handle end of string
+-                    if (*itrString == ch)
+-                    {
+-                        itrString++;
+-                        mark(itrFirst, itrString, ThemeColor::String, ThemeColor::None);
+-                        itrLast = itrString + 1;
+-                        break;
+-                    }
+-
+-                    if (itrString < (buffer.end() - 1))
+-                    {
+-                        auto itrNext = itrString + 1;
+-                        // Ignore quoted
+-                        if (*itrString == '\\' && *itrNext == ch)
+-                        {
+-                            itrString++;
+-                        }
+-                    }
++            if (*itrString != ch) return;
++            itrString++;
+ 
++            for (; itrString < buffer.end(); itrString++)
++            {
++                if (*itrString == '\\') // ignore escaped characters
+                     itrString++;
++                else if (*itrString == ch) // handle end of string
++                {
++                    itrLast = itrString + 1;
++                    mark(itrFirst, itrLast, ThemeColor::String, ThemeColor::None);
++                    break;
+                 }
+             }
+         };
+-        findString('\"');
+-        findString('\'');
++        findStringLiteral('\"');
++        findStringLiteral('\'');
+ 
+         if (m_flags & ZepSyntaxFlags::LispLike)
+         {
+-- 
+2.39.1
+

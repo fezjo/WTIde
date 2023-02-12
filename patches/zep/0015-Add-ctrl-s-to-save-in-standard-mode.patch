@@ -1,4 +1,4 @@
-From 5667be479789bde61e3f5bf969542d1975e96257 Mon Sep 17 00:00:00 2001
+From efba081a3c4fcd3d241a122aad9e26d6b8b6db1a Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Sun, 17 Apr 2022 20:38:14 +0200
 Subject: [PATCH] Add ctrl+s to save in standard mode
@@ -23,10 +23,10 @@ index c63f60be..fbc538e2 100644
  DECLARE_COMMANDID(StandardCopy)
  DECLARE_COMMANDID(StandardPaste)
 diff --git a/src/mode.cpp b/src/mode.cpp
-index 10993efe..86ba7a2c 100644
+index efdd41fe..26d96476 100644
 --- a/src/mode.cpp
 +++ b/src/mode.cpp
-@@ -1909,6 +1909,10 @@ bool ZepMode::GetCommand(CommandContext& context)
+@@ -1887,6 +1887,10 @@ bool ZepMode::GetCommand(CommandContext& context)
              context.op = CommandOperation::Delete;
          }
      }
@@ -38,10 +38,10 @@ index 10993efe..86ba7a2c 100644
      {
          // If not a single char, then we are trying to input a special, which isn't allowed
 diff --git a/src/mode_standard.cpp b/src/mode_standard.cpp
-index 62edee03..f8bbd3ad 100644
+index 3416e680..21cc5d23 100644
 --- a/src/mode_standard.cpp
 +++ b/src/mode_standard.cpp
-@@ -80,10 +80,11 @@ void ZepMode_Standard::Init()
+@@ -82,10 +82,11 @@ void ZepMode_Standard::Init()
      keymap_add({ &m_insertMap, &m_visualMap }, { "<C-a>" }, id_StandardSelectAll);
  
      keymap_add({ &m_normalMap, &m_visualMap, &m_insertMap }, { "<Escape>" }, id_InsertMode);
@@ -57,5 +57,5 @@ index 62edee03..f8bbd3ad 100644
  
  void ZepMode_Standard::Begin(ZepWindow* pWindow)
 -- 
-2.36.0
+2.39.1
 

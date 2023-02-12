@@ -1,18 +1,22 @@
-From 13c3a69b501d2c6b4a76b47ca25c7c3b34997c1b Mon Sep 17 00:00:00 2001
+From 41b3410a139d1b981612c7a4aea28bc45ee54719 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Tue, 12 Apr 2022 22:57:05 +0200
-Subject: [PATCH] Temporarily fix confusing behaviour when selecting all of
- empty document
+Subject: [PATCH] Fix confusing behaviour when selecting all of empty document
 
+When selecting all of an empty document, nothing was selected, but the
+mode changed to visual mode.
+This was confusing, because it's not the usual behaviour and it's not
+easy to tell what mode you are in standard mode.
+Now when nothing is selected, mode switches back to default (insert) mode.
 ---
  src/mode.cpp | 2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/src/mode.cpp b/src/mode.cpp
-index 33c73298..1fbf5278 100644
+index 17d5cc57..df3af365 100644
 --- a/src/mode.cpp
 +++ b/src/mode.cpp
-@@ -995,6 +995,8 @@ bool ZepMode::GetCommand(CommandContext& context)
+@@ -1000,6 +1000,8 @@ bool ZepMode::GetCommand(CommandContext& context)
          m_visualBegin = context.buffer.Begin();
          m_visualEnd = context.buffer.End();
          auto range = GetInclusiveVisualRange(false);
@@ -22,5 +26,5 @@ index 33c73298..1fbf5278 100644
          GetCurrentWindow()->SetBufferCursor(range.second);
          return true;
 -- 
-2.36.0
+2.39.1
 

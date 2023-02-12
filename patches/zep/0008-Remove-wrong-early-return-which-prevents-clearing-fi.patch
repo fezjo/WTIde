@@ -1,14 +1,15 @@
-From ec23df34b9d89d78f9c9ef8721a25d21d6258208 Mon Sep 17 00:00:00 2001
+From 4f3f5078e116de3b2af216625fbd18ee380d651e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Wed, 25 May 2022 18:31:39 +0200
 Subject: [PATCH] Remove wrong early return which prevents clearing file
 
+Somehow, saving an empty file was forbidden. This behaviour was fixed.
 ---
  src/buffer.cpp | 5 -----
  1 file changed, 5 deletions(-)
 
 diff --git a/src/buffer.cpp b/src/buffer.cpp
-index 16e3d6b4..e12d833c 100644
+index c436babc..16431728 100644
 --- a/src/buffer.cpp
 +++ b/src/buffer.cpp
 @@ -776,11 +776,6 @@ bool ZepBuffer::Save(int64_t& size)
@@ -24,5 +25,5 @@ index 16e3d6b4..e12d833c 100644
      {
          m_fileFlags = ZClearFlags(m_fileFlags, FileFlags::Dirty);
 -- 
-2.36.0
+2.39.1
 

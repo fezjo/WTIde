@@ -1,17 +1,18 @@
-From 947fa05db79d8d7c558fdf4ac1363e5e2c2728d8 Mon Sep 17 00:00:00 2001
+From cfe3e49f402a1e0e949179b63ea70a5c8feb2b19 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Wed, 13 Apr 2022 09:46:26 +0200
 Subject: [PATCH] Fix moving to end of line in insert mode
 
+Moving beyond the end of line in vim insert mode was not possible.
 ---
  src/mode.cpp | 8 +++++---
  1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/src/mode.cpp b/src/mode.cpp
-index 1fbf5278..3bcc7ef9 100644
+index b406c96f..17d5cc57 100644
 --- a/src/mode.cpp
 +++ b/src/mode.cpp
-@@ -728,6 +728,8 @@ bool ZepMode::GetCommand(CommandContext& context)
+@@ -731,6 +731,8 @@ bool ZepMode::GetCommand(CommandContext& context)
          return true;
      }
  
@@ -20,7 +21,7 @@ index 1fbf5278..3bcc7ef9 100644
      if (mappedCommand == id_NormalMode)
      {
          // TODO: I think this should be a 'command' which would get replayed with dot;
-@@ -945,19 +947,19 @@ bool ZepMode::GetCommand(CommandContext& context)
+@@ -948,19 +950,19 @@ bool ZepMode::GetCommand(CommandContext& context)
      }
      else if (mappedCommand == id_MotionDown)
      {
@@ -44,5 +45,5 @@ index 1fbf5278..3bcc7ef9 100644
          return true;
      }
 -- 
-2.36.0
+2.39.1
 

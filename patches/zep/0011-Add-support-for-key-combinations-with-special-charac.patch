@@ -1,20 +1,24 @@
-From b8162405af43a8a1da0d52d0c57053d91b10a0a1 Mon Sep 17 00:00:00 2001
+From fd3ec0344cad6570cda5889dbdd5220e31b247d2 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Wed, 13 Apr 2022 18:03:32 +0200
 Subject: [PATCH] Add support for key combinations with special characters
 
+Support for special characters -=[];'\,./` and control characters like
+LEFT, DOWN, HOME, PGUP, BACKSPACE, ENTER, ESCAPE, ... has been added.
 ---
- include/zep/imgui/editor_imgui.h | 128 ++++++++++++-------------------
- 1 file changed, 50 insertions(+), 78 deletions(-)
+ include/zep/imgui/editor_imgui.h | 130 ++++++++++++-------------------
+ 1 file changed, 50 insertions(+), 80 deletions(-)
 
 diff --git a/include/zep/imgui/editor_imgui.h b/include/zep/imgui/editor_imgui.h
-index 69498dbf..af2e6a27 100644
+index d2346932..0e538157 100644
 --- a/include/zep/imgui/editor_imgui.h
 +++ b/include/zep/imgui/editor_imgui.h
-@@ -34,19 +34,47 @@ public:
+@@ -32,21 +32,47 @@ public:
  
-         static std::map<int, int> MapUSBKeys =
-         {
+         uint32_t mod = 0;
+ 
+-        static std::map<int, int> MapUSBKeys =
+-        {
 -            { KEY_F1, ExtKeys::F1},
 -            { KEY_F2, ExtKeys::F2},
 -            { KEY_F3, ExtKeys::F3},
@@ -27,6 +31,7 @@ index 69498dbf..af2e6a27 100644
 -            { KEY_F10, ExtKeys::F10},
 -            { KEY_F11, ExtKeys::F11},
 -            { KEY_F12, ExtKeys::F12}
++        static std::map<int, int> MapUSBKeys = {
 +            { ImGuiKey_F1, ExtKeys::F1 },
 +            { ImGuiKey_F2, ExtKeys::F2 },
 +            { ImGuiKey_F3, ExtKeys::F3 },
@@ -52,92 +57,91 @@ index 69498dbf..af2e6a27 100644
 +            { ImGuiKey_DownArrow, ExtKeys::DOWN },
 +            { ImGuiKey_PageDown, ExtKeys::PAGEDOWN },
 +            { ImGuiKey_PageUp, ExtKeys::PAGEUP }
-         };
-+        static std::map<int, int> MapShiftableUSBKeys =
-+        {
-+            { ImGuiKey_Apostrophe, '\''},
-+            { ImGuiKey_Comma, ','},
-+            { ImGuiKey_Minus, '-'},
-+            { ImGuiKey_Period, '.'},
-+            { ImGuiKey_Slash, '/'},
-+            { ImGuiKey_Semicolon, ';'},
-+            { ImGuiKey_Equal, '='},
-+            { ImGuiKey_LeftBracket, '['},
-+            { ImGuiKey_Backslash, '\\'},
-+            { ImGuiKey_RightBracket, ']'},
-+            { ImGuiKey_GraveAccent, '`' }
 +        };
++        static std::map<int, int> MapShiftableUSBKeys = {
++            { ImGuiKey_Apostrophe, '\'' },
++            { ImGuiKey_Comma, ',' },
++            { ImGuiKey_Minus, '-' },
++            { ImGuiKey_Period, '.' },
++            { ImGuiKey_Slash, '/' },
++            { ImGuiKey_Semicolon, ';' },
++            { ImGuiKey_Equal, '=' },
++            { ImGuiKey_LeftBracket, '[' },
++            { ImGuiKey_Backslash, '\\' },
++            { ImGuiKey_RightBracket, ']' },
++            { ImGuiKey_GraveAccent, '`' }
+         };
 +
          if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
          {
              OnMouseMove(toNVec2f(io.MousePos));
-@@ -110,73 +138,17 @@ public:
+@@ -119,73 +145,17 @@ public:
              }
          }
  
 -        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Tab)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::TAB, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::TAB, mod);
 -            return;
 -        }
 -        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::ESCAPE, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::ESCAPE, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::RETURN, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::RETURN, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::DEL, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::DEL, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Home)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::HOME, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::HOME, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_End)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::END, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::END, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Backspace)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::BACKSPACE, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::BACKSPACE, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::RIGHT, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::RIGHT, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::LEFT, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::LEFT, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::UP, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::UP, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::DOWN, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::DOWN, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_PageDown)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::PAGEDOWN, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::PAGEDOWN, mod);
 -            return;
 -        }
 -        else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_PageUp)))
 -        {
--            buffer.GetMode()->AddKeyPress(ExtKeys::PAGEUP, mod);
+-            pBuffer->GetMode()->AddKeyPress(ExtKeys::PAGEUP, mod);
 -            return;
 -        }
 -        else if (io.KeyCtrl)
@@ -146,9 +150,9 @@ index 69498dbf..af2e6a27 100644
 +            // Check Shiftable USB Keys
 +            for (auto& usbKey : MapShiftableUSBKeys)
 +            {
-+                if (ImGui::IsKeyPressed(usbKey.first))
++                if (ImGui::IsKeyPressed(ImGuiKey(usbKey.first)))
 +                {
-+                    buffer.GetMode()->AddKeyPress(usbKey.second, mod);
++                    pBuffer->GetMode()->AddKeyPress(usbKey.second, mod);
 +                    return;
 +                }
 +            }
@@ -156,5 +160,5 @@ index 69498dbf..af2e6a27 100644
              // without modifying the ImGui base code, we have special handling here for CTRL.
              // For the Win32 case, we use VK_A (ASCII) is handled below
 -- 
-2.36.0
+2.39.1
 
