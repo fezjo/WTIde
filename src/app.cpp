@@ -273,7 +273,8 @@ public:
         delete plugin;
     }
 
-    void openEditor(fs::path path = "", bool mimickLastFocused = true,
+    // dockAsLastFocused: if true, the new editor will be opened in the same dockspace as the last
+    void openEditor(fs::path path = "", bool dockAsLastFocused = true,
                     PluginType type = PluginType::Unknown) {
         if (type == PluginType::Unknown)
             type = default_editor_plugin_type;
@@ -291,7 +292,7 @@ public:
         add_plugin(ep, ep->title, ImVec2(640, 480));
         editor_plugins.push_back(ep);
 
-        if (mimickLastFocused && !editor_plugins.empty()) {
+        if (dockAsLastFocused && !editor_plugins.empty()) {
             std::pair<timepoint, IEditorPlugin *> latest = {editor_plugins[0]->lastFocusedTime,
                                                             nullptr};
             for (IEditorPlugin *epi : editor_plugins) {
