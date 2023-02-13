@@ -10,13 +10,14 @@ public:
                     std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB);
     virtual Zep::ZepEditor &GetEditor() const override;
     static EditorZepPlugin *init(const Zep::NVec2f &pixelScale, std::string rootPath = "");
-    Zep::ZepBuffer &getCurrentBuffer();
+    Zep::ZepBuffer &getCurrentBuffer() const;
 
     void update() override;
     void show() override;
     void setFile(const std::string &filename) override;
     bool loadFile(const std::string &filename) override;
     bool saveFile(std::string filename = "") override;
+    bool isDirty() const override;
 
 protected:
     virtual void Notify(std::shared_ptr<Zep::ZepMessage> message) override;

@@ -21,6 +21,7 @@
 
 class App {
 public:
+    bool alive = false;
     bool show_demo_window = false;
     ImVec4 clear_color = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
 
@@ -28,6 +29,7 @@ protected:
     NFD::Guard nfd_guard;
 
     bool initialized = false;
+    bool show_unsaved_dialog = false;
     ImGuiWindowFlags flags;
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
 
@@ -50,6 +52,7 @@ public:
     void init() {
         if (initialized)
             return;
+        alive = true;
         initialized = true;
         flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar |
                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove |
@@ -190,18 +193,50 @@ public:
         }
         for (auto p : plugins_to_delete)
             delete_plugin(p);
-        ImGui::PopStyleColor();
 
+        if (show_unsaved_dialog)
+            ImGui::OpenPopup("Unsaved changes");
+        if (ImGui::BeginPopupModal("Unsaved changes", NULL,
+                                   ImGuiWindowFlags_AlwaysAutoResize |
+                                       ImGuiWindowFlags_NoSavedSettings)) {
+            ImGui::Text("You have unsaved changes.\nDo you want to save them?\n\n");
+            ImGui::Separator();
+
+            if (ImGui::Button("Save all", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup();
+                for (auto p : editor_plugins)
+                    p->saveFile();
+                quit();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Discard", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup();
+                quit(true);
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+                ImGui::CloseCurrentPopup();
+                show_unsaved_dialog = false;
+            }
+            ImGui::EndPopup();
+        }
+
+        showNotifications();
+
+        ImGui::PopStyleColor();
+        ImGui::End();
+    }
+
+    void showNotifications() {
         // Render toasts on top of everything, at the end of your code!
         // You should push style vars here
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 5.f); // Round borders
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(43.f / 255.f, 43.f / 255.f, 43.f / 255.f,
                                                         100.f / 255.f)); // Background color
         ImGui::RenderNotifications(); // <-- Here we render all notifications
-        ImGui::PopStyleVar(1);        // Don't forget to Pop()
         ImGui::PopStyleColor(1);
-
-        ImGui::End();
+        ImGui::PopStyleVar(1);        // Don't forget to Pop()
     }
 
     void handleInput() {
@@ -212,6 +247,16 @@ public:
             else if (ImGui::IsKeyPressed(ImGuiKey_O))
                 openFiles();
         }
+    }
+
+    void quit(bool force = false) {
+        if (!force && std::any_of(editor_plugins.begin(), editor_plugins.end(),
+                                  [](auto p) { return p->isDirty(); })) {
+            show_unsaved_dialog = true;
+            return;
+        }
+        alive = false;
+        show_unsaved_dialog = false;
     }
 
     void add_plugin(IPlugin *plugin, const std::string &title = "",

@@ -131,6 +131,7 @@ int main(int, char **) {
     ImGui::MergeIconsWithLatestFont(fontSize, false);
 
     App app;
+    app.alive = true;
     app.show_demo_window = true;
 
     // Main loop
@@ -155,12 +156,12 @@ int main(int, char **) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT)
-                alive = false;
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
-                event.window.windowID == SDL_GetWindowID(window))
-                alive = false;
+            if (event.type == SDL_QUIT ||
+                (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
+                 event.window.windowID == SDL_GetWindowID(window)))
+                app.quit();
         }
+        if (!app.alive) alive = false;
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();

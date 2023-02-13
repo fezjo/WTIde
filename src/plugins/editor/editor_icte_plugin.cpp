@@ -28,10 +28,9 @@ void EditorIctePlugin::show() {
     title = fs::path(editor.GetPath()).filename();
     if (title.empty())
         title = "Untitled";
-    bool dirty = editor.IsTextChanged();
     ImGuiWindowFlags flags =
         ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar |
-        ImGuiWindowFlags_UnsavedDocument * dirty; // TODO | ImGuiWindowFlags_NoSavedSettings
+        ImGuiWindowFlags_UnsavedDocument * isDirty(); // TODO | ImGuiWindowFlags_NoSavedSettings
     ImGui::SetNextWindowSize(displaySize, ImGuiCond_FirstUseEver);
     if (!imguiBegin(flags)) {
         ImGui::End();
@@ -134,4 +133,8 @@ bool EditorIctePlugin::saveFile(std::string filename) {
     if (ok)
         editor.ResetTextChanged();
     return ok;
+}
+
+bool EditorIctePlugin::isDirty() const {
+    return editor.IsTextChanged();
 }

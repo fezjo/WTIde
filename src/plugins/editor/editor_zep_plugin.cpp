@@ -103,9 +103,8 @@ void EditorZepPlugin::show() {
     title = zepBuffer.GetFilePath().filename();
     if (title.empty())
         title = "Untitled";
-    bool dirty = zepBuffer.HasFileFlags(Zep::FileFlags::Dirty);
     ImGuiWindowFlags flags =
-        ImGuiWindowFlags_UnsavedDocument * dirty; // TODO | ImGuiWindowFlags_NoSavedSettings
+        ImGuiWindowFlags_UnsavedDocument * isDirty(); // TODO | ImGuiWindowFlags_NoSavedSettings
 
     if (!imguiBegin(flags)) {
         ImGui::End();
@@ -161,6 +160,10 @@ bool EditorZepPlugin::saveFile(std::string filename) {
     return true;
 }
 
-ZepBuffer &EditorZepPlugin::getCurrentBuffer() {
+bool EditorZepPlugin::isDirty() const {
+    return getCurrentBuffer().HasFileFlags(Zep::FileFlags::Dirty);
+}
+
+ZepBuffer &EditorZepPlugin::getCurrentBuffer() const {
     return editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
 }
