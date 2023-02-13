@@ -138,3 +138,13 @@ bool EditorIctePlugin::saveFile(std::string filename) {
 bool EditorIctePlugin::isDirty() const {
     return editor.IsTextChanged();
 }
+
+void EditorIctePlugin::setBreakpointCallbacks(bp_callback_t update, bp_callback_t remove) {
+    editor.OnBreakpointUpdate = [=](TextEditor* te, int line, bool conditioned,
+                                    const std::string& condition, bool enabled) {
+        update(BreakpointData(te->GetPath(), line, enabled, condition));
+    };
+    editor.OnBreakpointRemove = [=](TextEditor* te, int line) {
+        remove(BreakpointData(te->GetPath(), line));
+    };
+}

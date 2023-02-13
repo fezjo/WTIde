@@ -34,6 +34,7 @@ protected:
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
 
     Debugger *debugger;
+    std::vector<bp_callback_t> breakpoint_callbacks;    // vector{update, remove}
 
     std::vector<IPlugin *> plugins;
     std::vector<IEditorPlugin *> editor_plugins;
@@ -59,6 +60,15 @@ public:
                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
 
         debugger = new Debugger();
+        breakpoint_callbacks = {
+            [&](BreakpointData bp) {
+                debugger->setBreakpointWithCondition(bp.file, (uint)bp.line, bp.condition);
+                debugger->setBreakpointEnabled(bp.file, (uint)bp.line, bp.enabled);
+            },
+            [&](BreakpointData bp) { 
+                debugger->removeBreakpoint(bp.file, (uint)bp.line);
+            },
+        };
 
         filetree_plugin = new FileTreePlugin();
         filetree_plugin->setPath(fs::path("."));
@@ -289,6 +299,8 @@ public:
         if (type == PluginType::EditorZep) // we can do this only after loadFile which initializes a zep window
             static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
                 Zep::ZepMode_Standard::StaticName());
+
+        ep->setBreakpointCallbacks(breakpoint_callbacks[0], breakpoint_callbacks[1]);
         add_plugin(ep, ep->title, ImVec2(640, 480));
         editor_plugins.push_back(ep);
 
