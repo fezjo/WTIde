@@ -19,6 +19,8 @@
 #include <variant>
 #include <vector>
 
+#include "dbg.h"
+
 namespace fs = std::filesystem;
 
 using imid_t = uint64_t;
