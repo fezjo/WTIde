@@ -17,5 +17,5 @@ protected:
 
 protected:
     Debugger *debugger;
-    Breakpoint edit_bp{};
+    VM_Breakpoint edit_bp{};
 };

@@ -169,8 +169,8 @@ std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t *ast,
     return {code, error_handler.read()};
 }
 
-Breakpoint *Debugger::findBreakpoint(const std::string &file, uint line) {
-    auto it = std::find_if(breakpoints.begin(), breakpoints.end(), [&](const Breakpoint &bp) {
+VM_Breakpoint *Debugger::findBreakpoint(const std::string &file, uint line) {
+    auto it = std::find_if(breakpoints.begin(), breakpoints.end(), [&](const VM_Breakpoint &bp) {
         return bp.file == file && bp.line == line;
     });
     if (it == breakpoints.end())
@@ -178,7 +178,7 @@ Breakpoint *Debugger::findBreakpoint(const std::string &file, uint line) {
     return &*it;
 }
 
-bool Debugger::addBreakpointToVm(Breakpoint &bp) {
+bool Debugger::addBreakpointToVm(VM_Breakpoint &bp) {
     if (WTStar::add_breakpoint(env, bp.bp_pos, bp.code.empty() ? NULL : bp.code.data(),
                                static_cast<uint>(bp.code.size())) == -1) {
         std::cerr << "setBreakpointWithCondition failed" << std::endl;
@@ -197,12 +197,12 @@ std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::str
                                                                   const std::string &condition) {
     breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
-                       [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; }),
+                       [&](const VM_Breakpoint &bp) { return bp.file == file && bp.line == line; }),
         breakpoints.end());
     auto it = std::upper_bound(breakpoints.begin(), breakpoints.end(), -1u,
-                               [](uint pos, const Breakpoint &bp) { return pos < bp.bp_pos; });
-    Breakpoint &bp =
-        *breakpoints.insert(it, {file, line, condition, -1u, "not compiled", {}, NULL, 0});
+                               [](uint pos, const VM_Breakpoint &bp) { return pos < bp.bp_pos; });
+    VM_Breakpoint &bp =
+        *breakpoints.insert(it, {file, line, false, condition, -1u, "not compiled", {}, NULL});
 
     bp.bp_pos = findInstructionNumber(file, line);
     std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp.bp_pos
@@ -256,7 +256,7 @@ bool Debugger::removeBreakpoint(const std::string &file, uint line) {
         return false;
     breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
-                       [&](const Breakpoint &bp) { return bp.file == file && bp.line == line; }),
+                       [&](const VM_Breakpoint &bp) { return bp.file == file && bp.line == line; }),
         breakpoints.end());
     return true;
 }

@@ -6,14 +6,15 @@
 struct Breakpoint {
     std::string file;
     uint line;
+    bool enabled;
     std::string condition;
+};
 
+struct VM_Breakpoint : Breakpoint {
     uint bp_pos;
     std::string error;
     code_t code;
     WTStar::breakpoint_t *vm_bp;
-
-    bool enabled;
 };
 
 struct SourcePosition {
@@ -79,8 +80,8 @@ protected:
     bool readInput();
 
     uint findInstructionNumber(const std::string &file, uint line);
-    Breakpoint *findBreakpoint(const std::string &file, uint line);
-    bool addBreakpointToVm(Breakpoint &bp);
+    VM_Breakpoint *findBreakpoint(const std::string &file, uint line);
+    bool addBreakpointToVm(VM_Breakpoint &bp);
 
 public:
     bool trace_on = false;
@@ -90,7 +91,7 @@ protected:
     std::string source_fn = "";
     std::string binary_fn = "";
     std::string input = "";
-    std::vector<Breakpoint> breakpoints = {};
+    std::vector<VM_Breakpoint> breakpoints = {};
 
     ErrorHandler error_handler;
 

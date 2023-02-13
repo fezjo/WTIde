@@ -110,7 +110,7 @@ void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
     }
 
     if (std::find_if(debugger->breakpoints.begin(), debugger->breakpoints.end(),
-                     [&](const Breakpoint &bp) { return bp.bp_pos == edit_bp.bp_pos; }) ==
+                     [&](const VM_Breakpoint &bp) { return bp.bp_pos == edit_bp.bp_pos; }) ==
         debugger->breakpoints.end())
         edit_bp = {};
 }
