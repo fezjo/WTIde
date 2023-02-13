@@ -17,6 +17,13 @@ struct VM_Breakpoint : Breakpoint {
     WTStar::breakpoint_t *vm_bp;
 };
 
+inline std::ostream &operator<<(std::ostream &os, const VM_Breakpoint &bp) {
+    os << "Breakpoint(" << bp.file << ":" << bp.line << ", " << bp.enabled
+       << ", cond='" << bp.condition
+       << "' | bp_pos" << bp.bp_pos << ", err=" << bp.error<< ")";
+    return os;
+}
+
 struct SourcePosition {
     SourcePosition() = default;
     SourcePosition(WTStar::item_info_t *info, WTStar::virtual_machine_t *env);
@@ -68,7 +75,8 @@ public:
 
     std::pair<bool, std::string> setBreakpoint(const std::string &file, uint line);
     std::pair<bool, std::string> setBreakpointWithCondition(const std::string &file, uint line,
-                                                            const std::string &condition);
+                                                            const std::string &condition,
+                                                            bool enabled=true);
     bool setBreakpointEnabled(const std::string &file, uint line, bool enabled);
     bool removeBreakpoint(const std::string &file, uint line);
     void removeAllBreakpoints();

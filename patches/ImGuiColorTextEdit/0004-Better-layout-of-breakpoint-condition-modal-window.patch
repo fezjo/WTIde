@@ -1,0 +1,62 @@
+From 3d4370dfb0cd42c81f67e74e29eaa766a998e9b6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Mon, 13 Feb 2023 19:04:11 +0100
+Subject: [PATCH] Better layout of breakpoint condition modal window
+
+---
+ TextEditor.cpp | 13 ++++++++-----
+ TextEditor.h   |  2 +-
+ 2 files changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/TextEditor.cpp b/TextEditor.cpp
+index cef93b9..07d8d2b 100644
+--- a/TextEditor.cpp
++++ b/TextEditor.cpp
+@@ -3277,7 +3277,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 				bool isEnabled = bkpt.mEnabled;
+ 				if (ImGui::Selectable("Condition")) {
+ 					mPopupCondition_Line = line;
+-					mPopupCondition_Use = bkpt.mUseCondition;
++					mPopupCondition_Use = true;
+ 					memcpy(mPopupCondition_Condition, bkpt.mCondition.c_str(), bkpt.mCondition.size());
+ 					mPopupCondition_Condition[std::min<size_t>(511, bkpt.mCondition.size())] = 0;
+ 					openBkptConditionWindow = true;
+@@ -3575,15 +3575,18 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 	ImFont* font = ImGui::GetFont();
+ 	ImGui::PopFont();
+ 	ImGui::SetNextWindowSize(ImVec2(430, 175), ImGuiCond_Once);
+-	if (ImGui::BeginPopupModal("Condition##condition")) {
++	if (ImGui::BeginPopupModal("Condition##condition", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+ 		ImGui::Checkbox("Use condition", &mPopupCondition_Use);
+ 
+ 		if (!mPopupCondition_Use) {
+ 			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+ 			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+-		}
+-		ImGui::InputText("Condition", mPopupCondition_Condition, 512);
+-		if (!mPopupCondition_Use) {
++        }
++        ImGui::Text("Condition");
++        ImGui::InputTextMultiline(
++            "##", mPopupCondition_Condition, sizeof(mPopupCondition_Condition),
++            ImVec2(420, ImGui::GetTextLineHeightWithSpacing() * 6), ImGuiInputTextFlags_AllowTabInput);
++        if (!mPopupCondition_Use) {
+ 			ImGui::PopStyleVar();
+ 			ImGui::PopItemFlag();
+ 		}
+diff --git a/TextEditor.h b/TextEditor.h
+index 224358e..2beba51 100644
+--- a/TextEditor.h
++++ b/TextEditor.h
+@@ -738,7 +738,7 @@ private:
+ 
+ 	int mPopupCondition_Line;
+ 	bool mPopupCondition_Use;
+-	char mPopupCondition_Condition[512];
++	char mPopupCondition_Condition[1024];
+ 
+ 	bool mCheckComments;
+ 	ErrorMarkers mErrorMarkers;
+-- 
+2.39.1
+

@@ -194,17 +194,20 @@ std::pair<bool, std::string> Debugger::setBreakpoint(const std::string &file, ui
 
 std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::string &file,
                                                                   uint line,
-                                                                  const std::string &condition) {
-    breakpoints.erase(
+                                                                  const std::string &condition,
+                                                                  bool enabled) {
+    auto it = breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
                        [&](const VM_Breakpoint &bp) { return bp.file == file && bp.line == line; }),
         breakpoints.end());
-    auto it = std::upper_bound(breakpoints.begin(), breakpoints.end(), -1u,
-                               [](uint pos, const VM_Breakpoint &bp) { return pos < bp.bp_pos; });
+    
+    auto bp_pos = findInstructionNumber(file, line);
+    if (it == breakpoints.end())
+        it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
+                                [](uint pos, const VM_Breakpoint &bp) { return pos < bp.bp_pos; });
     VM_Breakpoint &bp =
-        *breakpoints.insert(it, {file, line, false, condition, -1u, "not compiled", {}, NULL});
+        *breakpoints.insert(it, {{file, line, false, condition}, bp_pos, "not compiled", {}, NULL});
 
-    bp.bp_pos = findInstructionNumber(file, line);
     std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp.bp_pos
               << std::endl;
     if (bp.bp_pos == -1u) {
@@ -230,9 +233,12 @@ std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::str
         bp.enabled = bp.error.empty();
         std::cerr << "setBreakpointWithCondition added breakpoint at " << bp.bp_pos << std::endl;
         std::cerr << "bp.error " << bp.error << std::endl;
-    } else
+    } else {
+        bp.error = "";
         bp.enabled = true;
+    }
 
+    bp.enabled &= enabled;
     if (env && bp.enabled)
         addBreakpointToVm(bp);
     return {bp.enabled, bp.error};

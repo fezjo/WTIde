@@ -51,8 +51,7 @@ bool Debugger::initialize(bool memory) {
         return false;
     }
     for (auto &bp : breakpoints) {
-        addBreakpointToVm(bp);
-        setBreakpointEnabled(bp.file, bp.line, bp.enabled);
+        setBreakpointWithCondition(bp.file, bp.line, bp.condition, bp.enabled);
     }
     std::cerr << "created virtual machine" << std::endl;
     return true;
