@@ -22,8 +22,12 @@ void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
         std::string &condition = is_editing ? edit_bp.condition : bp.condition;
         ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_ReadOnly * !is_editing;
 
+        auto imgui_id =
+            hash_string(bp.file + ">" + std::to_string(bp.line) + ">" + std::to_string(bp.bp_pos));
+        ImGui::Checkbox(("##treenode_enabled" + std::to_string(imgui_id)).c_str(), &enabled);
+        ImGui::SameLine();
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-        if (ImGui::TreeNodeEx(std::to_string(bp.bp_pos).c_str(), default_treenode_flags, "%s:%d",
+        if (ImGui::TreeNodeEx(std::to_string(imgui_id).c_str(), default_treenode_flags, "%s:%d",
                               bp.file.c_str(), bp.line)) {
             // TODO compilation error
             ImGui::Checkbox("Enabled", &enabled);

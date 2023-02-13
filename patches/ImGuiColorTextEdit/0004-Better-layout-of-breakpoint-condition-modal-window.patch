@@ -1,4 +1,4 @@
-From 3d4370dfb0cd42c81f67e74e29eaa766a998e9b6 Mon Sep 17 00:00:00 2001
+From 990620b21db19009b7304e219edef49414225249 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Mon, 13 Feb 2023 19:04:11 +0100
 Subject: [PATCH] Better layout of breakpoint condition modal window
@@ -9,7 +9,7 @@ Subject: [PATCH] Better layout of breakpoint condition modal window
  2 files changed, 9 insertions(+), 6 deletions(-)
 
 diff --git a/TextEditor.cpp b/TextEditor.cpp
-index cef93b9..07d8d2b 100644
+index cef93b9..bc89898 100644
 --- a/TextEditor.cpp
 +++ b/TextEditor.cpp
 @@ -3277,7 +3277,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
@@ -26,7 +26,7 @@ index cef93b9..07d8d2b 100644
  	ImGui::PopFont();
  	ImGui::SetNextWindowSize(ImVec2(430, 175), ImGuiCond_Once);
 -	if (ImGui::BeginPopupModal("Condition##condition")) {
-+	if (ImGui::BeginPopupModal("Condition##condition", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
++	if (ImGui::BeginPopupModal("Condition##condition_modal", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
  		ImGui::Checkbox("Use condition", &mPopupCondition_Use);
  
  		if (!mPopupCondition_Use) {
@@ -38,7 +38,7 @@ index cef93b9..07d8d2b 100644
 +        }
 +        ImGui::Text("Condition");
 +        ImGui::InputTextMultiline(
-+            "##", mPopupCondition_Condition, sizeof(mPopupCondition_Condition),
++            "##condition_input", mPopupCondition_Condition, sizeof(mPopupCondition_Condition),
 +            ImVec2(420, ImGui::GetTextLineHeightWithSpacing() * 6), ImGuiInputTextFlags_AllowTabInput);
 +        if (!mPopupCondition_Use) {
  			ImGui::PopStyleVar();
