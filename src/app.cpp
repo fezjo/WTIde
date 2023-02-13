@@ -64,7 +64,7 @@ public:
         filetree_plugin->setPath(fs::path("."));
         add_plugin(filetree_plugin, "FileTree", ImVec2(120, 640));
         filetree_plugin->setCallback("open_file", [&](CallbackData data) {
-            openEditor(std::get<std::string>(data), true, default_editor_plugin_type);
+            openEditor(std::get<std::string>(data));
             return true;
         });
         filetree_plugin->setCallback("get_editor_icon", [&](CallbackData data) {
@@ -123,7 +123,7 @@ public:
             ->GetEditor()
             .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
 
-        openEditor(fs::path("test.wt"), false);
+        openEditor(fs::path("test.wt"), false, PluginType::EditorIcte);
     }
 
     void update() {
@@ -274,7 +274,9 @@ public:
     }
 
     void openEditor(fs::path path = "", bool mimickLastFocused = true,
-                    PluginType type = PluginType::EditorIcte) {
+                    PluginType type = PluginType::Unknown) {
+        if (type == PluginType::Unknown)
+            type = default_editor_plugin_type;
         IEditorPlugin *ep = nullptr;
         if (type == PluginType::EditorIcte) {
             ep = new EditorIctePlugin();
