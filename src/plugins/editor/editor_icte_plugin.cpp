@@ -5,6 +5,16 @@ EditorIctePlugin::EditorIctePlugin() {
     immortal = false;
     dockId = 0;
 
+    bpHandler = {
+        [this](const Breakpoint &bp) {
+            if (bp.file != editor.GetPath()) return;
+            editor.AddBreakpoint(bp.line, !bp.condition.empty(), bp.condition, bp.enabled);
+        },
+        [this](const Breakpoint &bp) {
+            if (bp.file != editor.GetPath()) return;
+            editor.RemoveBreakpoint(bp.line);
+        },
+    };
     auto lang = TextEditor_LanguageDefinition_WTStar();
     editor.SetLanguageDefinition(lang);
 }
@@ -142,9 +152,9 @@ bool EditorIctePlugin::isDirty() const {
 void EditorIctePlugin::setBreakpointCallbacks(bp_callback_t update, bp_callback_t remove) {
     editor.OnBreakpointUpdate = [=](TextEditor* te, int line, bool conditioned,
                                     const std::string& condition, bool enabled) {
-        update(BreakpointData(te->GetPath(), line, enabled, condition));
+        update({te->GetPath(), line, enabled, condition});
     };
     editor.OnBreakpointRemove = [=](TextEditor* te, int line) {
-        remove(BreakpointData(te->GetPath(), line));
+        remove({te->GetPath(), line});
     };
 }

@@ -4,22 +4,8 @@
 #include "../plugin.h"
 
 #include "wt_syntax.h"
+#include "../../debugger/breakpoint_storage.h"
 
-
-struct BreakpointData {
-    std::string file;
-    int line;
-    bool enabled;
-    std::string condition;
-
-    BreakpointData(const std::string &file, int line, bool enabled, const std::string &condition)
-        : file(file), line(line), enabled(enabled), condition(condition) {}
-    
-    BreakpointData(const std::string &file, int line)
-        : file(file), line(line) {}
-};
-
-using bp_callback_t = std::function<void(BreakpointData)>;
 
 class IEditorPlugin : public IPlugin {
 public:
@@ -35,6 +21,7 @@ public:
 public:
     timepoint lastFocusedTime;
     ImGuiID dockId;
+    BreakpointHandler bpHandler;
 
 protected:
     std::string fn;

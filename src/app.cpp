@@ -18,6 +18,7 @@
 #include "plugins/debugger/debugger_variable_viewer_plugin.h"
 
 #include "debugger/debugger.h"
+#include "debugger/breakpoint_storage.h"
 
 class App {
 public:
@@ -34,7 +35,8 @@ protected:
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
 
     Debugger *debugger;
-    std::vector<bp_callback_t> breakpoint_callbacks;    // vector{update, remove}
+    BreakpointStorage breakpoint_storage;
+    std::pair<bp_callback_t, bp_callback_t> breakpoint_callbacks;
 
     std::vector<IPlugin *> plugins;
     std::vector<IEditorPlugin *> editor_plugins;
@@ -60,15 +62,10 @@ public:
                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
 
         debugger = new Debugger();
-        breakpoint_callbacks = {
-            [&](BreakpointData bp) {
-                debugger->setBreakpointWithCondition(bp.file, (uint)bp.line, bp.condition);
-                debugger->setBreakpointEnabled(bp.file, (uint)bp.line, bp.enabled);
-            },
-            [&](BreakpointData bp) { 
-                debugger->removeBreakpoint(bp.file, (uint)bp.line);
-            },
-        };
+        breakpoint_callbacks = {std::bind(&BreakpointStorage::updateBreakpoint, &breakpoint_storage,
+                                          std::placeholders::_1),
+                                std::bind(&BreakpointStorage::removeBreakpoint, &breakpoint_storage,
+                                          std::placeholders::_1)};
 
         filetree_plugin = new FileTreePlugin();
         filetree_plugin->setPath(fs::path("."));
@@ -300,7 +297,8 @@ public:
             static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
                 Zep::ZepMode_Standard::StaticName());
 
-        ep->setBreakpointCallbacks(breakpoint_callbacks[0], breakpoint_callbacks[1]);
+        ep->setBreakpointCallbacks(breakpoint_callbacks.first, breakpoint_callbacks.second);
+        breakpoint_storage.addHandler(ep->bpHandler);
         add_plugin(ep, ep->title, ImVec2(640, 480));
         editor_plugins.push_back(ep);
 
