@@ -103,7 +103,7 @@ void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
             debugger->removeBreakpoint(bp.file, bp.line);
         if (action_update) {
             auto res =
-                debugger->setBreakpointWithCondition(edit_bp.file, edit_bp.line, edit_bp.condition);
+                debugger->setBreakpoint(edit_bp.file, edit_bp.line, true, edit_bp.condition);
             if (!res.first) {
                 ImGui::InsertNotification(
                     {ImGuiToastType_Error, 5000,

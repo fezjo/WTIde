@@ -150,7 +150,7 @@ return bn;";
             ImGui::InputTextMultiline("Condition", &condition, ImVec2(0, 0),
                                       ImGuiInputTextFlags_AllowTabInput);
             if (ImGui::Button("Add")) {
-                auto res = debugger->setBreakpointWithCondition(fileBuffer, lineBuffer, condition);
+                auto res = debugger->setBreakpoint(fileBuffer, lineBuffer, true, condition);
                 if (!res.first) {
                     ImGui::InsertNotification(
                         {ImGuiToastType_Error, 5000,

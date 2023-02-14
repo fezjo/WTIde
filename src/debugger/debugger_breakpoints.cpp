@@ -188,14 +188,14 @@ bool Debugger::addBreakpointToVm(VM_Breakpoint &bp) {
     return true;
 }
 
-std::pair<bool, std::string> Debugger::setBreakpoint(const std::string &file, uint line) {
-    return setBreakpointWithCondition(file, line, "");
+std::pair<bool, std::string> Debugger::setBreakpoint(const std::string &file, uint line, bool enabled,
+                                                     const std::string &condition) {
+    auto bp = _setBreakpoint(file, line, enabled, condition);
+    return {bp.enabled, bp.error};
 }
 
-std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::string &file,
-                                                                  uint line,
-                                                                  const std::string &condition,
-                                                                  bool enabled) {
+VM_Breakpoint& Debugger::_setBreakpoint(const std::string &file, uint line, bool enabled,
+                                        const std::string &condition) {
     auto it = breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
                        [&](const VM_Breakpoint &bp) { return bp.file == file && bp.line == line; }),
@@ -206,14 +206,14 @@ std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::str
         it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
                                 [](uint pos, const VM_Breakpoint &bp) { return pos < bp.bp_pos; });
     VM_Breakpoint &bp =
-        *breakpoints.insert(it, {{file, line, false, condition}, bp_pos, "not compiled", {}, NULL});
+        *breakpoints.insert(it, {{file, (int)line, false, condition}, bp_pos, "not compiled", {}, NULL});
 
     std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp.bp_pos
               << std::endl;
     if (bp.bp_pos == -1u) {
         bp.error = "Could not find corresponding instruction";
         bp.enabled = false;
-        return {bp.enabled, bp.error};
+        return bp;
     }
 
     if (!condition.empty()) {
@@ -224,7 +224,7 @@ std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::str
             std::cerr << "Could not find scope for breakpoint" << std::endl;
             bp.error = "Could not find corresponding scope";
             bp.enabled = false;
-            return {bp.enabled, bp.error};
+            return bp;
         } else
             std::cerr << "found scope and node id " << scope_and_node.first->val.sc->items->id
                       << " " << scope_and_node.second->id << std::endl;
@@ -241,7 +241,7 @@ std::pair<bool, std::string> Debugger::setBreakpointWithCondition(const std::str
     bp.enabled &= enabled;
     if (env && bp.enabled)
         addBreakpointToVm(bp);
-    return {bp.enabled, bp.error};
+    return bp;
 }
 
 bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool enabled) {

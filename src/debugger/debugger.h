@@ -2,13 +2,7 @@
 
 #include "../utils.h"
 #include "wtstar_utils.h"
-
-struct Breakpoint {
-    std::string file;
-    uint line;
-    bool enabled;
-    std::string condition;
-};
+#include "breakpoint_storage.h"
 
 struct VM_Breakpoint : Breakpoint {
     uint bp_pos;
@@ -20,7 +14,7 @@ struct VM_Breakpoint : Breakpoint {
 inline std::ostream &operator<<(std::ostream &os, const VM_Breakpoint &bp) {
     os << "Breakpoint(" << bp.file << ":" << bp.line << ", " << bp.enabled
        << ", cond='" << bp.condition
-       << "' | bp_pos" << bp.bp_pos << ", err=" << bp.error<< ")";
+       << "' | bp_pos=" << bp.bp_pos << ", err=" << bp.error << ")";
     return os;
 }
 
@@ -73,10 +67,9 @@ public:
     int stepInto();
     int stepOut();
 
-    std::pair<bool, std::string> setBreakpoint(const std::string &file, uint line);
-    std::pair<bool, std::string> setBreakpointWithCondition(const std::string &file, uint line,
-                                                            const std::string &condition,
-                                                            bool enabled=true);
+    std::pair<bool, std::string> setBreakpoint(const std::string &file, uint line,
+                                               bool enabled = true,
+                                               const std::string &condition = "");
     bool setBreakpointEnabled(const std::string &file, uint line, bool enabled);
     bool removeBreakpoint(const std::string &file, uint line);
     void removeAllBreakpoints();
@@ -89,7 +82,9 @@ protected:
 
     uint findInstructionNumber(const std::string &file, uint line);
     VM_Breakpoint *findBreakpoint(const std::string &file, uint line);
-    bool addBreakpointToVm(VM_Breakpoint &bp);
+    bool addBreakpointToVm(VM_Breakpoint& bp);
+    VM_Breakpoint& _setBreakpoint(const std::string &file, uint line, bool enabled,
+                                  const std::string &condition);
 
 public:
     bool trace_on = false;
