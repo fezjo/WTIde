@@ -241,17 +241,17 @@ void FileTreePlugin::show() {
     if (ImGui::BeginMenuBar()) {
         ImGui::BeginDisabled(selection.size() > 1);
         {
-            if (ImGui::MenuItem(u8"ﱐ")) {
+            if (ImGui::MenuItem("ﱐ")) {
                 ImGui::OpenPopup("filetree_name_action_popup");
                 popup_type = PopupType::NewFile;
             }
-            if (ImGui::MenuItem(u8"")) {
+            if (ImGui::MenuItem("")) {
                 ImGui::OpenPopup("filetree_name_action_popup");
                 popup_type = PopupType::NewDirectory;
             }
             ImGui::BeginDisabled(selection.size() != 1);
             {
-                if (ImGui::MenuItem(u8"Rename")) {
+                if (ImGui::MenuItem("Rename")) {
                     ImGui::OpenPopup("filetree_name_action_popup");
                     popup_type = PopupType::Rename;
                 }
@@ -265,7 +265,7 @@ void FileTreePlugin::show() {
 
         ImGui::BeginDisabled(selection.empty());
         {
-            if (ImGui::MenuItem(u8"")) {
+            if (ImGui::MenuItem("")) {
                 for (auto &p : selection)
                     fs::remove_all(p);
                 selection.clear();
@@ -273,7 +273,7 @@ void FileTreePlugin::show() {
             }
         }
         ImGui::EndDisabled();
-        if (ImGui::MenuItem(u8"")) {
+        if (ImGui::MenuItem("")) {
             files_changed = true;
         }
 
