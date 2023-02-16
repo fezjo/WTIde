@@ -28,9 +28,11 @@ inline std::ostream& operator<<(std::ostream& os, const Breakpoint& bp) {
     return os;
 }
 
-using bp_callback_t = std::function<bool(const Breakpoint&)>;
+using bp_change_callback_t = std::function<bool(const Breakpoint&)>;
+using bp_gather_callback_t = std::function<std::set<Breakpoint>()>;
 
 struct BreakpointCallbacks {
-    bp_callback_t create, update, remove;
+    bp_change_callback_t update, remove;
+    bp_gather_callback_t gather;
     std::string info;
 };
