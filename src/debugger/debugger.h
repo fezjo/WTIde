@@ -72,7 +72,6 @@ public:
                                                const std::string &condition = "");
     bool setBreakpointEnabled(const std::string &file, uint line, bool enabled);
     bool removeBreakpoint(const std::string &file, uint line);
-    void removeAllBreakpoints();
 
 protected:
     void destroy();

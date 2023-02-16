@@ -266,10 +266,3 @@ bool Debugger::removeBreakpoint(const std::string &file, uint line) {
         breakpoints.end());
     return true;
 }
-
-void Debugger::removeAllBreakpoints() {
-    if (env)
-        for (auto &bp : breakpoints)
-            WTStar::remove_breakpoint(env, bp.bp_pos);
-    breakpoints.clear();
-}

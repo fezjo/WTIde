@@ -174,7 +174,8 @@ return bn;";
         }
         ImGui::SameLine();
         if (ImGui::Button("Remove All")) {
-            debugger->removeAllBreakpoints();
+            // TODO
+            // debugger->removeAllBreakpoints(); 
         }
         ImGui::EndDisabled();
     }
