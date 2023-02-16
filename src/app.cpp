@@ -18,7 +18,7 @@
 #include "plugins/debugger/debugger_variable_viewer_plugin.h"
 
 #include "debugger/debugger.h"
-#include "debugger/breakpoint_storage.h"
+#include "debugger/breakpoint_manager.h"
 
 class App {
 public:
@@ -35,8 +35,8 @@ protected:
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
 
     Debugger *debugger;
-    BreakpointStorage breakpoint_storage;
-    std::pair<bp_callback_t, bp_callback_t> breakpoint_callbacks;
+    BreakpointManager breakpoint_storage;
+    BreakpointCallbacks breakpoint_callbacks;
 
     std::vector<IPlugin *> plugins;
     std::vector<IEditorPlugin *> editor_plugins;
@@ -62,10 +62,15 @@ public:
                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
 
         debugger = new Debugger();
-        breakpoint_callbacks = {std::bind(&BreakpointStorage::updateBreakpoint, &breakpoint_storage,
+        breakpoint_storage = BreakpointManager(debugger);
+        breakpoint_callbacks = {std::bind(&BreakpointManager::setBreakpoint, &breakpoint_storage,
                                           std::placeholders::_1),
-                                std::bind(&BreakpointStorage::removeBreakpoint, &breakpoint_storage,
-                                          std::placeholders::_1)};
+                                nullptr,
+                                std::bind(&BreakpointManager::removeBreakpoint, &breakpoint_storage,
+                                          std::placeholders::_1),
+                                "root callback"};
+        breakpoint_callbacks.update = breakpoint_callbacks.create;
+
 
         filetree_plugin = new FileTreePlugin();
         filetree_plugin->setPath(fs::path("."));
@@ -229,9 +234,38 @@ public:
             ImGui::EndPopup();
         }
 
+        showBreakpointStorage();
+
         showNotifications();
 
         ImGui::PopStyleColor();
+        ImGui::End();
+    }
+
+    void showBreakpointStorage() {
+        ImGui::Begin("Breakpoint Storage", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        if (ImGui::CollapsingHeader("Handlers", ImGuiTreeNodeFlags_None)) {
+            for (auto& h : breakpoint_storage.handlers) {
+                ImGui::BulletText("%s", h.info.c_str());
+            }
+        }
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        if (ImGui::CollapsingHeader("Breakpoints", ImGuiTreeNodeFlags_None)) {
+            for (auto& bp : breakpoint_storage.getBreakpoints()) {
+                std::stringstream ss;
+                ss << bp;
+                ImGui::BulletText("%s", ss.str().c_str());
+            }
+        }
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        if (ImGui::CollapsingHeader("Working Set", ImGuiTreeNodeFlags_None)) {
+            for (auto& bp : breakpoint_storage.bp_working_set) {
+                std::stringstream ss;
+                ss << bp;
+                ImGui::BulletText("%s", ss.str().c_str());
+            }
+        }
         ImGui::End();
     }
 
@@ -297,8 +331,8 @@ public:
             static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
                 Zep::ZepMode_Standard::StaticName());
 
-        ep->setBreakpointCallbacks(breakpoint_callbacks.first, breakpoint_callbacks.second);
-        breakpoint_storage.addHandler(ep->bpHandler);
+        ep->setBreakpointCallbacks(breakpoint_callbacks);
+        breakpoint_storage.addHandler(ep->bp_handler);
         add_plugin(ep, ep->title, ImVec2(640, 480));
         editor_plugins.push_back(ep);
 

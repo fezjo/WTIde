@@ -2,7 +2,7 @@
 
 #include "../utils.h"
 #include "wtstar_utils.h"
-#include "breakpoint_storage.h"
+#include "breakpoint.h"
 
 struct VM_Breakpoint : Breakpoint {
     uint bp_pos;
@@ -106,4 +106,5 @@ protected:
 
     friend class ProgramAnalyzerPlugin;
     friend class DebuggerVariableViewerPlugin;
+    friend class BreakpointManager;
 };
