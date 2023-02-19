@@ -98,13 +98,12 @@ void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
             edit_bp.line = static_cast<uint>(line);
 
         if (enabled != bp.enabled)
-            debugger->setBreakpointEnabled(bp.file, bp.line, enabled);
+            bp_callback.update({bp.file, bp.line, enabled, bp.condition});
         if (action_update || action_remove)
-            debugger->removeBreakpoint(bp.file, bp.line);
+            bp_callback.remove(bp);
         if (action_update) {
-            auto res =
-                debugger->setBreakpoint(edit_bp.file, edit_bp.line, true, edit_bp.condition);
-            if (!res.first) {
+            auto res = bp_callback.update({edit_bp.file, edit_bp.line, edit_bp.enabled, edit_bp.condition});
+            if (!res) {
                 ImGui::InsertNotification(
                     {ImGuiToastType_Error, 5000,
                      "Failed to set breakpoint\nSee breakpoint info for details"});

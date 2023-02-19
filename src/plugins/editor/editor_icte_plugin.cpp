@@ -5,18 +5,30 @@ EditorIctePlugin::EditorIctePlugin() {
     immortal = false;
     dockId = 0;
 
-    bpHandler = {
-        [this](const Breakpoint &bp) {
-            if (bp.file != editor.GetPath()) return;
-            editor.AddBreakpoint(bp.line, !bp.condition.empty(), bp.condition, bp.enabled);
-        },
-        [this](const Breakpoint &bp) {
-            if (bp.file != editor.GetPath()) return;
-            editor.RemoveBreakpoint(bp.line);
-        },
-    };
     auto lang = TextEditor_LanguageDefinition_WTStar();
     editor.SetLanguageDefinition(lang);
+
+    bp_handler = {
+        [this](const Breakpoint &bp) {
+            if (bp.file != editor.GetPath()) return false;
+            editor.AddBreakpoint(bp.line, !bp.condition.empty(), bp.condition, bp.enabled);
+            return true;
+        },
+        [this](const Breakpoint &bp) {
+            if (bp.file != editor.GetPath()) return false;
+            editor.RemoveBreakpoint(bp.line);
+            return true;
+        },
+        [this]() {
+            auto breakpoints = editor.GetBreakpoints();
+            std::set<Breakpoint> res;
+            auto file = editor.GetPath();
+            for (auto bp: breakpoints)
+                res.insert({file, bp.mLine, bp.mEnabled, bp.mCondition});
+            return res;
+        },
+        "handler icte"
+    };
 }
 
 void EditorIctePlugin::update() {
@@ -149,12 +161,13 @@ bool EditorIctePlugin::isDirty() const {
     return editor.IsTextChanged();
 }
 
-void EditorIctePlugin::setBreakpointCallbacks(bp_callback_t update, bp_callback_t remove) {
+void EditorIctePlugin::setBreakpointCallbacks(const BreakpointCallbacks &callbacks) {
     editor.OnBreakpointUpdate = [=](TextEditor* te, int line, bool conditioned,
                                     const std::string& condition, bool enabled) {
-        update({te->GetPath(), line, enabled, condition});
+        callbacks.update({te->GetPath(), line, enabled, condition});
+
     };
     editor.OnBreakpointRemove = [=](TextEditor* te, int line) {
-        remove({te->GetPath(), line});
+        callbacks.remove({te->GetPath(), line});
     };
 }

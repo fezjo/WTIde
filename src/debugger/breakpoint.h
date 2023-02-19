@@ -8,13 +8,11 @@ struct Breakpoint {
     bool enabled;
     std::string condition;
 
-    auto operator<=>(const Breakpoint& other) const {
+    std::weak_ordering operator<=>(const Breakpoint& other) const {
         if (auto cmp = file <=> other.file; cmp != 0)
             return cmp;
         return line <=> other.line;
     }
-
-    bool operator==(const Breakpoint& other) const = default;
 
     bool identical(const Breakpoint& other) const {
         return file == other.file && line == other.line && enabled == other.enabled &&
@@ -24,7 +22,7 @@ struct Breakpoint {
 
 inline std::ostream& operator<<(std::ostream& os, const Breakpoint& bp) {
     os << "Breakpoint(" << bp.file << ":" << bp.line << ", " << bp.enabled << ", cond='"
-       << bp.condition << ")";
+       << bp.condition << "')";
     return os;
 }
 

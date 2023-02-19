@@ -63,13 +63,12 @@ public:
 
         debugger = new Debugger();
         breakpoint_storage = BreakpointManager(debugger);
-        breakpoint_callbacks = {std::bind(&BreakpointManager::setBreakpoint, &breakpoint_storage,
+        breakpoint_callbacks = {std::bind(&BreakpointManager::updateBreakpoint, &breakpoint_storage,
                                           std::placeholders::_1),
-                                nullptr,
                                 std::bind(&BreakpointManager::removeBreakpoint, &breakpoint_storage,
                                           std::placeholders::_1),
+                                std::bind(&BreakpointManager::getBreakpoints, &breakpoint_storage),
                                 "root callback"};
-        breakpoint_callbacks.update = breakpoint_callbacks.create;
 
 
         filetree_plugin = new FileTreePlugin();
@@ -125,6 +124,8 @@ public:
 
         program_analyzer_plugin = new ProgramAnalyzerPlugin(debugger);
         add_plugin(program_analyzer_plugin, "Program Analyzer");
+        program_analyzer_plugin->bp_callback = breakpoint_callbacks;
+        program_analyzer_plugin->bp_callback.info = "analyzer callback";
 
         debugger_variable_viewer_plugin = new DebuggerVariableViewerPlugin(debugger);
         add_plugin(debugger_variable_viewer_plugin, "Variable Viewer");
@@ -142,6 +143,7 @@ public:
         handleInput();
         for (auto p : plugins)
             p->update();
+        breakpoint_storage.synchronizeHandlers();
     }
 
     void showDebugWindow() {
@@ -253,14 +255,6 @@ public:
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
         if (ImGui::CollapsingHeader("Breakpoints", ImGuiTreeNodeFlags_None)) {
             for (auto& bp : breakpoint_storage.getBreakpoints()) {
-                std::stringstream ss;
-                ss << bp;
-                ImGui::BulletText("%s", ss.str().c_str());
-            }
-        }
-        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-        if (ImGui::CollapsingHeader("Working Set", ImGuiTreeNodeFlags_None)) {
-            for (auto& bp : breakpoint_storage.bp_working_set) {
                 std::stringstream ss;
                 ss << bp;
                 ImGui::BulletText("%s", ss.str().c_str());

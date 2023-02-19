@@ -4,7 +4,7 @@
 #include "../plugin.h"
 
 #include "wt_syntax.h"
-#include "../../debugger/breakpoint_storage.h"
+#include "../../debugger/breakpoint_manager.h"
 
 
 class IEditorPlugin : public IPlugin {
@@ -16,12 +16,12 @@ public:
     virtual bool isDirty() const = 0;
     std::string getFileName() const { return fn; };
 
-    virtual void setBreakpointCallbacks(bp_callback_t update, bp_callback_t remove){};
+    virtual void setBreakpointCallbacks(const BreakpointCallbacks &handler) {};
 
 public:
     timepoint lastFocusedTime;
     ImGuiID dockId;
-    BreakpointHandler bpHandler;
+    BreakpointCallbacks bp_handler;
 
 protected:
     std::string fn;

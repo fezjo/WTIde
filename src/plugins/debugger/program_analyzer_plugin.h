@@ -15,6 +15,9 @@ public:
 protected:
     void showBreakpoints(WTStar::virtual_machine_t *env);
 
+public:
+    BreakpointCallbacks bp_callback;
+
 protected:
     Debugger *debugger;
     VM_Breakpoint edit_bp{};

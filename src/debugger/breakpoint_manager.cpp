@@ -9,6 +9,7 @@ void BreakpointManager::synchronizeHandlers() {
     locked = true;
     auto breakpoints = getBreakpoints();
     for (auto &handler: handlers) {
+        if (!handler.gather) continue;
         auto bp_add = breakpoints;
         decltype(bp_add) bp_remove;
         for (auto bp: handler.gather()) {
@@ -37,7 +38,7 @@ std::set<Breakpoint> BreakpointManager::getBreakpoints() const {
 
 int BreakpointManager::containsBreakpoint(const Breakpoint& bp) const {
     auto breakpoints = getBreakpoints();
-    auto it = std::find(breakpoints.begin(), breakpoints.end(), bp);
+    auto it = std::lower_bound(breakpoints.begin(), breakpoints.end(), bp);
     if (it == breakpoints.end())
         return 0;
     if (bp.identical(*it))
@@ -54,4 +55,5 @@ bool BreakpointManager::updateBreakpoint(const Breakpoint& bp) {
 bool BreakpointManager::removeBreakpoint(const Breakpoint& bp) {
     if (containsBreakpoint(bp))
         return debugger->removeBreakpoint(bp.file, bp.line);
+    return false;
 }
