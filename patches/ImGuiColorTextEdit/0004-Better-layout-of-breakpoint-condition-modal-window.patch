@@ -1,15 +1,15 @@
-From 990620b21db19009b7304e219edef49414225249 Mon Sep 17 00:00:00 2001
+From a358a2d206d82995fdd0b52615baadc3d6512588 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Mon, 13 Feb 2023 19:04:11 +0100
 Subject: [PATCH] Better layout of breakpoint condition modal window
 
 ---
- TextEditor.cpp | 13 ++++++++-----
+ TextEditor.cpp | 15 +++++++++------
  TextEditor.h   |  2 +-
- 2 files changed, 9 insertions(+), 6 deletions(-)
+ 2 files changed, 10 insertions(+), 7 deletions(-)
 
 diff --git a/TextEditor.cpp b/TextEditor.cpp
-index cef93b9..bc89898 100644
+index cef93b9..bfff42d 100644
 --- a/TextEditor.cpp
 +++ b/TextEditor.cpp
 @@ -3277,7 +3277,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
@@ -21,7 +21,13 @@ index cef93b9..bc89898 100644
  					memcpy(mPopupCondition_Condition, bkpt.mCondition.c_str(), bkpt.mCondition.size());
  					mPopupCondition_Condition[std::min<size_t>(511, bkpt.mCondition.size())] = 0;
  					openBkptConditionWindow = true;
-@@ -3575,15 +3575,18 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+@@ -3570,20 +3570,23 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 
+ 	// breakpoint condition popup
+ 	if (openBkptConditionWindow)
+-		ImGui::OpenPopup("Condition##condition");
++		ImGui::OpenPopup("Condition##condition_modal");
+ 
  	ImFont* font = ImGui::GetFont();
  	ImGui::PopFont();
  	ImGui::SetNextWindowSize(ImVec2(430, 175), ImGuiCond_Once);
