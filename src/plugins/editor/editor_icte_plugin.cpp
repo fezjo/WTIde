@@ -27,7 +27,8 @@ EditorIctePlugin::EditorIctePlugin() {
                 res.insert({file, bp.mLine, bp.mEnabled, bp.mCondition});
             return res;
         },
-        "handler icte"
+        "handler icte",
+        BreakpointCallbacks::generateId()
     };
 }
 

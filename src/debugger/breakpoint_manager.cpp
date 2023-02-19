@@ -1,8 +1,15 @@
 #include "breakpoint_manager.h"
 
 void BreakpointManager::addHandler(const BreakpointCallbacks& handler) {
-    dbg("bpStorage.addHandler");
+    dbg("bpStorage.addHandler", handler.info, handler.id);
     handlers.push_back(handler);
+}
+
+size_t BreakpointManager::removeHandler(size_t id) {
+    dbg("bpStorage.removeHandler", id);
+    return std::erase_if(handlers, [id](const BreakpointCallbacks& handler) {
+        return handler.id == id;
+    });
 }
 
 void BreakpointManager::synchronizeHandlers() {

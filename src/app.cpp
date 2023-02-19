@@ -306,8 +306,11 @@ public:
     }
 
     void delete_plugin(IPlugin *plugin) {
-        if (isPluginEditor(plugin->getPluginType()))
+        if (isPluginEditor(plugin->getPluginType())) {
             editor_plugins.erase(find(editor_plugins.begin(), editor_plugins.end(), plugin));
+            if (plugin->getPluginType() == PluginType::EditorIcte)
+                breakpoint_storage.removeHandler(static_cast<EditorIctePlugin *>(plugin)->bp_handler.id);
+        }
         plugins.erase(find(plugins.begin(), plugins.end(), plugin));
         delete plugin;
     }

@@ -33,4 +33,10 @@ struct BreakpointCallbacks {
     bp_change_callback_t update, remove;
     bp_gather_callback_t gather;
     std::string info;
+    size_t id;
+
+    static size_t generateId() { return _ID++; }
+
+private:
+    inline static size_t _ID = 0;
 };
