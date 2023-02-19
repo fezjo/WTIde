@@ -54,6 +54,7 @@ public:
     void clearCompilationOutput();
 
     std::string getSource() const;
+    /* returns {program counter, source position} */
     std::pair<size_t, SourcePosition> getSourcePosition() const;
     bool isCompiled() const;
     bool isRunning() const;
@@ -80,7 +81,7 @@ protected:
     bool readBinary();
     bool readInput();
 
-    uint findInstructionNumber(const std::string &file, uint line);
+    uint findInstructionNumber(const std::string &file, uint line) const;
     VM_Breakpoint *findBreakpoint(const std::string &file, uint line);
     bool addBreakpointToVm(VM_Breakpoint& bp);
     VM_Breakpoint& _setBreakpoint(const std::string &file, uint line, bool enabled,

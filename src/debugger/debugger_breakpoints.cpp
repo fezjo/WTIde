@@ -20,7 +20,7 @@ SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instructio
     return res;
 }
 
-uint Debugger::findInstructionNumber(const std::string &file, uint line) {
+uint Debugger::findInstructionNumber(const std::string &file, uint line) const {
     std::cerr << "findInstructionNumber " << file << " " << line << std::endl;
     auto debug_info = WTStar::getDebugInfo(env);
     if (!debug_info) // TODO add message

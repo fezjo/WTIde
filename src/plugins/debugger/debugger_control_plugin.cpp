@@ -130,7 +130,7 @@ void DebuggerControlPlugin::show() {
     }
 
     {
-        static int lineBuffer = 13;
+        static int lineBuffer = 11;
         static std::string condition =
 "int bn = A.size;\n\
 sum = bn + 1;\n\
