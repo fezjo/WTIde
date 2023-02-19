@@ -55,10 +55,7 @@ public:
     PluginType getPluginType() { return pluginType; }
 
 protected:
-    IPlugin() {
-        static imid_t iplugin_id = 0;
-        id = iplugin_id++;
-    }
+    IPlugin() : id(_iplugin_id++) {}
 
 public:
     bool shown = true;
@@ -71,4 +68,6 @@ protected:
     imid_t id;
     PluginType pluginType;
     std::unordered_map<std::string, CallbackFunction> callbacks;
+
+    inline static imid_t _iplugin_id = 0;
 };
