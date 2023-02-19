@@ -15,6 +15,7 @@ public:
     bool isDirty() const override;
 
     void setBreakpointCallbacks(const BreakpointCallbacks &handler) override;
+    void setDebuggerLine(size_t line) override;
 
 protected:
     TextEditor editor;

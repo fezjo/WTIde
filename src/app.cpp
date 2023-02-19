@@ -144,6 +144,10 @@ public:
         for (auto p : plugins)
             p->update();
         breakpoint_storage.synchronizeHandlers();
+
+        auto [pc, sp] = debugger->getSourcePosition();
+        for (auto p : editor_plugins)
+            p->setDebuggerLine(p->getFileName() == sp.file ? sp.line : 0);
     }
 
     void showDebugWindow() {

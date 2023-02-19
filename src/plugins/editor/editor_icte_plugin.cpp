@@ -171,3 +171,7 @@ void EditorIctePlugin::setBreakpointCallbacks(const BreakpointCallbacks &callbac
         callbacks.remove({te->GetPath(), line});
     };
 }
+
+void EditorIctePlugin::setDebuggerLine(size_t line) {
+    editor.SetCurrentLineIndicator(line, false);
+}
