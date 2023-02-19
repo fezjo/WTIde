@@ -188,10 +188,10 @@ bool Debugger::addBreakpointToVm(VM_Breakpoint &bp) {
     return true;
 }
 
-std::pair<bool, std::string> Debugger::setBreakpoint(const std::string &file, uint line, bool enabled,
-                                                     const std::string &condition) {
+std::pair<bool, std::string> Debugger::setBreakpoint(const std::string& file, uint line,
+                                                     bool enabled, const std::string& condition) {
     auto bp = _setBreakpoint(file, line, enabled, condition);
-    return {bp.enabled, bp.error};
+    return {bp.active, bp.error};
 }
 
 VM_Breakpoint& Debugger::_setBreakpoint(const std::string &file, uint line, bool enabled,
@@ -205,14 +205,14 @@ VM_Breakpoint& Debugger::_setBreakpoint(const std::string &file, uint line, bool
     if (it == breakpoints.end())
         it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
                                 [](uint pos, const VM_Breakpoint &bp) { return pos < bp.bp_pos; });
-    VM_Breakpoint &bp =
-        *breakpoints.insert(it, {{file, (int)line, false, condition}, bp_pos, "not compiled", {}, NULL});
+    VM_Breakpoint& bp = *breakpoints.insert(
+        it, {{file, (int)line, enabled, condition}, false, bp_pos, "not compiled", {}, NULL});
 
     std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp.bp_pos
               << std::endl;
     if (bp.bp_pos == -1u) {
         bp.error = "Could not find corresponding instruction";
-        bp.enabled = false;
+        bp.active = false;
         return bp;
     }
 
@@ -223,23 +223,23 @@ VM_Breakpoint& Debugger::_setBreakpoint(const std::string &file, uint line, bool
         if (!scope_and_node.first) {
             std::cerr << "Could not find scope for breakpoint" << std::endl;
             bp.error = "Could not find corresponding scope";
-            bp.enabled = false;
+            bp.active = false;
             return bp;
         } else
             std::cerr << "found scope and node id " << scope_and_node.first->val.sc->items->id
                       << " " << scope_and_node.second->id << std::endl;
 
         std::tie(bp.code, bp.error) = compileConditionInAst(ast, condition, scope_and_node.first);
-        bp.enabled = bp.error.empty();
+        bp.active = bp.error.empty();
         std::cerr << "setBreakpointWithCondition added breakpoint at " << bp.bp_pos << std::endl;
         std::cerr << "bp.error " << bp.error << std::endl;
     } else {
         bp.error = "";
-        bp.enabled = true;
+        bp.active = true;
     }
 
-    bp.enabled &= enabled;
-    if (env && bp.enabled)
+    bp.active &= enabled;
+    if (env && bp.active)
         addBreakpointToVm(bp);
     return bp;
 }
@@ -248,9 +248,10 @@ bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool ena
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
+    bp->enabled = enabled;
     if (env && WTStar::enable_breakpoint(env, bp->bp_pos, enabled) == -1)
         return false;
-    bp->enabled = enabled;
+    bp->active = enabled;
     return true;
 }
 

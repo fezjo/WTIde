@@ -5,16 +5,17 @@
 #include "breakpoint.h"
 
 struct VM_Breakpoint : Breakpoint {
+    bool active;
     uint bp_pos;
     std::string error;
     code_t code;
     WTStar::breakpoint_t *vm_bp;
 };
 
-inline std::ostream &operator<<(std::ostream &os, const VM_Breakpoint &bp) {
-    os << "Breakpoint(" << bp.file << ":" << bp.line << ", " << bp.enabled
-       << ", cond='" << bp.condition
-       << "' | bp_pos=" << bp.bp_pos << ", err=" << bp.error << ")";
+inline std::ostream& operator<<(std::ostream& os, const VM_Breakpoint& bp) {
+    os << "Breakpoint(" << bp.file << ":" << bp.line << ", enabled=" << bp.enabled << ", cond='"
+       << bp.condition << "' | active=" << bp.active << ", bp_pos=" << bp.bp_pos
+       << ", err=" << bp.error << ")";
     return os;
 }
 
