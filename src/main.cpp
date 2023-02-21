@@ -124,11 +124,23 @@ int main(int, char **) {
     // ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL,
     // io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
 
-    auto fontPath = fs::path("..") / "resources/fonts" / "Roboto Mono Nerd Font Complete Mono.ttf";
-    ImWchar glyph_ranges[] = {1, 0x10FFFF, 0};
-    float fontSize = 16.0f;
-    io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, NULL, glyph_ranges);
-    ImGui::MergeIconsWithLatestFont(fontSize, false);
+    {
+        // io.Fonts->AddFontDefault();
+        float fontSize = 16.0f;
+        fs::path fontPath;
+        ImFontConfig config;
+        config.MergeMode = true;
+
+        ImWchar glyph_ranges_roboto[] = {1, 0x10FFFF, 0};
+        fontPath = fs::path("..") / "resources" / "fonts" / "Roboto Mono Nerd Font Complete Mono.ttf";
+        assert(NULL != io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, NULL, glyph_ranges_roboto));
+
+        ImWchar glyph_ranges_codicon[] = {0xEA60, 0xEC10, 0};
+        fontPath = fs::path("..") / "resources" / "codicon" / "codicon.ttf";
+        assert(NULL != io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, &config, glyph_ranges_codicon));
+
+        io.Fonts->Build();
+    }
 
     App app;
     app.alive = true;
