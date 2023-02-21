@@ -10,7 +10,7 @@
 class IEditorPlugin : public IPlugin {
 public:
     virtual ~IEditorPlugin() = default;
-    virtual void setFile(const std::string &filename) { fn = filename; };
+    virtual void setFile(const std::string &filename) { fn = normalize_path(filename); };
     virtual bool loadFile(const std::string &filename) = 0;
     virtual bool saveFile(std::string filename = "") = 0;
     virtual bool isDirty() const = 0;

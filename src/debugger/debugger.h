@@ -84,8 +84,8 @@ protected:
     uint findInstructionNumber(const std::string &file, uint line) const;
     VM_Breakpoint *findBreakpoint(const std::string &file, uint line);
     bool addBreakpointToVm(VM_Breakpoint& bp);
-    VM_Breakpoint& _setBreakpoint(const std::string &file, uint line, bool enabled,
-                                  const std::string &condition);
+    VM_Breakpoint& _setBreakpoint(const std::string file, uint line, bool enabled,
+                                  const std::string condition);
 
 public:
     bool trace_on = false;

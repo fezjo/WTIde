@@ -130,8 +130,8 @@ void EditorIctePlugin::show() {
 }
 
 void EditorIctePlugin::setFile(const std::string &filename) {
-    editor.SetPath(filename);
-    fn = filename;
+    fn = normalize_path(filename);
+    editor.SetPath(fn);
 }
 
 bool EditorIctePlugin::loadFile(const std::string &filename) {

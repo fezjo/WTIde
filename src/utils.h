@@ -33,3 +33,5 @@ using timepoint = std::chrono::time_point<std::chrono::steady_clock>;
 timepoint get_time();
 
 bool ends_with(const std::string &str, const std::string &suffix);
+
+fs::path normalize_path(const fs::path &path);

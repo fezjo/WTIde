@@ -136,8 +136,8 @@ void EditorZepPlugin::show() {
 }
 
 void EditorZepPlugin::setFile(const std::string &filename) {
+    fn = normalize_path(filename);
     getCurrentBuffer().SetFilePath(filename);
-    fn = filename;
 }
 
 bool EditorZepPlugin::loadFile(const std::string &filename) {

@@ -9,3 +9,7 @@ bool ends_with(const std::string &str, const std::string &suffix) {
         return false;
     return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
+
+fs::path normalize_path(const fs::path &path) {
+    return fs::canonical(path);
+}

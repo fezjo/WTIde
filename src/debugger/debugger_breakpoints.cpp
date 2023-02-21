@@ -17,6 +17,7 @@ SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instructio
 
     WTStar::item_info_t *item = &debug_info->items[it];
     SourcePosition res(item, env);
+    res.file = normalize_path(res.file);
     return res;
 }
 
@@ -37,6 +38,7 @@ uint Debugger::findInstructionNumber(const std::string &file, uint line) const {
         std::cerr << "item: " << item->fileid << " " << item->fl << " " << item->fc << " "
                   << item->ll << " " << item->lc << std::endl;
         std::string i_file(debug_info->files[item->fileid]);
+        i_file = normalize_path(i_file);
         if (i_file == file && item->fl == line) {
             return instr_i;
         }
@@ -194,8 +196,8 @@ std::pair<bool, std::string> Debugger::setBreakpoint(const std::string& file, ui
     return {bp.active, bp.error};
 }
 
-VM_Breakpoint& Debugger::_setBreakpoint(const std::string &file, uint line, bool enabled,
-                                        const std::string &condition) {
+VM_Breakpoint& Debugger::_setBreakpoint(const std::string file, uint line, bool enabled,
+                                        const std::string condition) {
     auto it = breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
                        [&](const VM_Breakpoint &bp) { return bp.file == file && bp.line == line; }),
@@ -256,6 +258,7 @@ bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool ena
 }
 
 bool Debugger::removeBreakpoint(const std::string &file, uint line) {
+    dbg(file, line);
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
