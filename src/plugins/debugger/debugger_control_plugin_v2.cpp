@@ -85,8 +85,10 @@ void DebuggerControlPluginV2::show() {
         }
         ImGui::SameLine(0, spacing);
         if (ImGui::Button("")) {
+            auto tmp = debugger->stop_on_bp;
             debugger->stop_on_bp = false;
             resp = debugger->continueExecution();
+            debugger->stop_on_bp = tmp;
         }
         ImGui::SameLine(0, spacing2);
         if (ImGui::Button("")) {
