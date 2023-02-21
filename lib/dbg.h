@@ -760,10 +760,9 @@ class DebugOutput {
     std::string path = filepath;
     const std::size_t path_length = path.length();
     if (path_length > MAX_PATH_LENGTH) {
-      path = ".." + path.substr(path_length - MAX_PATH_LENGTH, MAX_PATH_LENGTH);
+      path = ".. " + path.substr(path_length - MAX_PATH_LENGTH, MAX_PATH_LENGTH);
     }
     std::stringstream ss;
-    path = "";
     ss << ansi(ANSI_DEBUG) << "[" << path << ":" << line << " ("
        << function_name << ")] " << ansi(ANSI_RESET);
     m_location = ss.str();
@@ -780,6 +779,7 @@ class DebugOutput {
           << ansi(ANSI_RESET) << std::endl;
     }
     std::cerr << m_location;
+    // if (exprs.size() > 1) std::cerr << std::endl;
     auto &&res = print_impl(exprs.begin(), types.begin(), std::forward<T>(values)...);
     std::cerr << std::endl;
     return res;
@@ -798,10 +798,9 @@ class DebugOutput {
       output << ansi(ANSI_EXPRESSION) << *expr << ansi(ANSI_RESET) << " = ";
     }
     output << ansi(ANSI_VALUE) << stream_value.str() << ansi(ANSI_RESET);
-    // if (print_expr_and_type) {
-    //   output << " (" << ansi(ANSI_TYPE) << *type << ansi(ANSI_RESET) << ")";
-    // }
-    // output << std::endl;
+    if (print_expr_and_type) {
+      output << " (" << ansi(ANSI_TYPE) << *type << ansi(ANSI_RESET) << ")";
+    }
     std::cerr << output.str();
 
     return std::forward<T>(value);
@@ -814,6 +813,7 @@ class DebugOutput {
                   U&&... rest) -> last_t<T, U...> {
     print_impl(exprs, types, std::forward<T>(value));
     std::cerr << " | ";
+    // std::cerr << std::endl;
     return print_impl(exprs + 1, types + 1, std::forward<U>(rest)...);
   }
 
@@ -910,7 +910,7 @@ auto identity(T&&, U&&... u) -> last_t<U...> {
 #define DBG_TYPE_NAME(x) dbg::type_name<decltype(x)>()
 
 #define dbg(...)                                    \
-  dbg::DebugOutput(__FILE__, __LINE__, __func__)    \
+  dbg::DebugOutput(__FILE_NAME__, __LINE__, __func__)    \
       .print({DBG_MAP(DBG_STRINGIFY, __VA_ARGS__)}, \
              {DBG_MAP(DBG_TYPE_NAME, __VA_ARGS__)}, __VA_ARGS__)
 #else
