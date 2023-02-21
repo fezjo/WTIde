@@ -67,7 +67,6 @@ void DebuggerControlPlugin::show() {
         ImGui::End();
         return;
     }
-    debugger->trace_on = true;
     static std::string fileBuffer = source_fn;
 
     if (ImGui::Button("Set source")) {
@@ -98,19 +97,23 @@ void DebuggerControlPlugin::show() {
             resp = runAction();
         }
         ImGui::EndDisabled();
+    
         ImGui::BeginDisabled(!debugger->canRun());
         ImGui::SameLine();
         if (ImGui::Button("Destroy")) {
             debugger->stopExecution();
             setSourceAction(source_fn);
         }
+        ImGui::EndDisabled();
+    
+        ImGui::SameLine();
+        ImGui::Checkbox("Trace", &debugger->trace_on);
 
+        ImGui::BeginDisabled(!debugger->canRun());
         if (ImGui::Button("Continue")) {
             resp = debugger->continueExecution();
         }
         ImGui::SameLine();
-        ImGui::Checkbox("Trace", &debugger->trace_on);
-
         ImGui::Text("Step");
         ImGui::SameLine();
         if (ImGui::Button("Over")) {

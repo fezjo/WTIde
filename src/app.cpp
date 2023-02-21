@@ -15,6 +15,7 @@
 #include "plugins/text/text_plugin.h"
 
 #include "plugins/debugger/debugger_control_plugin.h" // TODO why does it need to be after zep
+#include "plugins/debugger/debugger_control_plugin_v2.h"
 #include "plugins/debugger/debugger_variable_viewer_plugin.h"
 
 #include "debugger/debugger.h"
@@ -46,6 +47,7 @@ protected:
     OutputPlugin *output_plugin;
     OutputPlugin *compiler_output_plugin;
     DebuggerControlPlugin *debugger_control_plugin;
+    DebuggerControlPluginV2 *debugger_control_plugin_v2;
     ProgramAnalyzerPlugin *program_analyzer_plugin;
     DebuggerVariableViewerPlugin *debugger_variable_viewer_plugin;
 
@@ -118,6 +120,27 @@ public:
             return true;
         });
         debugger_control_plugin->setCallback("refresh_analyzer", [&](CallbackData data) {
+            program_analyzer_plugin->refresh();
+            return true;
+        });
+
+        debugger_control_plugin_v2 = new DebuggerControlPluginV2(debugger);
+        add_plugin(debugger_control_plugin_v2, "Debug Control V2", ImVec2(250, 100));
+        debugger_control_plugin_v2->setCallback("set_input", [&](CallbackData data) {
+            debugger_control_plugin_v2->setInput(input_plugin->read());
+            return true;
+        });
+        debugger_control_plugin_v2->setCallback("set_output", [&](CallbackData data) {
+            output_plugin->clear();
+            output_plugin->write(std::get<std::string>(data));
+            return true;
+        });
+        debugger_control_plugin_v2->setCallback("set_compilation_output", [&](CallbackData data) {
+            compiler_output_plugin->write(std::get<std::string>(data));
+            compiler_output_plugin->write("\n\n-----\n\n");
+            return true;
+        });
+        debugger_control_plugin_v2->setCallback("refresh_analyzer", [&](CallbackData data) {
             program_analyzer_plugin->refresh();
             return true;
         });
