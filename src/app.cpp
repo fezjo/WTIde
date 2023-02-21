@@ -144,6 +144,15 @@ public:
             program_analyzer_plugin->refresh();
             return true;
         });
+        debugger_control_plugin_v2->setCallback("get_focused_source", [&](CallbackData data) {
+            std::pair<timepoint, IEditorPlugin*> last_focus = {timepoint::min(), nullptr};
+            for (auto p : editor_plugins) {
+                dbg(p->getFileName(), p->lastFocusedTime.time_since_epoch().count());
+                if (p->lastFocusedTime > last_focus.first)
+                    last_focus = {p->lastFocusedTime, p};
+            }
+            return last_focus.second ? last_focus.second->getFileName() : "";
+        });
 
         program_analyzer_plugin = new ProgramAnalyzerPlugin(debugger);
         add_plugin(program_analyzer_plugin, "Program Analyzer");

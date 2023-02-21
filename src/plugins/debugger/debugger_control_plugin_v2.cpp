@@ -14,18 +14,12 @@ bool DebuggerControlPluginV2::setSource(const std::string &source) {
 void DebuggerControlPluginV2::setInput(const std::string &input) { debugger->setInput(input); }
 
 bool DebuggerControlPluginV2::setSourceAction(const std::string &source) {
-    static auto set_source = [&]() {
-        if (!setSource(source_fn)) {
-            source_fn_color = ImVec4(1.0, 0.25, 0.25, 1.0);
-            return false;
-        }
-        callbacks["refresh_analyzer"](0);
-        return true;
-    };
-    if (!set_source()) {
+    auto path = std::get<std::string>(callbacks["get_focused_source"](0));
+    if (!setSource(path)) {
         std::cerr << "Failed to set source" << std::endl;
         return false;
     }
+    callbacks["refresh_analyzer"](0);
     if (!debugger->compile(true)) {
         std::cerr << "Failed to compile source" << std::endl;
         return false;
@@ -69,12 +63,11 @@ void DebuggerControlPluginV2::show() {
 
     {
         int resp = -1000;
-        float spacing = 5.f;
-        float spacing2 = spacing * 2;
+        float spacing = 5.f, spacing2 = spacing * 2;
 
         if (ImGui::Button("")) {
-            setSourceAction(source_fn);
-            compileAction();
+            if (setSourceAction(source_fn))
+                compileAction();
         }
 
         ImGui::BeginDisabled(debugger->getSource().empty());
