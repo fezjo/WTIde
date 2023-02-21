@@ -106,6 +106,8 @@ void DebuggerControlPluginV2::show() {
         }
         ImGui::EndDisabled();
 
+        if (resp != -1000)
+            callbacks["execution_progress"](resp);
         if (resp == -1)
             callbacks["set_output"](debugger->getOutput());
     }

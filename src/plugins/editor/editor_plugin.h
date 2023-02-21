@@ -17,7 +17,7 @@ public:
     std::string getFileName() const { return fn; };
 
     virtual void setBreakpointCallbacks(const BreakpointCallbacks &handler) {};
-    virtual void setDebuggerLine(size_t line) {};
+    virtual void setDebuggerLine(size_t line, bool focus = false) {};
 
 public:
     timepoint lastFocusedTime;

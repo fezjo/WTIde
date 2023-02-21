@@ -32,6 +32,7 @@ protected:
 
     bool initialized = false;
     bool show_unsaved_dialog = false;
+    bool execution_halted_now = false;
     ImGuiWindowFlags flags;
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
 
@@ -123,6 +124,18 @@ public:
             program_analyzer_plugin->refresh();
             return true;
         });
+        debugger_control_plugin->setCallback("get_focused_source", [&](CallbackData data) {
+            std::pair<timepoint, IEditorPlugin*> last_focus = {timepoint::min(), nullptr};
+            for (auto p : editor_plugins) {
+                if (p->lastFocusedTime > last_focus.first)
+                    last_focus = {p->lastFocusedTime, p};
+            }
+            return last_focus.second ? last_focus.second->getFileName() : "";
+        });
+        debugger_control_plugin->setCallback("execution_progress", [&](CallbackData data) {
+            execution_halted_now = true;
+            return true;
+        });
 
         debugger_control_plugin_v2 = new DebuggerControlPluginV2(debugger);
         add_plugin(debugger_control_plugin_v2, "Debug Control V2", ImVec2(250, 100));
@@ -147,11 +160,14 @@ public:
         debugger_control_plugin_v2->setCallback("get_focused_source", [&](CallbackData data) {
             std::pair<timepoint, IEditorPlugin*> last_focus = {timepoint::min(), nullptr};
             for (auto p : editor_plugins) {
-                dbg(p->getFileName(), p->lastFocusedTime.time_since_epoch().count());
                 if (p->lastFocusedTime > last_focus.first)
                     last_focus = {p->lastFocusedTime, p};
             }
             return last_focus.second ? last_focus.second->getFileName() : "";
+        });
+        debugger_control_plugin_v2->setCallback("execution_progress", [&](CallbackData data) {
+            execution_halted_now = true;
+            return true;
         });
 
         program_analyzer_plugin = new ProgramAnalyzerPlugin(debugger);
@@ -178,8 +194,13 @@ public:
         breakpoint_storage.synchronizeHandlers();
 
         auto [pc, sp] = debugger->getSourcePosition();
-        for (auto p : editor_plugins)
-            p->setDebuggerLine(p->getFileName() == sp.file ? sp.line : 0);
+        for (auto p : editor_plugins) {
+            if (p->getFileName() == sp.file)
+                p->setDebuggerLine(sp.line, execution_halted_now);
+            else
+                p->setDebuggerLine(0);
+        }
+        execution_halted_now = false;
     }
 
     void showDebugWindow() {

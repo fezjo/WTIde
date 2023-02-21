@@ -258,7 +258,6 @@ bool Debugger::setBreakpointEnabled(const std::string &file, uint line, bool ena
 }
 
 bool Debugger::removeBreakpoint(const std::string &file, uint line) {
-    dbg(file, line);
     auto bp = findBreakpoint(file, line);
     if (!bp)
         return false;
