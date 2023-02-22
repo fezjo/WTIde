@@ -307,8 +307,11 @@ public:
                 if (ImGui::MenuItem("New", "Ctrl+N")) {
                     openEditor("", true);
                 }
-                if (ImGui::MenuItem("*Open", "Ctrl+O")) {
-                    // openEditor("", false);
+                if (ImGui::MenuItem("Open", "Ctrl+O")) {
+                    openFiles();
+                }
+                if (ImGui::MenuItem("Editor force close", "Ctrl-W", false, editor)) {
+                    closeEditor();
                 }
                 if (ImGui::MenuItem("Save", "Ctrl+S", false, editor && editor->isDirty())) {
                     editor->saveFile();
@@ -378,6 +381,10 @@ public:
                 openEditor();
             else if (ImGui::IsKeyPressed(ImGuiKey_O))
                 openFiles();
+            else if (ImGui::IsKeyPressed(ImGuiKey_S))
+                saveFileAs();
+            else if (ImGui::IsKeyPressed(ImGuiKey_W))
+                closeEditor();
         }
     }
 
@@ -471,5 +478,23 @@ public:
         } else {
             std::cerr << "Error: " << NFD::GetError() << std::endl;
         }
+    }
+
+    void saveFileAs(const std::string &path = "") {
+        auto editor = getLastFocusedEditor();
+        if (!editor)
+            return;
+        editor->saveFile(path);
+    }
+
+    void closeEditor() {
+        auto editor = getLastFocusedEditor();
+        if (!editor)
+            return;
+        if (editor->isDirty()) {
+            unsaved_dialog_editors.push_back(editor);
+            return;
+        }
+        delete_plugin(editor);
     }
 };

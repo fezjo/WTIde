@@ -62,15 +62,7 @@ void EditorIctePlugin::show() {
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
         lastFocusedTime = get_time();
 
-    if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Save", "Ctrl-S")) {
-                saveFile();
-            }
-            if (ImGui::MenuItem("Quit"))
-                alive = false;
-            ImGui::EndMenu();
-        }
+    if (focused && ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Edit")) {
             bool ro = editor.IsReadOnly();
             if (ImGui::MenuItem("Read-only mode", nullptr, &ro))
@@ -103,16 +95,19 @@ void EditorIctePlugin::show() {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("View")) {
-            if (ImGui::MenuItem("Dark palette"))
-                editor.SetPalette(TextEditor::GetDarkPalette());
-            if (ImGui::MenuItem("Light palette"))
-                editor.SetPalette(TextEditor::GetLightPalette());
-            if (ImGui::MenuItem("Retro blue palette"))
-                editor.SetPalette(TextEditor::GetRetroBluePalette());
+        if (ImGui::BeginMenu("Appearance")) {
+            if (ImGui::BeginMenu("ICTE pallette")) {
+                if (ImGui::MenuItem("Dark palette"))
+                    editor.SetPalette(TextEditor::GetDarkPalette());
+                if (ImGui::MenuItem("Light palette"))
+                    editor.SetPalette(TextEditor::GetLightPalette());
+                if (ImGui::MenuItem("Retro blue palette"))
+                    editor.SetPalette(TextEditor::GetRetroBluePalette());
+                ImGui::EndMenu();
+            }
             ImGui::EndMenu();
         }
-        ImGui::EndMenuBar();
+        ImGui::EndMainMenuBar();
     }
 
     auto cpos = editor.GetCursorPosition();
