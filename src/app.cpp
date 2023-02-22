@@ -32,7 +32,7 @@ protected:
     NFD::Guard nfd_guard;
 
     bool initialized = false;
-    bool show_unsaved_dialog = false;
+    std::vector<IEditorPlugin*> unsaved_dialog_editors;
     bool execution_halted_now = false;
     ImGuiWindowFlags flags;
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
@@ -261,7 +261,7 @@ public:
         for (auto p : plugins_to_delete)
             delete_plugin(p);
 
-        if (show_unsaved_dialog)
+        if (!unsaved_dialog_editors.empty())
             ImGui::OpenPopup("Unsaved changes");
         if (ImGui::BeginPopupModal("Unsaved changes", NULL,
                                    ImGuiWindowFlags_AlwaysAutoResize |
@@ -269,11 +269,16 @@ public:
             ImGui::Text("You have unsaved changes.\nDo you want to save them?\n\n");
             ImGui::Separator();
 
-            if (ImGui::Button("Save all", ImVec2(120, 0))) {
+            auto msg = unsaved_dialog_editors.size() > 1 ? "Save all" : "Save " +
+                unsaved_dialog_editors[0]->getFileName();
+            if (ImGui::Button(msg.c_str(), ImVec2(120, 0))) {
                 ImGui::CloseCurrentPopup();
-                for (auto p : editor_plugins)
-                    p->saveFile();
-                quit();
+                bool ok = true;
+                for (auto p : unsaved_dialog_editors)
+                    ok &= p->saveFile();
+                if (ok)
+                    quit();
+                unsaved_dialog_editors.clear();
             }
             ImGui::SameLine();
             if (ImGui::Button("Discard", ImVec2(120, 0))) {
@@ -284,7 +289,7 @@ public:
             ImGui::SameLine();
             if (ImGui::Button("Cancel", ImVec2(120, 0))) {
                 ImGui::CloseCurrentPopup();
-                show_unsaved_dialog = false;
+                unsaved_dialog_editors.clear();
             }
             ImGui::EndPopup();
         }
@@ -377,13 +382,17 @@ public:
     }
 
     void quit(bool force = false) {
-        if (!force && std::any_of(editor_plugins.begin(), editor_plugins.end(),
-                                  [](auto p) { return p->isDirty(); })) {
-            show_unsaved_dialog = true;
-            return;
+        if (!force) {
+            unsaved_dialog_editors.clear(); // TODO why called twice
+            for (auto p : editor_plugins)
+                if (p->isDirty())
+                    unsaved_dialog_editors.push_back(p);
+            dbg(unsaved_dialog_editors.size());
+            if (!unsaved_dialog_editors.empty())
+                return;
         }
         alive = false;
-        show_unsaved_dialog = false;
+        unsaved_dialog_editors.clear();
     }
 
     void add_plugin(IPlugin *plugin, const std::string &title = "",
