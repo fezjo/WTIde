@@ -73,7 +73,10 @@ public:
                                 std::bind(&BreakpointManager::getBreakpoints, &breakpoint_storage),
                                 "root callback"};
 
+        _initializePlugins();
+    }
 
+    void _initializePlugins() {
         filetree_plugin = new FileTreePlugin();
         filetree_plugin->setPath(fs::path("."));
         add_plugin(filetree_plugin, "FileTree", ImVec2(120, 640));
@@ -105,70 +108,53 @@ public:
         add_plugin(compiler_output_plugin, "Compiler output");
 
         debugger_control_plugin_v1 = new DebuggerControlPluginV1(debugger);
-        add_plugin(debugger_control_plugin_v1, "Debug Control", ImVec2(250, 100));
-        debugger_control_plugin_v1->setCallback("set_input", [&](CallbackData data) {
-            debugger_control_plugin_v1->setInput(input_plugin->read());
-            return true;
-        });
-        debugger_control_plugin_v1->setCallback("set_output", [&](CallbackData data) {
-            output_plugin->clear();
-            output_plugin->write(std::get<std::string>(data));
-            return true;
-        });
-        debugger_control_plugin_v1->setCallback("set_compilation_output", [&](CallbackData data) {
-            compiler_output_plugin->write(std::get<std::string>(data));
-            compiler_output_plugin->write("\n\n-----\n\n");
-            return true;
-        });
-        debugger_control_plugin_v1->setCallback("refresh_analyzer", [&](CallbackData data) {
-            program_analyzer_plugin->refresh();
-            return true;
-        });
-        debugger_control_plugin_v1->setCallback("get_focused_source", [&](CallbackData data) {
-            std::pair<timepoint, IEditorPlugin*> last_focus = {timepoint::min(), nullptr};
-            for (auto p : editor_plugins) {
-                if (p->lastFocusedTime > last_focus.first)
-                    last_focus = {p->lastFocusedTime, p};
-            }
-            return last_focus.second ? last_focus.second->getFileName() : "";
-        });
-        debugger_control_plugin_v1->setCallback("execution_progress", [&](CallbackData data) {
-            execution_halted_now = true;
-            return true;
-        });
+        add_plugin(debugger_control_plugin_v1, "Debug Control V1", ImVec2(250, 100));
 
         debugger_control_plugin_v2 = new DebuggerControlPluginV2(debugger);
         add_plugin(debugger_control_plugin_v2, "Debug Control V2", ImVec2(250, 100));
-        debugger_control_plugin_v2->setCallback("set_input", [&](CallbackData data) {
-            debugger_control_plugin_v2->setInput(input_plugin->read());
-            return true;
-        });
-        debugger_control_plugin_v2->setCallback("set_output", [&](CallbackData data) {
-            output_plugin->clear();
-            output_plugin->write(std::get<std::string>(data));
-            return true;
-        });
-        debugger_control_plugin_v2->setCallback("set_compilation_output", [&](CallbackData data) {
-            compiler_output_plugin->write(std::get<std::string>(data));
-            compiler_output_plugin->write("\n\n-----\n\n");
-            return true;
-        });
-        debugger_control_plugin_v2->setCallback("refresh_analyzer", [&](CallbackData data) {
-            program_analyzer_plugin->refresh();
-            return true;
-        });
-        debugger_control_plugin_v2->setCallback("get_focused_source", [&](CallbackData data) {
-            std::pair<timepoint, IEditorPlugin*> last_focus = {timepoint::min(), nullptr};
-            for (auto p : editor_plugins) {
-                if (p->lastFocusedTime > last_focus.first)
-                    last_focus = {p->lastFocusedTime, p};
-            }
-            return last_focus.second ? last_focus.second->getFileName() : "";
-        });
-        debugger_control_plugin_v2->setCallback("execution_progress", [&](CallbackData data) {
-            execution_halted_now = true;
-            return true;
-        });
+
+        std::vector<std::pair<std::string, CallbackFunction>> debugger_control_plugin_callbacks = {
+            {"set_input",
+             [&](CallbackData data) {
+                 debugger_control_plugin_v1->setInput(input_plugin->read());
+                 return true;
+             }},
+            {"set_output",
+             [&](CallbackData data) {
+                 output_plugin->clear();
+                 output_plugin->write(std::get<std::string>(data));
+                 return true;
+             }},
+            {"set_compilation_output",
+             [&](CallbackData data) {
+                 compiler_output_plugin->write(std::get<std::string>(data));
+                 compiler_output_plugin->write("\n\n-----\n\n");
+                 return true;
+             }},
+            {"refresh_analyzer",
+             [&](CallbackData data) {
+                 program_analyzer_plugin->refresh();
+                 return true;
+             }},
+            {"get_focused_source",
+             [&](CallbackData data) {
+                 std::pair<timepoint, IEditorPlugin*> last_focus = {timepoint::min(), nullptr};
+                 for (auto p : editor_plugins) {
+                     if (p->lastFocusedTime > last_focus.first)
+                         last_focus = {p->lastFocusedTime, p};
+                 }
+                 return last_focus.second ? last_focus.second->getFileName() : "";
+             }},
+            {"execution_progress",
+             [&](CallbackData data) {
+                 execution_halted_now = true;
+                 return true;
+             }},
+        };
+        for (auto [name, callback] : debugger_control_plugin_callbacks) {
+            debugger_control_plugin_v1->setCallback(name, callback);
+            debugger_control_plugin_v2->setCallback(name, callback);
+        }
 
         program_analyzer_plugin = new ProgramAnalyzerPlugin(debugger);
         add_plugin(program_analyzer_plugin, "Program Analyzer");
@@ -293,30 +279,9 @@ public:
             ImGui::EndPopup();
         }
 
-        showBreakpointStorage();
-
         showNotifications();
 
         ImGui::PopStyleColor();
-        ImGui::End();
-    }
-
-    void showBreakpointStorage() {
-        ImGui::Begin("Breakpoint Storage", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-        if (ImGui::CollapsingHeader("Handlers", ImGuiTreeNodeFlags_None)) {
-            for (auto& h : breakpoint_storage.handlers) {
-                ImGui::BulletText("%s", h.info.c_str());
-            }
-        }
-        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-        if (ImGui::CollapsingHeader("Breakpoints", ImGuiTreeNodeFlags_None)) {
-            for (auto& bp : breakpoint_storage.getBreakpoints()) {
-                std::stringstream ss;
-                ss << bp;
-                ImGui::BulletText("%s", ss.str().c_str());
-            }
-        }
         ImGui::End();
     }
 
