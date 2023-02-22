@@ -314,11 +314,10 @@ public:
                     closeEditor();
                 }
                 if (ImGui::MenuItem("Save", "Ctrl+S", false, editor && editor->isDirty())) {
-                    editor->saveFile();
+                    saveFileAs("", false);
                 }
-                if (ImGui::MenuItem("*Save As", "*Ctrl+Shift+S")) {
-                    // for (auto p : editor_plugins)
-                    //     p->saveFileAs();
+                if (ImGui::MenuItem("Save As", "Ctrl+Shift+S")) {
+                    saveFileAs("", true, true);
                 }
                 if (ImGui::MenuItem("Quit")) {
                     quit();
@@ -382,9 +381,13 @@ public:
             else if (ImGui::IsKeyPressed(ImGuiKey_O))
                 openFiles();
             else if (ImGui::IsKeyPressed(ImGuiKey_S))
-                saveFileAs();
+                saveFileAs("", false);
             else if (ImGui::IsKeyPressed(ImGuiKey_W))
                 closeEditor();
+        }
+        if (io.KeyMods == (ImGuiModFlags_Ctrl | ImGuiModFlags_Shift)) {
+            if (ImGui::IsKeyPressed(ImGuiKey_S))
+                saveFileAs("", true, true);
         }
     }
 
@@ -487,17 +490,32 @@ public:
         for (auto path : paths)
             openEditor(path);
     }
+
+    fs::path openSaveFileDialog(fs::path defaultPath = "") {
+        NFD::UniquePath savePath;
+        nfdfilteritem_t filterItem[1] = {{"WT* source", "wt"}};
+        fs::path base = defaultPath.empty() ? fs::current_path() : defaultPath.parent_path();
+        fs::path name = defaultPath.empty() ? "untitled.wt" : defaultPath.filename();
+        nfdresult_t result = NFD::SaveDialog(savePath, filterItem, 1, base.c_str(), name.c_str());
+        if (result == NFD_OKAY) {
+            return savePath.get();
         } else if (result == NFD_CANCEL) {
+            return "";
         } else {
             std::cerr << "Error: " << NFD::GetError() << std::endl;
         }
     }
 
-    void saveFileAs(const std::string &path = "") {
+    void saveFileAs(std::string path = "", bool rename = true, bool dialog = false) {
         auto editor = getLastFocusedEditor();
         if (!editor)
             return;
-        editor->saveFile(path);
+        if (path.empty())
+            path = editor->getFileName();
+        if (dialog)
+            path = openSaveFileDialog(path);
+        if (!path.empty())
+            editor->saveFile(path, rename);
     }
 
     void closeEditor() {
