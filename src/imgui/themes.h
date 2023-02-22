@@ -1,14 +1,16 @@
 #pragma once
 
-#include <cstdint>
 #include <imgui/imgui.h>
+#include "../utils.h"
 
 constexpr auto ColorFromBytes = [](uint8_t r, uint8_t g, uint8_t b) {
     return ImVec4((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, 1.0f);
 };
 
-void theme_EmbraceTheDarkness() {
-    ImVec4* colors = ImGui::GetStyle().Colors;
+inline void theme_EmbraceTheDarkness(ImGuiStyle* dst = NULL) {
+    auto & style = dst ? *dst : ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
     colors[ImGuiCol_Text]                   = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
     colors[ImGuiCol_TextDisabled]           = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
     colors[ImGuiCol_WindowBg]               = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
@@ -65,7 +67,6 @@ void theme_EmbraceTheDarkness() {
     colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(1.00f, 0.00f, 0.00f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(1.00f, 0.00f, 0.00f, 0.35f);
 
-    ImGuiStyle& style = ImGui::GetStyle();
     style.WindowPadding                     = ImVec2(8.00f, 8.00f);
     style.FramePadding                      = ImVec2(5.00f, 2.00f);
     style.CellPadding                       = ImVec2(6.00f, 6.00f);
@@ -90,8 +91,8 @@ void theme_EmbraceTheDarkness() {
     style.TabRounding                       = 4;
 }
 
-void theme_VSCode() {
-    auto& style = ImGui::GetStyle();
+inline void theme_VSCode(ImGuiStyle* dst = NULL) {
+    auto & style = dst ? *dst : ImGui::GetStyle();
     ImVec4* colors = style.Colors;
 
     const ImVec4 bgColor           = ColorFromBytes(37, 37, 38);
@@ -163,8 +164,10 @@ void theme_VSCode() {
     style.TabRounding       = 0.0f;
 }
 
-void theme_YetAnotherDarkTheme() {
-    auto& style = ImGui::GetStyle();
+inline void theme_YetAnotherDarkTheme(ImGuiStyle* dst = NULL) {
+    auto & style = dst ? *dst : ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
     style.WindowRounding    = 0.0f;
     style.ChildRounding     = 0.0f;
     style.FrameRounding     = 1.0f;
@@ -173,7 +176,6 @@ void theme_YetAnotherDarkTheme() {
     style.ScrollbarRounding = 5.0f;
     style.TabRounding       = 2.0f;
     
-    ImVec4* colors = style.Colors;
     colors[ImGuiCol_Text]                   = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
     colors[ImGuiCol_TextDisabled]           = ImVec4(0.36f, 0.42f, 0.47f, 1.00f);
     colors[ImGuiCol_WindowBg]               = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
@@ -223,3 +225,13 @@ void theme_YetAnotherDarkTheme() {
     colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
+
+using theme_t = void(*)(ImGuiStyle*);
+inline std::vector<std::pair<std::string, theme_t>> THEMES = {
+    {"Dark", ImGui::StyleColorsDark},
+    {"Classic", ImGui::StyleColorsClassic},
+    {"Light", ImGui::StyleColorsLight},
+    {"Embrace The Darkness", theme_EmbraceTheDarkness},
+    {"VSCode", theme_VSCode},
+    {"Yet Another Dark Theme", theme_YetAnotherDarkTheme},
+};
