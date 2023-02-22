@@ -140,12 +140,8 @@ public:
              }},
             {"get_focused_source",
              [&](CallbackData data) {
-                 std::pair<timepoint, IEditorPlugin*> last_focus = {timepoint::min(), nullptr};
-                 for (auto p : editor_plugins) {
-                     if (p->lastFocusedTime > last_focus.first)
-                         last_focus = {p->lastFocusedTime, p};
-                 }
-                 return last_focus.second ? last_focus.second->getFileName() : "";
+                auto last_focused = getLastFocusedEditor();
+                return last_focused ? last_focused->getFileName() : "";
              }},
             {"execution_progress",
              [&](CallbackData data) {
@@ -403,6 +399,14 @@ public:
         delete plugin;
     }
 
+    IEditorPlugin* getLastFocusedEditor() {
+        std::pair<timepoint, IEditorPlugin*> res = {timepoint::min(), nullptr};
+        for (auto p : editor_plugins)
+            if (p->lastFocusedTime > res.first)
+                res = {p->lastFocusedTime, p};
+        return res.second;
+    }
+
     // dockAsLastFocused: if true, the new editor will be opened in the same dockspace as the last
     void openEditor(fs::path path = "", bool dockAsLastFocused = true,
                     PluginType type = PluginType::Unknown) {
@@ -426,13 +430,7 @@ public:
         editor_plugins.push_back(ep);
 
         if (dockAsLastFocused && !editor_plugins.empty()) {
-            std::pair<timepoint, IEditorPlugin *> latest = {editor_plugins[0]->lastFocusedTime,
-                                                            nullptr};
-            for (IEditorPlugin *epi : editor_plugins) {
-                if (epi->lastFocusedTime >= latest.first)
-                    latest = {epi->lastFocusedTime, epi};
-            }
-            ImGui::SetNextWindowDockID(latest.second->dockId);
+            ImGui::SetNextWindowDockID(getLastFocusedEditor()->dockId);
             ep->show();
         }
     }
