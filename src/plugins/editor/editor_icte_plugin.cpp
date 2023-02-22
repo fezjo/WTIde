@@ -139,7 +139,7 @@ bool EditorIctePlugin::loadFile(const std::string &filename) {
     return true;
 }
 
-bool EditorIctePlugin::saveFile(std::string filename) {
+bool EditorIctePlugin::saveFile(std::string filename, bool rename) {
     if (filename.empty())
         filename = fn;
     std::ofstream t(filename, std::ios::out);
@@ -147,8 +147,11 @@ bool EditorIctePlugin::saveFile(std::string filename) {
         return false;
     t << editor.GetText();
     bool ok = t.good();
-    if (ok)
+    if (ok) {
         editor.ResetTextChanged();
+        if (rename)
+            setFile(filename);
+    }
     return ok;
 }
 

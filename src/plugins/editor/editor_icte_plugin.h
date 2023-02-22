@@ -11,7 +11,7 @@ public:
     virtual void update() override;
     void setFile(const std::string &filename) override;
     bool loadFile(const std::string &filename) override;
-    bool saveFile(std::string filename = "") override;
+    bool saveFile(std::string filename = "", bool rename = false) override;
     bool isDirty() const override;
 
     void setBreakpointCallbacks(const BreakpointCallbacks &handler) override;

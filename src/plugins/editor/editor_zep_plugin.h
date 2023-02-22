@@ -16,7 +16,7 @@ public:
     void show() override;
     void setFile(const std::string &filename) override;
     bool loadFile(const std::string &filename) override;
-    bool saveFile(std::string filename = "") override;
+    bool saveFile(std::string filename = "", bool rename = false) override;
     bool isDirty() const override;
 
 protected:

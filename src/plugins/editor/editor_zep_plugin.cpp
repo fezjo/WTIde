@@ -148,7 +148,7 @@ bool EditorZepPlugin::loadFile(const std::string &filename) {
     return true;
 }
 
-bool EditorZepPlugin::saveFile(std::string filename) {
+bool EditorZepPlugin::saveFile(std::string filename, bool rename) {
     if (filename.empty())
         filename = fn;
     if (fn.empty())
@@ -159,6 +159,8 @@ bool EditorZepPlugin::saveFile(std::string filename) {
     buffer.SetFilePath(filename);
     editor.SaveBuffer(buffer);
     buffer.SetFilePath(fn);
+    if (rename)
+        setFile(filename);
     return true;
 }
 

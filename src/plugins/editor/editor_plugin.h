@@ -12,7 +12,7 @@ public:
     virtual ~IEditorPlugin() = default;
     virtual void setFile(const std::string &filename) { fn = normalize_path(filename); };
     virtual bool loadFile(const std::string &filename) = 0;
-    virtual bool saveFile(std::string filename = "") = 0;
+    virtual bool saveFile(std::string filename = "", bool rename = false) = 0;
     virtual bool isDirty() const = 0;
     std::string getFileName() const { return fn; };
 
