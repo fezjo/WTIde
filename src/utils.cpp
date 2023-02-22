@@ -11,5 +11,6 @@ bool ends_with(const std::string &str, const std::string &suffix) {
 }
 
 fs::path normalize_path(const fs::path &path) {
+    if (path.empty()) return path;
     return fs::relative(fs::canonical(path), fs::current_path());
 }
