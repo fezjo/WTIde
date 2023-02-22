@@ -4,6 +4,7 @@
 
 #include "plugins/plugin.h"
 #include "utils.h"
+#include "imgui/themes.h"
 
 #include "plugins/debugger/program_analyzer_plugin.h"
 #include "plugins/editor/editor_icte_plugin.h"
@@ -74,6 +75,7 @@ public:
                                 "root callback", 0);
 
         _initializePlugins();
+        switchAppDebugMode();
     }
 
     void _initializePlugins() {
@@ -171,7 +173,9 @@ public:
             .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
 
         openEditor(fs::path("test.wt"), false, PluginType::EditorIcte);
+    }
 
+    void switchAppDebugMode() {
         plugin_control_plugin->shown = APP_DEBUG;
         debugger_control_plugin_v1->shown = APP_DEBUG;
         program_analyzer_plugin->shown = APP_DEBUG;
@@ -244,6 +248,8 @@ public:
             return;
         }
 
+        showMainMenuBar();
+
         if (APP_DEBUG)
             showDebugWindow();
 
@@ -288,6 +294,65 @@ public:
 
         ImGui::PopStyleColor();
         ImGui::End();
+    }
+
+    void showMainMenuBar() {
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("New")) {
+                    openEditor("", true);
+                }
+                if (ImGui::MenuItem("Open")) {
+                    openEditor("", false);
+                }
+                if (ImGui::MenuItem("Save")) {
+                    // for (auto p : editor_plugins)
+                    //     p->saveFile();
+                }
+                if (ImGui::MenuItem("Save As")) {
+                    // for (auto p : editor_plugins)
+                    //     p->saveFileAs();
+                }
+                if (ImGui::MenuItem("Quit")) {
+                    quit();
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Appearance")) {
+                if (ImGui::BeginMenu("Font")) {
+                    // for (auto [name, font] : fonts) {
+                    //     if (ImGui::MenuItem(name.c_str())) {
+                    //         ImGui::GetIO().FontDefault = font;
+                    //         ImGui::GetIO().Fonts->Build();
+                    //     }
+                    // }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Theme")) {
+                    for (auto [name, theme] : THEMES) {
+                        if (ImGui::MenuItem(name.c_str())) {
+                            ImGui::StyleColorsDark();
+                            theme(nullptr);
+                        }
+                    }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Plugins")) {
+                    for (auto p : plugins) {
+                        ImGui::MenuItem(p->title.c_str(), nullptr, &p->shown);
+                    }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Settings")) {
+                if (ImGui::MenuItem("DEBUG", nullptr, &APP_DEBUG)) {
+                    switchAppDebugMode();
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
     }
 
     void showNotifications() {
