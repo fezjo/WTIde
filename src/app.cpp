@@ -171,6 +171,10 @@ public:
             .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
 
         openEditor(fs::path("test.wt"), false, PluginType::EditorIcte);
+
+        plugin_control_plugin->shown = APP_DEBUG;
+        debugger_control_plugin_v1->shown = APP_DEBUG;
+        program_analyzer_plugin->shown = APP_DEBUG;
     }
 
     void update() {
@@ -230,7 +234,7 @@ public:
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You
         // can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
+        if (APP_DEBUG && show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
         ImGui::PushStyleColor(ImGuiCol_WindowBg, clear_color);
@@ -240,7 +244,8 @@ public:
             return;
         }
 
-        showDebugWindow();
+        if (APP_DEBUG)
+            showDebugWindow();
 
         std::vector<IPlugin *> plugins_to_delete;
         for (auto p : plugins) {

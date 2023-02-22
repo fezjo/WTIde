@@ -35,3 +35,10 @@ timepoint get_time();
 bool ends_with(const std::string &str, const std::string &suffix);
 
 fs::path normalize_path(const fs::path &path);
+
+#define DEBUG
+#ifdef DEBUG
+inline bool APP_DEBUG = true;
+#else
+inline bool APP_DEBUG = false;
+#endif
