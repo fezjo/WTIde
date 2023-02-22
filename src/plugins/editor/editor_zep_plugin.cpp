@@ -111,8 +111,10 @@ void EditorZepPlugin::show() {
         return;
     }
     dockId = ImGui::GetWindowDockID();
-    editor.isFocused = ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows);
-    if (editor.isFocused) {
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
+        lastFocusedTime = get_time();
+    editor.isFocused = focused;
+    if (focused) {
         lastFocusedTime = get_time();
         editor.HandleInput();
     }

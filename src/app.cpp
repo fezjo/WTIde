@@ -192,6 +192,8 @@ public:
                 p->setDebuggerLine(0);
         }
         execution_halted_now = false;
+
+        getLastFocusedEditor(true);
     }
 
     void showDebugWindow() {
@@ -401,11 +403,16 @@ public:
         delete plugin;
     }
 
-    IEditorPlugin* getLastFocusedEditor() {
+    IEditorPlugin* getLastFocusedEditor(bool updateFocus = false) {
         std::pair<timepoint, IEditorPlugin*> res = {timepoint::min(), nullptr};
-        for (auto p : editor_plugins)
-            if (p->lastFocusedTime > res.first)
-                res = {p->lastFocusedTime, p};
+        for (auto editor : editor_plugins) {
+            if (updateFocus)
+                editor->focused = false;
+            if (editor->lastFocusedTime > res.first)
+                res = {editor->lastFocusedTime, editor};
+        }
+        if (updateFocus)
+            res.second->focused = true;
         return res.second;
     }
 

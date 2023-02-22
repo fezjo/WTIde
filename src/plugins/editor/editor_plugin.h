@@ -21,6 +21,7 @@ public:
 
 public:
     timepoint lastFocusedTime;
+    bool focused;
     ImGuiID dockId;
     BreakpointCallbacks bp_handler;
 
