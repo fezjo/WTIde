@@ -1,24 +1,9 @@
 #pragma once
 
-#include "../../utils.h"
-#include "../plugin.h"
+#include "debugger_control_plugin.h"
 
-#include "../../debugger/debugger.h" // TODO why does it need to be at the end
-
-class DebuggerControlPluginV2 : public IPlugin {
+class DebuggerControlPluginV2 : public DebuggerControlPlugin {
 public:
-    DebuggerControlPluginV2(Debugger *debugger);
+    DebuggerControlPluginV2(Debugger *debugger) : DebuggerControlPlugin(debugger) {};
     void show() override;
-
-    bool setSource(const std::string &source);
-    void setInput(const std::string &input);
-    bool setSourceAction(const std::string &source);
-    bool compileAction();
-    int runAction();
-
-protected:
-    Debugger *debugger;
-    std::string source_fn = "test.wt"; // TODO testing
-    bool seen = false;
-    ImVec4 source_fn_color = ImVec4();
 };

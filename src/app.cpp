@@ -14,7 +14,7 @@
 #include "plugins/text/output_plugin.h"
 #include "plugins/text/text_plugin.h"
 
-#include "plugins/debugger/debugger_control_plugin.h" // TODO why does it need to be after zep
+#include "plugins/debugger/debugger_control_plugin_v1.h" // TODO why does it need to be after zep
 #include "plugins/debugger/debugger_control_plugin_v2.h"
 #include "plugins/debugger/debugger_variable_viewer_plugin.h"
 
@@ -47,7 +47,7 @@ protected:
     InputPlugin *input_plugin;
     OutputPlugin *output_plugin;
     OutputPlugin *compiler_output_plugin;
-    DebuggerControlPlugin *debugger_control_plugin;
+    DebuggerControlPluginV1 *debugger_control_plugin_v1;
     DebuggerControlPluginV2 *debugger_control_plugin_v2;
     ProgramAnalyzerPlugin *program_analyzer_plugin;
     DebuggerVariableViewerPlugin *debugger_variable_viewer_plugin;
@@ -104,27 +104,27 @@ public:
         compiler_output_plugin = new OutputPlugin();
         add_plugin(compiler_output_plugin, "Compiler output");
 
-        debugger_control_plugin = new DebuggerControlPlugin(debugger);
-        add_plugin(debugger_control_plugin, "Debug Control", ImVec2(250, 100));
-        debugger_control_plugin->setCallback("set_input", [&](CallbackData data) {
-            debugger_control_plugin->setInput(input_plugin->read());
+        debugger_control_plugin_v1 = new DebuggerControlPluginV1(debugger);
+        add_plugin(debugger_control_plugin_v1, "Debug Control", ImVec2(250, 100));
+        debugger_control_plugin_v1->setCallback("set_input", [&](CallbackData data) {
+            debugger_control_plugin_v1->setInput(input_plugin->read());
             return true;
         });
-        debugger_control_plugin->setCallback("set_output", [&](CallbackData data) {
+        debugger_control_plugin_v1->setCallback("set_output", [&](CallbackData data) {
             output_plugin->clear();
             output_plugin->write(std::get<std::string>(data));
             return true;
         });
-        debugger_control_plugin->setCallback("set_compilation_output", [&](CallbackData data) {
+        debugger_control_plugin_v1->setCallback("set_compilation_output", [&](CallbackData data) {
             compiler_output_plugin->write(std::get<std::string>(data));
             compiler_output_plugin->write("\n\n-----\n\n");
             return true;
         });
-        debugger_control_plugin->setCallback("refresh_analyzer", [&](CallbackData data) {
+        debugger_control_plugin_v1->setCallback("refresh_analyzer", [&](CallbackData data) {
             program_analyzer_plugin->refresh();
             return true;
         });
-        debugger_control_plugin->setCallback("get_focused_source", [&](CallbackData data) {
+        debugger_control_plugin_v1->setCallback("get_focused_source", [&](CallbackData data) {
             std::pair<timepoint, IEditorPlugin*> last_focus = {timepoint::min(), nullptr};
             for (auto p : editor_plugins) {
                 if (p->lastFocusedTime > last_focus.first)
@@ -132,7 +132,7 @@ public:
             }
             return last_focus.second ? last_focus.second->getFileName() : "";
         });
-        debugger_control_plugin->setCallback("execution_progress", [&](CallbackData data) {
+        debugger_control_plugin_v1->setCallback("execution_progress", [&](CallbackData data) {
             execution_halted_now = true;
             return true;
         });
