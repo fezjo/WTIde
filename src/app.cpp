@@ -460,7 +460,7 @@ public:
         }
     }
 
-    void openFiles() {
+    std::vector<fs::path> openMultipleFilesDialog() {
         NFD::UniquePathSet outPaths;
         nfdfilteritem_t filterItem[1] = {{"WT* source", "wt"}};
         nfdresult_t result = NFD::OpenDialogMultiple(outPaths, filterItem, 1, ".");
@@ -468,12 +468,25 @@ public:
             nfdpathsetsize_t numPaths;
             NFD::PathSet::Count(outPaths, numPaths);
 
-            nfdpathsetsize_t i;
-            for (i = 0; i < numPaths; ++i) {
+            std::vector<fs::path> paths;
+            for (nfdpathsetsize_t i = 0; i < numPaths; ++i) {
                 NFD::UniquePathSetPath path;
                 NFD::PathSet::GetPath(outPaths, i, path);
-                openEditor(path.get());
+                paths.push_back(path.get());
             }
+            return paths;
+        } else if (result == NFD_CANCEL) {
+        } else {
+            std::cerr << "Error: " << NFD::GetError() << std::endl;
+        }
+        return {};
+    }
+
+    void openFiles() {
+        auto paths = openMultipleFilesDialog();
+        for (auto path : paths)
+            openEditor(path);
+    }
         } else if (result == NFD_CANCEL) {
         } else {
             std::cerr << "Error: " << NFD::GetError() << std::endl;
