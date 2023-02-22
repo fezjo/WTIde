@@ -66,12 +66,12 @@ public:
 
         debugger = new Debugger();
         breakpoint_storage = BreakpointManager(debugger);
-        breakpoint_callbacks = {std::bind(&BreakpointManager::updateBreakpoint, &breakpoint_storage,
+        breakpoint_callbacks = BreakpointCallbacks(std::bind(&BreakpointManager::updateBreakpoint, &breakpoint_storage,
                                           std::placeholders::_1),
                                 std::bind(&BreakpointManager::removeBreakpoint, &breakpoint_storage,
                                           std::placeholders::_1),
                                 std::bind(&BreakpointManager::getBreakpoints, &breakpoint_storage),
-                                "root callback"};
+                                "root callback", 0);
 
         _initializePlugins();
     }

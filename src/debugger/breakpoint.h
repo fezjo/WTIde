@@ -35,15 +35,14 @@ struct BreakpointCallbacks {
     std::string info;
     size_t id;
 
-    BreakpointCallbacks() : info("emptydefault"), id(0) {};
+    BreakpointCallbacks() : info("emptydefault"), id(0){};
     BreakpointCallbacks(bp_change_callback_t update, bp_change_callback_t remove,
-                        bp_gather_callback_t gather)
-        : update(update), remove(remove), gather(gather), info("noinfo"), id(generateId()) {}
-    BreakpointCallbacks(bp_change_callback_t update, bp_change_callback_t remove,
-                        bp_gather_callback_t gather, std::string info)
-        : update(update), remove(remove), gather(gather), info(info), id(generateId()) {}
-    static size_t generateId() { return _ID++; }
+                        bp_gather_callback_t gather, const std::string& info = "noinfo",
+                        size_t id = -1ul)
+        : update(update), remove(remove), gather(gather), info(info),
+          id(id == -1ul ? generateId() : id) {}
+    static size_t generateId() { return ++_REGISTERED_IDS; }
 
 private:
-    inline static size_t _ID = 1;
+    inline static size_t _REGISTERED_IDS = 0;
 };

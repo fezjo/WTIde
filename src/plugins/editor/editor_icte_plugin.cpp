@@ -8,7 +8,7 @@ EditorIctePlugin::EditorIctePlugin() {
     auto lang = TextEditor_LanguageDefinition_WTStar();
     editor.SetLanguageDefinition(lang);
 
-    bp_handler = {
+    bp_handler = BreakpointCallbacks(
         [this](const Breakpoint &bp) {
             if (bp.file != editor.GetPath()) return false;
             editor.AddBreakpoint(bp.line, !bp.condition.empty(), bp.condition, bp.enabled);
@@ -28,7 +28,7 @@ EditorIctePlugin::EditorIctePlugin() {
             return res;
         },
         "handler icte"
-    };
+    );
 }
 
 void EditorIctePlugin::update() {
