@@ -295,17 +295,17 @@ public:
     void showMainMenuBar() {
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("New")) {
+                auto editor = getLastFocusedEditor();
+                if (ImGui::MenuItem("New", "Ctrl+N")) {
                     openEditor("", true);
                 }
-                if (ImGui::MenuItem("Open")) {
-                    openEditor("", false);
+                if (ImGui::MenuItem("*Open", "Ctrl+O")) {
+                    // openEditor("", false);
                 }
-                if (ImGui::MenuItem("Save")) {
-                    // for (auto p : editor_plugins)
-                    //     p->saveFile();
+                if (ImGui::MenuItem("Save", "Ctrl+S", false, editor && editor->isDirty())) {
+                    editor->saveFile();
                 }
-                if (ImGui::MenuItem("Save As")) {
+                if (ImGui::MenuItem("*Save As", "*Ctrl+Shift+S")) {
                     // for (auto p : editor_plugins)
                     //     p->saveFileAs();
                 }
@@ -315,7 +315,7 @@ public:
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Appearance")) {
-                if (ImGui::BeginMenu("Font")) {
+                if (ImGui::BeginMenu("*Font")) {
                     // for (auto [name, font] : fonts) {
                     //     if (ImGui::MenuItem(name.c_str())) {
                     //         ImGui::GetIO().FontDefault = font;
