@@ -94,10 +94,7 @@ int main(int, char **) {
     // settings from your own storage. io.IniFilename = NULL; // TODO
 
     // Setup Dear ImGui style
-    // ImGui::StyleColorsClassic();
-    ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
-    theme_YetAnotherDarkTheme();
+    theme_YetAnotherDarkerTheme();
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);

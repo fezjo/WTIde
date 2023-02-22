@@ -26,7 +26,7 @@ class App {
 public:
     bool alive = false;
     bool show_demo_window = false;
-    ImVec4 clear_color = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
+    ImVec4 clear_color;
 
 protected:
     NFD::Guard nfd_guard;
@@ -64,6 +64,7 @@ public:
         flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoTitleBar |
                 ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove |
                 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+        clear_color = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
 
         debugger = new Debugger();
         breakpoint_storage = BreakpointManager(debugger);
@@ -329,6 +330,7 @@ public:
                         if (ImGui::MenuItem(name.c_str())) {
                             ImGui::StyleColorsDark();
                             theme(nullptr);
+                            clear_color = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
                         }
                     }
                     ImGui::EndMenu();

@@ -226,6 +226,15 @@ inline void theme_YetAnotherDarkTheme(ImGuiStyle* dst = NULL) {
     colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
 
+inline void theme_YetAnotherDarkerTheme(ImGuiStyle* dst = NULL) {
+    auto & style = dst ? *dst : ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    theme_YetAnotherDarkTheme(&style);
+
+    colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
+}
+
 using theme_t = void(*)(ImGuiStyle*);
 inline std::vector<std::pair<std::string, theme_t>> THEMES = {
     {"Dark", ImGui::StyleColorsDark},
@@ -234,4 +243,5 @@ inline std::vector<std::pair<std::string, theme_t>> THEMES = {
     {"Embrace The Darkness", theme_EmbraceTheDarkness},
     {"VSCode", theme_VSCode},
     {"Yet Another Dark Theme", theme_YetAnotherDarkTheme},
+    {"Yet Another Darker Theme", theme_YetAnotherDarkerTheme},
 };
