@@ -393,7 +393,7 @@ public:
 
     void quit(bool force = false) {
         if (!force) {
-            unsaved_dialog_editors.clear(); // TODO why called twice
+            unsaved_dialog_editors.clear();
             for (auto p : editor_plugins)
                 if (p->isDirty())
                     unsaved_dialog_editors.push_back(p);

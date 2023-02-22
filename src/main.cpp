@@ -170,7 +170,7 @@ int main(int, char **) {
             if (event.type == SDL_QUIT ||
                 (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
                  event.window.windowID == SDL_GetWindowID(window)))
-                app.quit();
+                app.quit(); // Note: this may be called twice from the same event
         }
         if (!app.alive) alive = false;
 
