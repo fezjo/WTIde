@@ -134,6 +134,25 @@ void EditorZepPlugin::show() {
     editor.SetDisplayRegion(Zep::NVec2f(min.x, min.y), Zep::NVec2f(max.x, max.y));
     editor.Display();
 
+    // show main menu bar with zep window options
+    if (focused && ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("Appearance")) {
+            if (ImGui::BeginMenu("Zep")) {
+                auto window = editor.GetActiveWindow();
+                auto currentWindowFlags = window->GetWindowFlags();
+                for (size_t i = 0; i < windowOptions.size(); ++i) {
+                    int flag = 1 << i;
+                    if (ImGui::MenuItem(windowOptions[i].c_str(), nullptr, currentWindowFlags & flag)) {
+                        window->ToggleFlag(flag);
+                    }
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
     ImGui::End();
 }
 
