@@ -1,0 +1,50 @@
+From e73228c87c338a9a8fbaa30f8bca9f0eecd61214 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Thu, 23 Feb 2023 16:20:08 +0100
+Subject: [PATCH] Fix focus issues with find window
+
+---
+ TextEditor.cpp | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/TextEditor.cpp b/TextEditor.cpp
+index 9108ff0..bc7cb76 100644
+--- a/TextEditor.cpp
++++ b/TextEditor.cpp
+@@ -3326,6 +3326,10 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 		}
+ 
+ 		ImGui::PushItemWidth(mUICalculateSize(-45));
++		if (mFindJustOpened) {
++			ImGui::SetKeyboardFocusHere(0);
++			mFindJustOpened = false;
++		}
+ 		if (ImGui::InputText(("##ted_findtextbox" + std::string(aTitle)).c_str(), mFindWord, 256, ImGuiInputTextFlags_EnterReturnsTrue) || mFindNext) {
+ 			auto curPos = mState.mCursorPosition;
+ 			size_t cindex = 0;
+@@ -3382,10 +3386,6 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 			mFindFocused = true;
+ 		else
+ 			mFindFocused = false;
+-		if (mFindJustOpened) {
+-			ImGui::SetKeyboardFocusHere(0);
+-			mFindJustOpened = false;
+-		}
+ 		ImGui::PopItemWidth();
+ 
+ 		if (!mReadOnly) {
+@@ -3512,8 +3512,10 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 
+ 		ImGui::PushFont(font);
+ 
+-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)))
++		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape))) {
+ 			mFindOpened = false;
++			ImGui::SetKeyboardFocusHere(0); // focus back the text area
++		}
+ 	}
+ 
+ 	/* DEBUGGER CONTROLS */
+-- 
+2.39.2
+
