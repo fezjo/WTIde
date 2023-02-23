@@ -1,0 +1,144 @@
+From 26f703d5226d0e8b1dca1f10ebecd2795239fa01 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Thu, 23 Feb 2023 19:37:32 +0100
+Subject: [PATCH] Refactor replace one and all
+
+---
+ TextEditor.cpp | 105 +++++++++++++++++++------------------------------
+ 1 file changed, 40 insertions(+), 65 deletions(-)
+
+diff --git a/TextEditor.cpp b/TextEditor.cpp
+index bc7cb76..7474fec 100644
+--- a/TextEditor.cpp
++++ b/TextEditor.cpp
+@@ -3410,6 +3410,37 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 				mReplaceFocused = false;
+ 			ImGui::PopItemWidth();
+ 
++			auto replaceOne = [&](Coordinates &curPos, size_t textLoc) {
++				// TODO this is inefficient
++				curPos.mLine = curPos.mColumn = 0;
++				int totalCount = 0;
++				for (size_t ln = 0; ln < mLines.size(); ln++) {
++					int lineCharCount = GetLineCharacterCount(ln) + 1;
++					if (textLoc >= totalCount && textLoc < totalCount + lineCharCount) {
++						curPos.mLine = ln;
++						curPos.mColumn = textLoc - totalCount;
++
++						auto& line = mLines[curPos.mLine];
++						for (int i = 0; i < line.size(); i++)
++							if (line[i].mChar == '\t')
++								curPos.mColumn += (mTabSize - 1);
++
++						break;
++					}
++					totalCount += lineCharCount;
++				}
++
++				auto selStart = curPos, selEnd = curPos;
++				selEnd.mColumn += strlen(mFindWord);
++				SetSelection(curPos, selEnd);
++				DeleteSelection();
++				InsertText(mReplaceWord);
++				SetCursorPosition(selEnd);
++				mScrollToCursor = true;
++
++				ImGui::SetKeyboardFocusHere(0);
++			};
++
+ 			ImGui::SameLine();
+ 			if (ImGui::Button((">##replaceOne" + std::string(aTitle)).c_str()) || shouldReplace) {
+ 				if (strlen(mFindWord) > 0) {
+@@ -3424,36 +3455,8 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 						textLoc = textSrc.find(mFindWord, 0);
+ 					}
+ 
+-
+ 					if (textLoc != std::string::npos) {
+-						curPos.mLine = curPos.mColumn = 0;
+-						int totalCount = 0;
+-						for (size_t ln = 0; ln < mLines.size(); ln++) {
+-							int lineCharCount = GetLineCharacterCount(ln) + 1;
+-							if (textLoc >= totalCount && textLoc < totalCount + lineCharCount) {
+-								curPos.mLine = ln;
+-								curPos.mColumn = textLoc - totalCount;
+-
+-								auto& line = mLines[curPos.mLine];
+-								for (int i = 0; i < line.size(); i++)
+-									if (line[i].mChar == '\t')
+-										curPos.mColumn += (mTabSize - 1);
+-
+-								break;
+-							}
+-							totalCount += lineCharCount;
+-						}
+-
+-						auto selStart = curPos, selEnd = curPos;
+-						selEnd.mColumn += strlen(mFindWord);
+-						SetSelection(curPos, selEnd);
+-						DeleteSelection();
+-						InsertText(mReplaceWord);
+-						SetCursorPosition(selEnd);
+-						mScrollToCursor = true;
+-
+-						ImGui::SetKeyboardFocusHere(0);
+-
++						replaceOne(curPos, textLoc);
+ 						mReplaceIndex = textLoc + strlen(mReplaceWord);
+ 					}
+ 				}
+@@ -3467,43 +3470,15 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+ 					std::string textSrc = GetText();
+ 					size_t textLoc = textSrc.find(mFindWord, 0);
+ 
+-					do {
+-						if (textLoc != std::string::npos) {
+-							curPos.mLine = curPos.mColumn = 0;
+-							int totalCount = 0;
+-							for (size_t ln = 0; ln < mLines.size(); ln++) {
+-								int lineCharCount = GetLineCharacterCount(ln) + 1;
+-								if (textLoc >= totalCount && textLoc < totalCount + lineCharCount) {
+-									curPos.mLine = ln;
+-									curPos.mColumn = textLoc - totalCount;
+-
+-									auto& line = mLines[curPos.mLine];
+-									for (int i = 0; i < line.size(); i++)
+-										if (line[i].mChar == '\t')
+-											curPos.mColumn += (mTabSize - 1);
++					while (textLoc != std::string::npos) {
++						replaceOne(curPos, textLoc);
+ 
+-									break;
+-								}
+-								totalCount += lineCharCount;
+-							}
+-
+-
+-							auto selStart = curPos, selEnd = curPos;
+-							selEnd.mColumn += strlen(mFindWord);
+-							SetSelection(curPos, selEnd);
+-							DeleteSelection();
+-							InsertText(mReplaceWord);
+-							SetCursorPosition(selEnd);
+-							mScrollToCursor = true;
+-
+-							ImGui::SetKeyboardFocusHere(0);
+-
+-							// find next occurance
+-							textSrc = GetText();
+-							textLoc += strlen(mReplaceWord);
+-							textLoc = textSrc.find(mFindWord, textLoc);
+-						}
+-					} while (textLoc != std::string::npos);
++						// find next occurance
++						// TODO this is inefficient
++						textSrc = GetText();
++						textLoc += strlen(mReplaceWord);
++						textLoc = textSrc.find(mFindWord, textLoc);
++					}
+ 				}
+ 			}
+ 		}
+-- 
+2.39.2
+
