@@ -1,0 +1,28 @@
+From 4cec05a8da8dc1f681c989b3ec02a77f8c718595 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Wed, 22 Feb 2023 23:02:32 +0100
+Subject: [PATCH] Reduce sidebar width
+
+---
+ TextEditor.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/TextEditor.cpp b/TextEditor.cpp
+index bfff42d..323ee1f 100644
+--- a/TextEditor.cpp
++++ b/TextEditor.cpp
+@@ -1669,9 +1669,9 @@ void TextEditor::RenderInternal(const char* aTitle)
+ 	auto lineMax = std::max<int>(0, std::min<int>((int)mLines.size() - 1, lineNo + pageSize));
+ 	int totalLinesFolded = 0;
+ 
+-	// Deduce mTextStart by evaluating mLines size (global lineMax) plus two spaces as text width
++	// Deduce mTextStart by evaluating mLines size (global lineMax) plus one space as text width
+ 	char buf[16];
+-	snprintf(buf, 16, " %3d ", globalLineMax);
++	snprintf(buf, 16, " %3d", globalLineMax);
+ 	mTextStart = (ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, buf, nullptr, nullptr).x + mLeftMargin) * mSidebar;
+ 
+ 	// render
+-- 
+2.39.2
+

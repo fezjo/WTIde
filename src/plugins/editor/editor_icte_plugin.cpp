@@ -179,6 +179,6 @@ void EditorIctePlugin::setBreakpointCallbacks(const BreakpointCallbacks &callbac
 
 void EditorIctePlugin::setDebuggerLine(size_t line, bool focus) {
     editor.SetCurrentLineIndicator(line * focus, false);
-    std::vector<int> lines = {(int)line - 1};
+    std::vector<int> lines = {(int)line};
     editor.SetHighlightedLines(lines);
 }

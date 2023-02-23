@@ -1,0 +1,25 @@
+From d0959e2c6e8bda612b54aaa26ddac4e14d8aa232 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Thu, 23 Feb 2023 13:54:59 +0100
+Subject: [PATCH] Set highlighted lines indexing from 1
+
+---
+ TextEditor.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/TextEditor.cpp b/TextEditor.cpp
+index 323ee1f..9108ff0 100644
+--- a/TextEditor.cpp
++++ b/TextEditor.cpp
+@@ -1970,7 +1970,7 @@ void TextEditor::RenderInternal(const char* aTitle)
+ 
+ 			// highlight the user defined lines
+ 			if (mHighlightLine) {
+-				if (std::find(mHighlightedLines.begin(), mHighlightedLines.end(), lineNo) != mHighlightedLines.end()) {
++				if (std::find(mHighlightedLines.begin(), mHighlightedLines.end(), lineNo + 1) != mHighlightedLines.end()) {
+ 					auto end = ImVec2(start.x + contentSize.x + scrollX, start.y + mCharAdvance.y);
+ 					drawList->AddRectFilled(start, end, mPalette[(int)(PaletteIndex::CurrentLineFill)]);
+ 				}
+-- 
+2.39.2
+
