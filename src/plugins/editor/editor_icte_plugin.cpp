@@ -96,13 +96,20 @@ void EditorIctePlugin::show() {
         }
 
         if (ImGui::BeginMenu("Appearance")) {
-            if (ImGui::BeginMenu("ICTE pallette")) {
-                if (ImGui::MenuItem("Dark palette"))
-                    editor.SetPalette(TextEditor::GetDarkPalette());
-                if (ImGui::MenuItem("Light palette"))
-                    editor.SetPalette(TextEditor::GetLightPalette());
-                if (ImGui::MenuItem("Retro blue palette"))
-                    editor.SetPalette(TextEditor::GetRetroBluePalette());
+            if (ImGui::BeginMenu("ICTE")) {
+                static bool showWhitespaces = false;
+                if (ImGui::MenuItem("Show whitespace", nullptr, &showWhitespaces)) {
+                    editor.SetShowWhitespaces(showWhitespaces);
+                }
+                if (ImGui::BeginMenu("Pallette")) {
+                    if (ImGui::MenuItem("Dark"))
+                        editor.SetPalette(TextEditor::GetDarkPalette());
+                    if (ImGui::MenuItem("Light"))
+                        editor.SetPalette(TextEditor::GetLightPalette());
+                    if (ImGui::MenuItem("Retro blue"))
+                        editor.SetPalette(TextEditor::GetRetroBluePalette());
+                    ImGui::EndMenu();
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();
