@@ -59,10 +59,12 @@ set(CLIP_PATH ${CMAKE_CURRENT_LIST_DIR}/clip)
 add_subdirectory(${CLIP_PATH})
 target_include_directories("clip" SYSTEM PUBLIC ${CLIP_PATH})
 
-
-set(NFD_PATH ${CMAKE_CURRENT_LIST_DIR}/nativefiledialog-extended)
-add_subdirectory(${NFD_PATH})
-target_include_directories("nfd" SYSTEM PUBLIC ${NFD_PATH}/src/include)
+# if system is not emscripten
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    set(NFD_PATH ${CMAKE_CURRENT_LIST_DIR}/nativefiledialog-extended)
+    add_subdirectory(${NFD_PATH})
+    target_include_directories("nfd" SYSTEM PUBLIC ${NFD_PATH}/src/include)
+endif()
 
 
 set(WTSTAR_PATH ${CMAKE_CURRENT_LIST_DIR}/wtstar)
