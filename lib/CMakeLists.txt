@@ -1,7 +1,7 @@
 set(IMGUI_PATH ${CMAKE_CURRENT_LIST_DIR}/imgui)
 file(GLOB IMGUI_SOURCES
     ${IMGUI_PATH}/*.cpp
-    ${IMGUI_PATH}/backends/imgui_impl_sdl.cpp
+    ${IMGUI_PATH}/backends/imgui_impl_sdl2.cpp
     ${IMGUI_PATH}/backends/imgui_impl_opengl3.cpp
     ${IMGUI_PATH}/misc/cpp/*.cpp
 )
