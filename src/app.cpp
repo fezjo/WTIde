@@ -1,6 +1,10 @@
 #include <imgui/imgui.h>
-#include <nfd.hpp>
 #include <zep.h>
+
+#if defined(__EMSCRIPTEN__)
+#else
+#include <nfd.hpp>
+#endif
 
 #include "plugins/plugin.h"
 #include "utils.h"
@@ -29,7 +33,10 @@ public:
     ImVec4 clear_color;
 
 protected:
+#if defined(__EMSCRIPTEN__)
+#else
     NFD::Guard nfd_guard;
+#endif
 
     bool initialized = false;
     std::vector<IEditorPlugin*> unsaved_dialog_editors;
@@ -464,6 +471,9 @@ public:
     }
 
     std::vector<fs::path> openMultipleFilesDialog() {
+#if defined(__EMSCRIPTEN__)
+        return {};
+#else
         NFD::UniquePathSet outPaths;
         nfdfilteritem_t filterItem[1] = {{"WT* source", "wt"}};
         nfdresult_t result = NFD::OpenDialogMultiple(outPaths, filterItem, 1, ".");
@@ -483,6 +493,7 @@ public:
             std::cerr << "Error: " << NFD::GetError() << std::endl;
         }
         return {};
+#endif
     }
 
     void openFiles() {
@@ -492,6 +503,9 @@ public:
     }
 
     fs::path openSaveFileDialog(fs::path defaultPath = "") {
+#if defined(__EMSCRIPTEN__)
+        return {};
+#else
         NFD::UniquePath savePath;
         nfdfilteritem_t filterItem[1] = {{"WT* source", "wt"}};
         fs::path base = defaultPath.empty() ? fs::current_path() : defaultPath.parent_path();
@@ -504,6 +518,7 @@ public:
         } else {
             std::cerr << "Error: " << NFD::GetError() << std::endl;
         }
+#endif
     }
 
     void saveFileAs(std::string path = "", bool rename = true, bool dialog = false) {
