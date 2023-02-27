@@ -77,5 +77,5 @@ list(REMOVE_ITEM WTSTAR_SOURCES
     ${WTSTAR_PATH}/src/wtdb.c
     ${WTSTAR_PATH}/src/wtdump.c
 )
-add_library("WTStar" SHARED ${WTSTAR_SOURCES})
+add_library("WTStar" ${WTSTAR_SOURCES})
 target_include_directories("WTStar" SYSTEM PUBLIC ${WTSTAR_PATH}/src)

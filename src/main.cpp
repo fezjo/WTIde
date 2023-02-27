@@ -9,7 +9,7 @@
 #endif
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__)
 #include "../lib/emscripten_mainloop_stub.h"
 #endif
 
@@ -103,7 +103,7 @@ int main(int, char **) {
     {
         // io.Fonts->AddFontDefault();
         float fontSize = 16.0f;
-        fs::path fontPath, fontDirPath = fs::path("..") / "resources" / "fonts";
+        fs::path fontPath, fontDirPath = fs::path("../resources/fonts");
         ImFontConfig config;
         config.MergeMode = true;
 
@@ -126,7 +126,7 @@ int main(int, char **) {
 
     // Main loop
     bool alive = true;
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__)
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
     // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
     io.IniFilename = NULL;
@@ -176,7 +176,7 @@ int main(int, char **) {
         auto delta_time = static_cast<int>(end_frame - start_frame);
         SDL_WaitEventTimeout(NULL, std::max(0, 1000 / 10 - delta_time));
     }
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__)
     EMSCRIPTEN_MAINLOOP_END;
 #endif
 
