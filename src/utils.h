@@ -1,5 +1,8 @@
 #pragma once
 
+using ulong = unsigned long;
+using uint = unsigned int;
+
 #include <algorithm>
 #include <assert.h>
 #include <chrono>

@@ -10,7 +10,7 @@ target_link_libraries(
     ImGui
     PRIVATE
         SDL2::SDL2
-        OpenGL::OpenGL
+        GL
 )
 target_include_directories("ImGui"
     SYSTEM PUBLIC

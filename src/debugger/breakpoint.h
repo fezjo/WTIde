@@ -9,8 +9,8 @@ struct Breakpoint {
     std::string condition;
 
     std::weak_ordering operator<=>(const Breakpoint& other) const {
-        if (auto cmp = file <=> other.file; cmp != 0)
-            return cmp;
+        // if (auto cmp = file <=> other.file; cmp != 0)
+        //     return cmp;
         return line <=> other.line;
     }
 

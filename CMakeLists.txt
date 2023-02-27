@@ -43,7 +43,7 @@ target_link_libraries(
     ${TARGET_NAME}
     PRIVATE
         SDL2::SDL2
-        OpenGL::OpenGL
+        GL
         ImGui
         ImGui-Notify
         ICTE
