@@ -1,0 +1,26 @@
+#mode cCRCW
+input int A[_];
+int n = A.size;
+output int x = -1;
+
+#include "test2"
+#include once "test"
+@1;
+@2(1);
+A.dim;
+
+int sn = sqrt(n);
+
+int Box[sn];
+
+pardo(i : sn) {
+  Box[i] = 0;
+  pardo(j : sn) if (A[i * sn + j] == 1) Box[i] = 1;
+}
+
+int fb = first_one_simple(Box);
+
+int C[sn];
+pardo(i : sn) C[i] = A[fb * sn + i];
+
+x = first_one_simple(C) + fb * sn;

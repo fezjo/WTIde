@@ -1,0 +1,5 @@
+int libx = 10;
+
+for (int i = 0; i < libx; ++i)
+	if (i % 2 == 0)
+		libx++;

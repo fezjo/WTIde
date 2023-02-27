@@ -1,0 +1,96 @@
+input int x;
+input int A[_];
+output int sum = 0;
+BRK;
+if (1) {
+    x = x;
+}
+
+
+
+
+
+
+if (1)
+    x = x;
+
+if (1)
+    x = x;
+else
+    x = x;
+
+for(int x = 0; x < 10; ++x) x = x;
+
+{
+BRK;
+x = x;
+int y;
+}
+
+if (1) {
+    if (1)
+        x = x;
+    else
+        x = x;
+} else {
+    if (1)
+        x = x;
+    else {
+        x = x;
+    }
+}
+
+#mode cCRCW
+
+int y = 0;
+{
+	int y = 1;
+	{
+		int y = 2;
+		{
+			int y = 3;
+			BRK;
+		}
+	}
+}
+
+int f(int i) {
+    if (i < 2)
+        return 1;
+    int res = i * f(i-1);
+    return res;
+}
+
+BRK;
+f(9);
+
+for (int i = 0; i < A.size; i++) {
+    {
+//        BRK(1);
+//        BRK(i % 2 == 0);
+    }
+    sum += A[i];// * f(9);
+}
+
+BRK;
+pardo(i: 100) {
+    x += 1;
+}
+
+if(sum % x == 0) {
+    int local = 10;
+    sum += 1;
+}
+
+sum = 0;
+int i = 1;
+while(i < 100) {
+    sum += i;
+    i *= 2;
+}
+
+i = 1000;
+do {
+    sum += i;
+    i *= 2;
+} while (i < 100000);

@@ -1,0 +1,8 @@
+int x = 10;
+output int res = 0;
+
+if (0)
+    if (x == 10)
+        res = 1;
+    else
+        res = 2;
