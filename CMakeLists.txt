@@ -58,6 +58,9 @@ target_compile_options(
         # -Weverything -Wno-c++98-compat-pedantic
 )
 if (EMSCRIPTEN)
+    # Documentation for Emscripten options:
+    # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
+
     target_link_libraries(${TARGET_NAME} PRIVATE GL)
     target_link_options(${TARGET_NAME} PUBLIC
         "SHELL:-sUSE_SDL=2"
