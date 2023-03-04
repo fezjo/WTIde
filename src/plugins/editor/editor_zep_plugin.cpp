@@ -1,7 +1,3 @@
-#if ZEP_SINGLE_HEADER == 1
-#define ZEP_SINGLE_HEADER_BUILD
-#endif
-
 #include <clip.h>
 
 #include "config_app.h"
