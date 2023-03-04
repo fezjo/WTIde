@@ -10,7 +10,7 @@
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
 #if defined(__EMSCRIPTEN__)
-#include "../lib/emscripten_mainloop_stub.h"
+#include "../lib/emscripten/emscripten_mainloop_stub.h"
 #endif
 
 #include "utils.h"
