@@ -21,6 +21,9 @@ include(cmake/compiler.cmake)
 if (EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set(BUILD_SHARED_LIBS OFF)
+    add_definitions(-D__EMSCRIPTEN__)
+    add_compile_options(-fwasm-exceptions)
+    add_link_options(-fwasm-exceptions)
 endif()
 
 find_package(OpenGL REQUIRED)
@@ -29,28 +32,21 @@ find_package(SDL2 REQUIRED)
 add_definitions(-DIMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/imgui/my_imconfig.h")
 
 set(TARGET_NAME ${CMAKE_PROJECT_NAME})
-add_executable(${TARGET_NAME} "")
+add_executable(${TARGET_NAME})
 
 add_subdirectory(lib)
 add_subdirectory(src)
 
-target_include_directories(
-    ${TARGET_NAME}
-    PRIVATE
-        ${CMAKE_BINARY_DIR}
-)
-target_link_libraries(
-    ${TARGET_NAME}
-    PRIVATE
-        SDL2::SDL2
-        GL
-        ImGui
-        ImGui-Notify
-        ICTE
-        Zep::Zep
-        WTStar
-        clip
-        $<$<NOT:$<BOOL:EMSCRIPTEN>>:nfd>
+target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_BINARY_DIR})
+target_link_libraries(${TARGET_NAME} PRIVATE
+    SDL2::SDL2
+    ImGui
+    ImGui-Notify
+    ICTE
+    Zep::Zep
+    WTStar
+    clip
+    $<IF:$<BOOL:${EMSCRIPTEN}>,,nfd>
 )
 target_compile_options(
     ${TARGET_NAME} PRIVATE
@@ -62,23 +58,29 @@ target_compile_options(
         # -Weverything -Wno-c++98-compat-pedantic
 )
 if (EMSCRIPTEN)
-    add_definitions(-D__EMSCRIPTEN__)
+    target_link_libraries(${TARGET_NAME} PRIVATE GL)
     target_link_options(${TARGET_NAME} PUBLIC
-        "SHELL:-s USE_SDL=2"
-        "SHELL:-s USE_WEBGL2=1"
-        # "SHELL:-s USE_GLFW=3"
-        "SHELL:-s FULL_ES3=1"
-        # "SHELL:-s USE_WEBGPU=1"
-        "SHELL:-s WASM=1"
-        "SHELL:-s ALLOW_MEMORY_GROWTH=1"
-        "SHELL:-s ASSERTIONS=1"
-        # "SHELL:-s EXIT_RUNTIME=1"
-        "SHELL:--preload-file ../resources"
-        # "SHELL:--preload-file shaders"
-        # "SHELL:--preload-file textures"
+        "SHELL:-sUSE_SDL=2"
+        "SHELL:-sUSE_WEBGL2=1"
+        # "SHELL:-sUSE_GLFW=3"
+        "SHELL:-sFULL_ES2=1"
+        # "SHELL:-sUSE_WEBGPU=1"
+        "SHELL:-sWASM=1"
+
+        "SHELL:-sALLOW_MEMORY_GROWTH=1"
         # "SHELL:--no-heap-copy"
+        
+        "SHELL:-sASSERTIONS=1"
+        # "SHELL:-sSAFE_HEAP=1"
+        # "SHELL:-sDEMANGLE_SUPPORT=1"
+        # "SHELL:-sDISABLE_EXCEPTION_CATCHING=0"
+        # "SHELL:-sEXIT_RUNTIME=1"
+
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources@resources"
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/zep.cfg@zep.cfg"
         # "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/shell.html"
     )
+else ()
+    target_link_libraries(${TARGET_NAME} PRIVATE OpenGL::GL)
+    configure_file(zep.cfg zep.cfg COPYONLY)
 endif ()
-
-configure_file(zep.cfg zep.cfg COPYONLY)

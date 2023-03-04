@@ -6,16 +6,13 @@ file(GLOB IMGUI_SOURCES
     ${IMGUI_PATH}/misc/cpp/*.cpp
 )
 add_library("ImGui" STATIC ${IMGUI_SOURCES})
-target_link_libraries(
-    ImGui
-    PRIVATE
-        SDL2::SDL2
-        GL
+target_link_libraries(ImGui PRIVATE
+    SDL2::SDL2
+    $<IF:$<BOOL:${EMSCRIPTEN}>,GL,OpenGL::GL>
 )
-target_include_directories("ImGui"
-    SYSTEM PUBLIC
-        ${CMAKE_CURRENT_LIST_DIR}
-        ${IMGUI_PATH}
+target_include_directories("ImGui" SYSTEM PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
+    ${IMGUI_PATH}
 )
 
 
@@ -24,11 +21,7 @@ file(GLOB IMGUI_NOTIFY_SOURCES
     ${IMGUI_NOTIFY_PATH}/*.h
 )
 add_library("ImGui-Notify" STATIC ${IMGUI_NOTIFY_SOURCES})
-target_link_libraries(
-    "ImGui-Notify"
-    PRIVATE
-        ImGui
-)
+target_link_libraries("ImGui-Notify" PRIVATE ImGui)
 set_target_properties("ImGui-Notify" PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories("ImGui-Notify" SYSTEM PUBLIC ${IMGUI_NOTIFY_PATH})
 
@@ -39,11 +32,7 @@ file(GLOB ICTE_SOURCES
     ${ICTE_PATH}/*.h
 )
 add_library("ICTE" STATIC ${ICTE_SOURCES})
-target_link_libraries(
-    "ICTE"
-    PRIVATE
-        ImGui
-)
+target_link_libraries("ICTE" PRIVATE ImGui)
 set_target_properties("ICTE" PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories("ICTE" SYSTEM PUBLIC ${ICTE_PATH})
 
@@ -59,8 +48,7 @@ set(CLIP_PATH ${CMAKE_CURRENT_LIST_DIR}/clip)
 add_subdirectory(${CLIP_PATH})
 target_include_directories("clip" SYSTEM PUBLIC ${CLIP_PATH})
 
-# if system is not emscripten
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+if (NOT EMSCRIPTEN)
     set(NFD_PATH ${CMAKE_CURRENT_LIST_DIR}/nativefiledialog-extended)
     add_subdirectory(${NFD_PATH})
     target_include_directories("nfd" SYSTEM PUBLIC ${NFD_PATH}/src/include)
