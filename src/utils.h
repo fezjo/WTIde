@@ -1,8 +1,5 @@
 #pragma once
 
-using ulong = unsigned long;
-using uint = unsigned int;
-
 #include <algorithm>
 #include <assert.h>
 #include <chrono>
@@ -28,6 +25,10 @@ using uint = unsigned int;
 #include "dbg.h"
 
 namespace fs = std::filesystem;
+
+using ushort = unsigned short;
+using uint = unsigned int;
+using ulong = unsigned long;
 
 using imid_t = uint64_t;
 
