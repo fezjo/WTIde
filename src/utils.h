@@ -22,6 +22,7 @@
 #include <variant>
 #include <vector>
 
+#define DBG_MACRO_NO_WARNING
 #include "dbg.h"
 
 namespace fs = std::filesystem;
