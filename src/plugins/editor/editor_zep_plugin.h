@@ -28,14 +28,6 @@ protected:
     std::function<void(std::shared_ptr<Zep::ZepMessage>)> Callback;
 
     inline static std::vector<std::string> windowOptions = {
-        "ShowWhiteSpace",
-        "ShowCR",
-        "ShowLineNumbers",
-        "ShowIndicators",
-        "HideScrollBar",
-        "Modal",
-        "WrapText",
-        "HideSplitMark",
-        "GridStyle"
-    };
+        "ShowWhiteSpace", "ShowCR",   "ShowLineNumbers", "ShowIndicators", "HideScrollBar",
+        "Modal",          "WrapText", "HideSplitMark",   "GridStyle"};
 };

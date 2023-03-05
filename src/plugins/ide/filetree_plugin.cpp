@@ -217,7 +217,7 @@ bool FileTreePlugin::renameFile() {
         return false;
     try {
         fs::rename(target_path, create_path);
-    } catch (fs::filesystem_error const &) {
+    } catch (const fs::filesystem_error &) {
         return false;
     }
     return true;

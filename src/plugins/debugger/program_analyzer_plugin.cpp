@@ -102,7 +102,8 @@ void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
         if (action_update || action_remove)
             bp_callback.remove(bp);
         if (action_update) {
-            auto res = bp_callback.update({edit_bp.file, edit_bp.line, edit_bp.enabled, edit_bp.condition});
+            auto res = bp_callback.update(
+                {edit_bp.file, edit_bp.line, edit_bp.enabled, edit_bp.condition});
             if (!res) {
                 ImGui::InsertNotification(
                     {ImGuiToastType_Error, 5000,
@@ -147,9 +148,10 @@ void ProgramAnalyzerPlugin::show() {
 
         env = WTStar::virtual_machine_t_new(code.data(), static_cast<int>(code.size()));
         if (!env) {
-            ImGui::TextWrapped("Failed to create virtual machine, corrupted "
-                               "binary? Read %lu bytes from %s",
-                               code.size(), fn.c_str());
+            ImGui::TextWrapped(
+                "Failed to create virtual machine, corrupted "
+                "binary? Read %lu bytes from %s",
+                code.size(), fn.c_str());
             ImGui::End();
             return;
         }

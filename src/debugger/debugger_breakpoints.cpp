@@ -190,24 +190,24 @@ bool Debugger::addBreakpointToVm(VM_Breakpoint &bp) {
     return true;
 }
 
-std::pair<bool, std::string> Debugger::setBreakpoint(const std::string& file, uint line,
-                                                     bool enabled, const std::string& condition) {
+std::pair<bool, std::string> Debugger::setBreakpoint(const std::string &file, uint line,
+                                                     bool enabled, const std::string &condition) {
     auto bp = _setBreakpoint(file, line, enabled, condition);
     return {bp.active, bp.error};
 }
 
-VM_Breakpoint& Debugger::_setBreakpoint(const std::string file, uint line, bool enabled,
+VM_Breakpoint &Debugger::_setBreakpoint(const std::string file, uint line, bool enabled,
                                         const std::string condition) {
     auto it = breakpoints.erase(
         std::remove_if(breakpoints.begin(), breakpoints.end(),
                        [&](const VM_Breakpoint &bp) { return bp.file == file && bp.line == line; }),
         breakpoints.end());
-    
+
     auto bp_pos = findInstructionNumber(file, line);
     if (it == breakpoints.end())
         it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
-                                [](uint pos, const VM_Breakpoint &bp) { return pos < bp.bp_pos; });
-    VM_Breakpoint& bp = *breakpoints.insert(
+                              [](uint pos, const VM_Breakpoint &bp) { return pos < bp.bp_pos; });
+    VM_Breakpoint &bp = *breakpoints.insert(
         it, {{file, (int)line, enabled, condition}, false, bp_pos, "not compiled", {}, NULL});
 
     std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp.bp_pos

@@ -20,7 +20,9 @@ void DebuggerControlPluginV2::show() {
             if (setSourceAction())
                 compileAction();
         }
-        tooltip("Set source file to currently focused editor tab and compile\nCurrent source file: " + source_fn);
+        tooltip(
+            "Set source file to currently focused editor tab and compile\nCurrent source file: " +
+            source_fn);
 
         ImGui::BeginDisabled(debugger->getSource().empty());
         ImGui::SameLine(0, spacing);

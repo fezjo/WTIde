@@ -4,9 +4,7 @@
 
 class InputPlugin : public TextPlugin {
 public:
-    InputPlugin() {
-        pluginType = PluginType::Input;
-    }
+    InputPlugin() { pluginType = PluginType::Input; }
 
 protected:
     using TextPlugin::setReadonly;

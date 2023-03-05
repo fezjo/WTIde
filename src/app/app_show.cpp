@@ -9,25 +9,26 @@ void App::showDebugWindow() {
         ImGui::Begin("Debug"); // Create a window called "Hello, world!" and append into it.
 
         ImGui::Text("This is some useful text."); // Display some text (you can use a format
-                                                    // strings too)
+                                                  // strings too)
         ImGui::Checkbox("Demo App",
                         &show_demo_window); // Edit bools storing our window open/close state
 
         ImGui::ColorEdit3("clear color",
-                            (float *)&clear_color); // Edit 3 floats representing a color
+                          (float *)&clear_color); // Edit 3 floats representing a color
 
         if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return
-                                        // true when edited/activated)
+                                     // true when edited/activated)
             counter++;
         ImGui::SameLine();
         ImGui::Text("counter = %d", counter);
 
-        ImGui::Text("average of 120 frames\n"
-                    "%5.1fms=%5.1f FPS\n"
-                    "last frame\n"
-                    "%5.1fms=%5.1f FPS",
-                    1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
-                    1000 * ImGui::GetIO().DeltaTime, 1.0f / ImGui::GetIO().DeltaTime);
+        ImGui::Text(
+            "average of 120 frames\n"
+            "%5.1fms=%5.1f FPS\n"
+            "last frame\n"
+            "%5.1fms=%5.1f FPS",
+            1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate,
+            1000 * ImGui::GetIO().DeltaTime, 1.0f / ImGui::GetIO().DeltaTime);
         ImGui::End();
     }
 }
@@ -68,13 +69,14 @@ void App::show(bool *p_open) {
     if (!unsaved_dialog_editors.empty())
         ImGui::OpenPopup("Unsaved changes");
     if (ImGui::BeginPopupModal("Unsaved changes", NULL,
-                                ImGuiWindowFlags_AlwaysAutoResize |
-                                    ImGuiWindowFlags_NoSavedSettings)) {
+                               ImGuiWindowFlags_AlwaysAutoResize |
+                                   ImGuiWindowFlags_NoSavedSettings)) {
         ImGui::Text("You have unsaved changes.\nDo you want to save them?\n\n");
         ImGui::Separator();
 
-        auto msg = unsaved_dialog_editors.size() > 1 ? "Save all" : "Save " +
-            unsaved_dialog_editors[0]->getFileName();
+        auto msg = unsaved_dialog_editors.size() > 1
+                       ? "Save all"
+                       : "Save " + unsaved_dialog_editors[0]->getFileName();
         if (ImGui::Button(msg.c_str(), ImVec2(120, 0))) {
             ImGui::CloseCurrentPopup();
             bool ok = true;
@@ -174,5 +176,5 @@ void App::showNotifications() {
                                                     100.f / 255.f)); // Background color
     ImGui::RenderNotifications(); // <-- Here we render all notifications
     ImGui::PopStyleColor(1);
-    ImGui::PopStyleVar(1);        // Don't forget to Pop()
+    ImGui::PopStyleVar(1); // Don't forget to Pop()
 }

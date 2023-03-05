@@ -66,14 +66,15 @@ void App::delete_plugin(IPlugin *plugin) {
     if (isPluginEditor(plugin->getPluginType())) {
         editor_plugins.erase(find(editor_plugins.begin(), editor_plugins.end(), plugin));
         if (plugin->getPluginType() == PluginType::EditorIcte)
-            breakpoint_storage.removeHandler(static_cast<EditorIctePlugin *>(plugin)->bp_handler.id);
+            breakpoint_storage.removeHandler(
+                static_cast<EditorIctePlugin *>(plugin)->bp_handler.id);
     }
     plugins.erase(find(plugins.begin(), plugins.end(), plugin));
     delete plugin;
 }
 
-IEditorPlugin* App::getLastFocusedEditor(bool updateFocus) {
-    std::pair<timepoint, IEditorPlugin*> res = {timepoint::min(), nullptr};
+IEditorPlugin *App::getLastFocusedEditor(bool updateFocus) {
+    std::pair<timepoint, IEditorPlugin *> res = {timepoint::min(), nullptr};
     for (auto editor : editor_plugins) {
         if (updateFocus)
             editor->focused = false;
@@ -94,9 +95,10 @@ void App::openEditor(fs::path path, bool dockAsLastFocused, PluginType type) {
     } else {
         ep = EditorZepPlugin::init(Zep::NVec2f(1.0f, 1.0f));
     }
-    if(!ep->loadFile(path))
+    if (!ep->loadFile(path))
         ep->setFile(path); // set anyway
-    if (type == PluginType::EditorZep) // we can do this only after loadFile which initializes a zep window
+    if (type ==
+        PluginType::EditorZep) // we can do this only after loadFile which initializes a zep window
         static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
             Zep::ZepMode_Standard::StaticName());
 

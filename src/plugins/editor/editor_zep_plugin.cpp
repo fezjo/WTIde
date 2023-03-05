@@ -9,7 +9,8 @@ EditorZepPlugin::EditorZepPlugin(const fs::path &rootPath, const Zep::NVec2f &pi
                                  std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB)
     : editor(Zep::ZepPath(rootPath), pixelScale), Callback(fnCommandCB) {
     static std::unordered_set<std::string> keywords(wt_keywords.begin(), wt_keywords.end());
-    static std::unordered_set<std::string> identifiers(wt_identifiers.begin(), wt_identifiers.end());
+    static std::unordered_set<std::string> identifiers(wt_identifiers.begin(),
+                                                       wt_identifiers.end());
     editor.RegisterCallback(this);
     editor.RegisterSyntaxFactory({".wt"},
                                  SyntaxProvider{"wt", Zep::tSyntaxFactory([&](ZepBuffer *pBuffer) {
@@ -138,7 +139,8 @@ void EditorZepPlugin::show() {
                 auto currentWindowFlags = window->GetWindowFlags();
                 for (size_t i = 0; i < windowOptions.size(); ++i) {
                     int flag = 1 << i;
-                    if (ImGui::MenuItem(windowOptions[i].c_str(), nullptr, currentWindowFlags & flag)) {
+                    if (ImGui::MenuItem(windowOptions[i].c_str(), nullptr,
+                                        currentWindowFlags & flag)) {
                         window->ToggleFlag(flag);
                     }
                 }

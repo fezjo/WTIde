@@ -6,7 +6,7 @@ bool DebuggerControlPluginV1::setSourceAction() {
 }
 
 bool DebuggerControlPluginV1::setSourceAction(const std::string &source) {
-        if (!setSource(source)) {
+    if (!setSource(source)) {
         source_fn_color = ImVec4(1.0, 0.25, 0.25, 1.0);
         std::cerr << "Failed to set source" << std::endl;
         return false;
@@ -60,7 +60,7 @@ void DebuggerControlPluginV1::show() {
             resp = runAction();
         }
         ImGui::EndDisabled();
-    
+
         ImGui::BeginDisabled(!debugger->canRun());
         ImGui::SameLine();
         if (ImGui::Button("Destroy")) {
@@ -68,7 +68,7 @@ void DebuggerControlPluginV1::show() {
             setSourceAction(source_fn);
         }
         ImGui::EndDisabled();
-    
+
         ImGui::SameLine();
         ImGui::Checkbox("Trace", &debugger->trace_on);
 
@@ -101,7 +101,7 @@ void DebuggerControlPluginV1::show() {
     {
         static int line_buffer = 11;
         static std::string condition =
-"int bn = A.size;\n\
+            "int bn = A.size;\n\
 sum = bn + 1;\n\
 return bn;";
 
@@ -144,7 +144,7 @@ return bn;";
         ImGui::SameLine();
         if (ImGui::Button("Remove All")) {
             // TODO
-            // debugger->removeAllBreakpoints(); 
+            // debugger->removeAllBreakpoints();
         }
         ImGui::EndDisabled();
     }

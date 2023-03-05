@@ -9,6 +9,7 @@ public:
     virtual void show() override;
 
     std::vector<IPlugin *> *plugins;
+
 protected:
     void showLine(IPlugin *plugin);
 };

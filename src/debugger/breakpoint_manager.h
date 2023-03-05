@@ -14,14 +14,14 @@ public:
 
 public:
     BreakpointManager() = default;
-    BreakpointManager(Debugger *debugger) : debugger(debugger) {};
+    BreakpointManager(Debugger *debugger) : debugger(debugger){};
     ~BreakpointManager() = default;
 
-    void addHandler(const BreakpointCallbacks& handler);
+    void addHandler(const BreakpointCallbacks &handler);
     size_t removeHandler(size_t id);
     void synchronizeHandlers();
     std::set<Breakpoint> getBreakpoints() const;
-    int containsBreakpoint(const Breakpoint& bp) const;
-    bool updateBreakpoint(const Breakpoint& bp);
-    bool removeBreakpoint(const Breakpoint& bp);
+    int containsBreakpoint(const Breakpoint &bp) const;
+    bool updateBreakpoint(const Breakpoint &bp);
+    bool removeBreakpoint(const Breakpoint &bp);
 };

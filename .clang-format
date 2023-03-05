@@ -8,9 +8,10 @@ DisableFormat: false
 IndentWidth: 4
 InsertTrailingCommas: None
 KeepEmptyLinesAtTheStartOfBlocks: false
-PointerAlignment: Left
+PointerAlignment: Right
 QualifierAlignment: Left
-RemoveBracesLLVM: false # temp
-SeparateDefinitionBlocks: Always
-SortIncludes: Never # temp
+ReflowComments: false
+RemoveBracesLLVM: false
+SeparateDefinitionBlocks: Leave
+SortIncludes: Never
 SpacesInContainerLiterals: false

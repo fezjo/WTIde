@@ -6,7 +6,6 @@
 #include "wt_syntax.h"
 #include "../../debugger/breakpoint_manager.h"
 
-
 class IEditorPlugin : public IPlugin {
 public:
     virtual ~IEditorPlugin() = default;
@@ -16,8 +15,8 @@ public:
     virtual bool isDirty() const = 0;
     std::string getFileName() const { return fn; };
 
-    virtual void setBreakpointCallbacks(const BreakpointCallbacks &handler) {};
-    virtual void setDebuggerLine(size_t line, bool focus = false) {};
+    virtual void setBreakpointCallbacks(const BreakpointCallbacks &handler){};
+    virtual void setDebuggerLine(size_t line, bool focus = false){};
 
 public:
     timepoint lastFocusedTime;

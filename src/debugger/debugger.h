@@ -12,7 +12,7 @@ struct VM_Breakpoint : Breakpoint {
     WTStar::breakpoint_t *vm_bp;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const VM_Breakpoint& bp) {
+inline std::ostream &operator<<(std::ostream &os, const VM_Breakpoint &bp) {
     os << "Breakpoint(" << bp.file << ":" << bp.line << ", enabled=" << bp.enabled << ", cond='"
        << bp.condition << "' | active=" << bp.active << ", bp_pos=" << bp.bp_pos
        << ", err=" << bp.error << ")";
@@ -83,8 +83,8 @@ protected:
 
     uint findInstructionNumber(const std::string &file, uint line) const;
     VM_Breakpoint *findBreakpoint(const std::string &file, uint line);
-    bool addBreakpointToVm(VM_Breakpoint& bp);
-    VM_Breakpoint& _setBreakpoint(const std::string file, uint line, bool enabled,
+    bool addBreakpointToVm(VM_Breakpoint &bp);
+    VM_Breakpoint &_setBreakpoint(const std::string file, uint line, bool enabled,
                                   const std::string condition);
 
 public:

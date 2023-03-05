@@ -98,8 +98,8 @@ std::string Debugger::getOutput() const {
     Writer wout;
     for (uint i = 0; i < env->n_out_vars; i++)
         WTStar::write_output(wout.w, env, i);
-    WTStar::out_text(wout.w, "-----\nwork: %10d\ntime: %10d\nratio: %9.3f\n",
-        env->W, env->T, env->W / (double)env->T);
+    WTStar::out_text(wout.w, "-----\nwork: %10d\ntime: %10d\nratio: %9.3f\n", env->W, env->T,
+                     env->W / (double)env->T);
     return wout.read();
 }
 

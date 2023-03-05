@@ -12,12 +12,10 @@ void App::init() {
 
     debugger = new Debugger();
     breakpoint_storage = BreakpointManager(debugger);
-    breakpoint_callbacks = BreakpointCallbacks(std::bind(&BreakpointManager::updateBreakpoint, &breakpoint_storage,
-                                        std::placeholders::_1),
-                            std::bind(&BreakpointManager::removeBreakpoint, &breakpoint_storage,
-                                        std::placeholders::_1),
-                            std::bind(&BreakpointManager::getBreakpoints, &breakpoint_storage),
-                            "root callback", 0);
+    breakpoint_callbacks = BreakpointCallbacks(
+        std::bind(&BreakpointManager::updateBreakpoint, &breakpoint_storage, std::placeholders::_1),
+        std::bind(&BreakpointManager::removeBreakpoint, &breakpoint_storage, std::placeholders::_1),
+        std::bind(&BreakpointManager::getBreakpoints, &breakpoint_storage), "root callback", 0);
 
     _initializePlugins();
     _defaultLayout();
@@ -110,7 +108,7 @@ void App::_initializePlugins() {
 
     // Called once the fonts/device is guaranteed setup
     openEditor(fs::path("../resources/sample_project/main.cpp"), false, PluginType::EditorZep);
-    static_cast<EditorZepPlugin*>(editor_plugins[0])
+    static_cast<EditorZepPlugin *>(editor_plugins[0])
         ->GetEditor()
         .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
 
