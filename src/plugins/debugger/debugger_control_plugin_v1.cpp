@@ -52,13 +52,11 @@ void DebuggerControlPluginV1::show() {
     {
         int resp = -1000;
         ImGui::BeginDisabled(debugger->getSource().empty());
-        if (ImGui::Button("Compile")) {
+        if (ImGui::Button("Compile"))
             compileAction();
-        }
         ImGui::SameLine();
-        if (ImGui::Button("Run")) {
+        if (ImGui::Button("Run"))
             resp = runAction();
-        }
         ImGui::EndDisabled();
 
         ImGui::BeginDisabled(!debugger->canRun());
@@ -73,23 +71,19 @@ void DebuggerControlPluginV1::show() {
         ImGui::Checkbox("Trace", &debugger->trace_on);
 
         ImGui::BeginDisabled(!debugger->canRun());
-        if (ImGui::Button("Continue")) {
+        if (ImGui::Button("Continue"))
             resp = debugger->continueExecution();
-        }
         ImGui::SameLine();
         ImGui::Text("Step");
         ImGui::SameLine();
-        if (ImGui::Button("Over")) {
+        if (ImGui::Button("Over"))
             resp = debugger->stepOver();
-        }
         ImGui::SameLine();
-        if (ImGui::Button("Into")) {
+        if (ImGui::Button("Into"))
             resp = debugger->stepInto();
-        }
         ImGui::SameLine();
-        if (ImGui::Button("Out")) {
+        if (ImGui::Button("Out"))
             resp = debugger->stepOut();
-        }
         ImGui::EndDisabled();
 
         if (resp != -1000)
@@ -110,9 +104,8 @@ return bn;";
         ImGui::Checkbox("Stop on BP", &debugger->stop_on_bp);
 
         ImGui::BeginDisabled(!debugger->canAddBreakpoints());
-        if (ImGui::Button("Add")) {
+        if (ImGui::Button("Add"))
             ImGui::OpenPopup("Add Breakpoint");
-        }
         if (ImGui::BeginPopup("Add Breakpoint")) {
             ImGui::InputText("File", &file_buffer);
             ImGui::InputInt("Line", &line_buffer);
@@ -130,15 +123,13 @@ return bn;";
             ImGui::EndPopup();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Remove")) {
+        if (ImGui::Button("Remove"))
             ImGui::OpenPopup("Remove Breakpoint");
-        }
         if (ImGui::BeginPopup("Remove Breakpoint")) {
             ImGui::InputText("File", &file_buffer);
             ImGui::InputInt("Line", &line_buffer);
-            if (ImGui::Button("Remove")) {
+            if (ImGui::Button("Remove"))
                 debugger->removeBreakpoint(file_buffer, line_buffer);
-            }
             ImGui::EndPopup();
         }
         ImGui::SameLine();

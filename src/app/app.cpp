@@ -13,12 +13,11 @@ void App::update() {
     breakpoint_storage.synchronizeHandlers();
 
     auto [pc, sp] = debugger->getSourcePosition();
-    for (auto p : editor_plugins) {
+    for (auto p : editor_plugins)
         if (p->getFileName() == sp.file)
             p->setDebuggerLine(sp.line, execution_halted_now);
         else
             p->setDebuggerLine(0);
-    }
     execution_halted_now = false;
 
     getLastFocusedEditor(true);
@@ -90,11 +89,10 @@ void App::openEditor(fs::path path, bool dockAsLastFocused, PluginType type) {
     if (type == PluginType::Unknown)
         type = default_editor_plugin_type;
     IEditorPlugin *ep = nullptr;
-    if (type == PluginType::EditorIcte) {
+    if (type == PluginType::EditorIcte)
         ep = new EditorIctePlugin();
-    } else {
+    else
         ep = EditorZepPlugin::init(Zep::NVec2f(1.0f, 1.0f));
-    }
     if (!ep->loadFile(path))
         ep->setFile(path); // set anyway
     if (type ==

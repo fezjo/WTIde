@@ -74,19 +74,16 @@ void FileTreePlugin::handleItem(bool is_dir, fs::path path) {
     if (is_dir) {
         if (wasNodeSelected())
             node_selected = path;
-    } else {
-        if (wasNodeSelected()) {
-            if (ImGui::IsMouseDoubleClicked(0)) {
-                selection.clear();
-                selection.insert(path);
-                openAllSelected();
-            } else
-                node_selected = path;
-        }
+    } else if (wasNodeSelected()) {
+        if (ImGui::IsMouseDoubleClicked(0)) {
+            selection.clear();
+            selection.insert(path);
+            openAllSelected();
+        } else
+            node_selected = path;
     }
-    if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+    if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
         menu_node = path;
-    }
     if (ImGui::IsItemHovered(0, 0.5f))
         ImGui::SetTooltip("%s", fs::canonical(path).c_str());
     showFileMenu();
@@ -273,14 +270,12 @@ void FileTreePlugin::show() {
             }
         }
         ImGui::EndDisabled();
-        if (ImGui::MenuItem("")) {
+        if (ImGui::MenuItem(""))
             files_changed = true;
-        }
 
         std::string editor_icon = std::get<std::string>(callbacks["get_editor_icon"](0));
-        if (ImGui::MenuItem(editor_icon.c_str())) {
+        if (ImGui::MenuItem(editor_icon.c_str()))
             callbacks["switch_default_editor_type"](0);
-        }
 
         ImGui::EndMenuBar();
     }

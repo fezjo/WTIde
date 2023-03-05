@@ -26,9 +26,8 @@ void DebuggerControlPluginV2::show() {
 
         ImGui::BeginDisabled(debugger->getSource().empty());
         ImGui::SameLine(0, spacing);
-        if (ImGui::Button(debugger->isRunning() ? "" : "")) {
+        if (ImGui::Button(debugger->isRunning() ? "" : ""))
             resp = runAction();
-        }
         tooltip("Run/Rerun");
         ImGui::EndDisabled();
 
@@ -48,24 +47,20 @@ void DebuggerControlPluginV2::show() {
         }
         tooltip("Finish");
         ImGui::SameLine(0, spacing2);
-        if (ImGui::Button("")) {
+        if (ImGui::Button(""))
             resp = debugger->continueExecution();
-        }
         tooltip("Continue");
         ImGui::SameLine(0, spacing);
-        if (ImGui::Button("")) {
+        if (ImGui::Button(""))
             resp = debugger->stepOver();
-        }
         tooltip("Step Over");
         ImGui::SameLine(0, spacing);
-        if (ImGui::Button("")) {
+        if (ImGui::Button(""))
             resp = debugger->stepInto();
-        }
         tooltip("Step Into");
         ImGui::SameLine(0, spacing);
-        if (ImGui::Button("")) {
+        if (ImGui::Button(""))
             resp = debugger->stepOut();
-        }
         tooltip("Step Out");
         ImGui::EndDisabled();
 

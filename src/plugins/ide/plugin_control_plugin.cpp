@@ -9,9 +9,8 @@ void PluginControlPlugin::showLine(IPlugin *plugin) {
                     &plugin->shown);
     if (!plugin->immortal) {
         ImGui::SameLine();
-        if (ImGui::Button(("X##" + std::to_string(plugin->getId())).c_str())) {
+        if (ImGui::Button(("X##" + std::to_string(plugin->getId())).c_str()))
             plugin->alive = false;
-        }
     }
 }
 

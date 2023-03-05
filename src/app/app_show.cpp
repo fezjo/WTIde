@@ -110,24 +110,18 @@ void App::showMainMenuBar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             auto editor = getLastFocusedEditor();
-            if (ImGui::MenuItem("New", "Ctrl+N")) {
+            if (ImGui::MenuItem("New", "Ctrl+N"))
                 openEditor("", true);
-            }
-            if (ImGui::MenuItem("Open", "Ctrl+O")) {
+            if (ImGui::MenuItem("Open", "Ctrl+O"))
                 openFiles();
-            }
-            if (ImGui::MenuItem("Editor force close", "Ctrl-W", false, editor)) {
+            if (ImGui::MenuItem("Editor force close", "Ctrl-W", false, editor))
                 closeEditor();
-            }
-            if (ImGui::MenuItem("Save", "Ctrl+S", false, editor && editor->isDirty())) {
+            if (ImGui::MenuItem("Save", "Ctrl+S", false, editor && editor->isDirty()))
                 saveFileAs("", false);
-            }
-            if (ImGui::MenuItem("Save As", "Ctrl+Shift+S")) {
+            if (ImGui::MenuItem("Save As", "Ctrl+Shift+S"))
                 saveFileAs("", true, true);
-            }
-            if (ImGui::MenuItem("Quit")) {
+            if (ImGui::MenuItem("Quit"))
                 quit();
-            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Appearance")) {
@@ -151,17 +145,15 @@ void App::showMainMenuBar() {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Plugins")) {
-                for (auto p : plugins) {
+                for (auto p : plugins)
                     ImGui::MenuItem(p->title.c_str(), nullptr, &p->shown);
-                }
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Settings")) {
-            if (ImGui::MenuItem("DEBUG", nullptr, &APP_DEBUG)) {
+            if (ImGui::MenuItem("DEBUG", nullptr, &APP_DEBUG))
                 switchAppDebugMode();
-            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

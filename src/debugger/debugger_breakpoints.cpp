@@ -39,9 +39,8 @@ uint Debugger::findInstructionNumber(const std::string &file, uint line) const {
                   << item->ll << " " << item->lc << std::endl;
         std::string i_file(debug_info->files[item->fileid]);
         i_file = normalize_path(i_file);
-        if (i_file == file && item->fl == line) {
+        if (i_file == file && item->fl == line)
             return instr_i;
-        }
     }
     return -1u;
 }

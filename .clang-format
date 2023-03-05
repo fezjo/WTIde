@@ -11,7 +11,7 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 PointerAlignment: Right
 QualifierAlignment: Left
 ReflowComments: false
-RemoveBracesLLVM: false
+RemoveBracesLLVM: true
 SeparateDefinitionBlocks: Leave
 SortIncludes: Never
 SpacesInContainerLiterals: false

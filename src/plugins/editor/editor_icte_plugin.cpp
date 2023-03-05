@@ -34,9 +34,8 @@ EditorIctePlugin::EditorIctePlugin() {
 
 void EditorIctePlugin::update() {
     auto &io = ImGui::GetIO();
-    if (io.KeyMods == ImGuiModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_S)) {
+    if (io.KeyMods == ImGuiModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_S))
         saveFile();
-    }
 }
 
 void EditorIctePlugin::show() {
@@ -99,9 +98,8 @@ void EditorIctePlugin::show() {
         if (ImGui::BeginMenu("Appearance")) {
             if (ImGui::BeginMenu("ICTE")) {
                 static bool showWhitespaces = false;
-                if (ImGui::MenuItem("Show whitespace", nullptr, &showWhitespaces)) {
+                if (ImGui::MenuItem("Show whitespace", nullptr, &showWhitespaces))
                     editor.SetShowWhitespaces(showWhitespaces);
-                }
                 if (ImGui::BeginMenu("Pallette")) {
                     if (ImGui::MenuItem("Dark"))
                         editor.SetPalette(TextEditor::GetDarkPalette());

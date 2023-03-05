@@ -18,7 +18,7 @@ void App::init() {
         std::bind(&BreakpointManager::getBreakpoints, &breakpoint_storage), "root callback", 0);
 
     _initializePlugins();
-    _defaultLayout();
+    // _defaultLayout();
     switchAppDebugMode();
 }
 

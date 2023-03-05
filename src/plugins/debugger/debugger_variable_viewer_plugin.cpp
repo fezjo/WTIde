@@ -205,9 +205,8 @@ void showTableVariableRow(const Variable &var) {
     ImGui::TextWrapped("%d", var.level);
     ImGui::TableNextColumn();
     ImGui::TextWrapped("%s", var.stype.c_str());
-    if (var.n_dims) {
+    if (var.n_dims)
         ImGui::TextWrapped("[#%u:%s]", var.n_dims, var.sdims.c_str());
-    }
     ImGui::TableNextColumn();
     ImGui::TextWrapped("%u/%u", var.raddr, var.addr);
     ImGui::TableNextColumn();
