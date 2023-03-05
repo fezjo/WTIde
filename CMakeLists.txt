@@ -29,7 +29,8 @@ endif()
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 
-add_definitions(-DIMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/imgui/my_imconfig.h")
+add_compile_definitions(IMGUI_USER_CONFIG="${CMAKE_SOURCE_DIR}/src/imgui/my_imconfig.h")
+set(OPENGL_TARGET $<IF:$<BOOL:${EMSCRIPTEN}>,GL,OpenGL::GL>)
 
 set(TARGET_NAME ${CMAKE_PROJECT_NAME})
 add_executable(${TARGET_NAME})
@@ -40,6 +41,7 @@ add_subdirectory(src)
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_BINARY_DIR})
 target_link_libraries(${TARGET_NAME} PRIVATE
     SDL2::SDL2
+    ${OPENGL_TARGET}
     ImGui
     ImGui-Notify
     ICTE
@@ -57,11 +59,11 @@ target_compile_options(
         -Wno-unused-parameter -Wno-shadow
         # -Weverything -Wno-c++98-compat-pedantic
 )
+
 if (EMSCRIPTEN)
     # Documentation for Emscripten options:
     # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
 
-    target_link_libraries(${TARGET_NAME} PRIVATE GL)
     target_link_options(${TARGET_NAME} PUBLIC
         "SHELL:-sUSE_SDL=2"
         "SHELL:-sUSE_WEBGL2=1"
@@ -84,6 +86,5 @@ if (EMSCRIPTEN)
         # "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/shell.html"
     )
 else ()
-    target_link_libraries(${TARGET_NAME} PRIVATE OpenGL::GL)
     configure_file(zep.cfg zep.cfg COPYONLY)
 endif ()

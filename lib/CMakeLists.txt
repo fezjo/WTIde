@@ -8,7 +8,7 @@ file(GLOB IMGUI_SOURCES
 add_library("ImGui" STATIC ${IMGUI_SOURCES})
 target_link_libraries(ImGui PRIVATE
     SDL2::SDL2
-    $<IF:$<BOOL:${EMSCRIPTEN}>,GL,OpenGL::GL>
+    ${OPENGL_TARGET}
 )
 target_include_directories("ImGui" SYSTEM PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
@@ -36,6 +36,7 @@ target_link_libraries("ICTE" PRIVATE ImGui)
 set_target_properties("ICTE" PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories("ICTE" SYSTEM PUBLIC ${ICTE_PATH})
 
+
 set(ZEP_PATH ${CMAKE_CURRENT_LIST_DIR}/zep)
 # set(APP_ROOT ${CMAKE_SOURCE_DIR})
 configure_file(${ZEP_PATH}/cmake/config_app.h.cmake ${CMAKE_BINARY_DIR}/config_app.h)
@@ -47,6 +48,7 @@ target_compile_definitions(Zep PUBLIC ZEP_USE_SDL ZEP_FEATURE_CPP_FILE_SYSTEM)
 set(CLIP_PATH ${CMAKE_CURRENT_LIST_DIR}/clip)
 add_subdirectory(${CLIP_PATH})
 target_include_directories("clip" SYSTEM PUBLIC ${CLIP_PATH})
+
 
 if (NOT EMSCRIPTEN)
     set(NFD_PATH ${CMAKE_CURRENT_LIST_DIR}/nativefiledialog-extended)
