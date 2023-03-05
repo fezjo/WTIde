@@ -1,0 +1,25 @@
+From 689fd1750a9bdefa07baf16cbd409d0abf87d6d6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Wed, 22 Feb 2023 23:02:17 +0100
+Subject: [PATCH] Fix typos
+
+---
+ imgui.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/imgui.h b/imgui.h
+index bfe8fe56a..de911b0fc 100644
+--- a/imgui.h
++++ b/imgui.h
+@@ -662,7 +662,7 @@ namespace ImGui
+     // - Use BeginMenuBar() on a window ImGuiWindowFlags_MenuBar to append to its menu bar.
+     // - Use BeginMainMenuBar() to create a menu bar at the top of the screen and append to it.
+     // - Use BeginMenu() to create a menu. You can call BeginMenu() multiple time with the same identifier to append more items to it.
+-    // - Not that MenuItem() keyboardshortcuts are displayed as a convenience but _not processed_ by Dear ImGui at the moment.
++    // - Note that MenuItem() keyboard shortcuts are displayed as a convenience but _not processed_ by Dear ImGui at the moment.
+     IMGUI_API bool          BeginMenuBar();                                                     // append to menu-bar of current window (requires ImGuiWindowFlags_MenuBar flag set on parent window).
+     IMGUI_API void          EndMenuBar();                                                       // only call EndMenuBar() if BeginMenuBar() returns true!
+     IMGUI_API bool          BeginMainMenuBar();                                                 // create and append to a full screen menu-bar.
+-- 
+2.39.2
+
