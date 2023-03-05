@@ -3,8 +3,8 @@
 #include "../../utils.h"
 #include "../plugin.h"
 
-#include "wt_syntax.h"
 #include "../../debugger/breakpoint_manager.h"
+#include "wt_syntax.h"
 
 class IEditorPlugin : public IPlugin {
 public:

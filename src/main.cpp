@@ -1,7 +1,7 @@
 #include <SDL.h>
-#include <imgui/imgui.h>
-#include <imgui/backends/imgui_impl_sdl2.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_sdl2.h>
+#include <imgui/imgui.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
 #else
@@ -13,9 +13,9 @@
 #include "../lib/emscripten/emscripten_mainloop_stub.h"
 #endif
 
-#include "utils.h"
 #include "app/app.h"
 #include "imgui/themes.h"
+#include "utils.h"
 
 // Main code
 int main(int, char**) {

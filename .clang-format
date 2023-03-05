@@ -13,5 +13,5 @@ QualifierAlignment: Left
 ReflowComments: false
 RemoveBracesLLVM: true
 SeparateDefinitionBlocks: Leave
-SortIncludes: Never
+SortIncludes: CaseSensitive
 SpacesInContainerLiterals: false

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../utils.h"
-#include "wtstar_utils.h"
 #include "breakpoint.h"
+#include "wtstar_utils.h"
 
 struct VM_Breakpoint : Breakpoint {
     bool active;
