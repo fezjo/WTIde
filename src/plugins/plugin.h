@@ -46,9 +46,10 @@ public:
     virtual void unsetCallback(const std::string &name) { callbacks.erase(name); }
 
     virtual bool imguiBegin(ImGuiWindowFlags flags = ImGuiWindowFlags_None) {
-        return ImGui::Begin(
-            (title + "###plugin_" + pluginTypeNames[getPluginType()] + "_" + std::to_string(getId())).c_str(),
-            immortal ? nullptr : &alive, flags);
+        return ImGui::Begin(getWindowName().c_str(), immortal ? nullptr : &alive, flags);
+    }
+    virtual std::string getWindowName() {
+        return title + "###plugin_" + pluginTypeNames[pluginType] + "_" + std::to_string(getId());
     }
 
     imid_t getId() { return id; }
