@@ -83,7 +83,7 @@ if (EMSCRIPTEN)
 
         "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources@resources"
         "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources/config@."
-        # "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/shell.html"
+        "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/lib/emscripten/shell.html"
     )
 else ()
     # file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources/config/zep.cfg" DESTINATION ${CMAKE_BINARY_DIR})
