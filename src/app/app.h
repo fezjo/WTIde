@@ -10,6 +10,9 @@
 #include "../plugins/plugin.h"
 #include "../utils.h"
 
+#include "../plugins/debugger/debugger_control_plugin_v1.h"
+#include "../plugins/debugger/debugger_control_plugin_v2.h"
+#include "../plugins/debugger/debugger_variable_viewer_plugin.h"
 #include "../plugins/debugger/program_analyzer_plugin.h"
 #include "../plugins/editor/editor_icte_plugin.h"
 #include "../plugins/editor/editor_zep_plugin.h"
@@ -18,10 +21,6 @@
 #include "../plugins/text/input_plugin.h"
 #include "../plugins/text/output_plugin.h"
 #include "../plugins/text/text_plugin.h"
-
-#include "../plugins/debugger/debugger_control_plugin_v1.h" // TODO why does it need to be after zep
-#include "../plugins/debugger/debugger_control_plugin_v2.h"
-#include "../plugins/debugger/debugger_variable_viewer_plugin.h"
 
 #include "../debugger/breakpoint_manager.h"
 #include "../debugger/debugger.h"

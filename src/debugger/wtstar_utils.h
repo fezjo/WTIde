@@ -10,6 +10,8 @@ extern "C" {
 #include "errors.h"
 #include "vm.h"
 }
+
+debug_info_t* getDebugInfo(virtual_machine_t* env);
 } // namespace WTStar
 
 class Writer {
@@ -45,7 +47,3 @@ public:
     bool to_cerr = false;
     std::stringstream ss;
 };
-
-namespace WTStar {
-debug_info_t* getDebugInfo(virtual_machine_t* env);
-} // namespace WTStar

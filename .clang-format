@@ -1,5 +1,5 @@
-Language:        Cpp
-BasedOnStyle:    LLVM
+Language: Cpp
+BasedOnStyle: LLVM
 
 AccessModifierOffset: -4
 AlwaysBreakBeforeMultilineStrings: true
@@ -13,5 +13,6 @@ QualifierAlignment: Left
 ReflowComments: false
 RemoveBracesLLVM: true
 SeparateDefinitionBlocks: Leave
+ShortNamespaceLines: 0
 SortIncludes: CaseSensitive
 SpacesInContainerLiterals: false
