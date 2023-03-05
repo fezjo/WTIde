@@ -1,0 +1,16 @@
+Language:        Cpp
+BasedOnStyle:    LLVM
+
+AccessModifierOffset: -4
+AlwaysBreakBeforeMultilineStrings: true
+ColumnLimit: 100
+DisableFormat: false
+IndentWidth: 4
+InsertTrailingCommas: None
+KeepEmptyLinesAtTheStartOfBlocks: false
+PointerAlignment: Left
+QualifierAlignment: Left
+RemoveBracesLLVM: false # temp
+SeparateDefinitionBlocks: Always
+SortIncludes: Never # temp
+SpacesInContainerLiterals: false
