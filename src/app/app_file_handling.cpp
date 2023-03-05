@@ -44,10 +44,10 @@ fs::path App::openSaveFileDialog(fs::path defaultPath) {
     if (result == NFD_OKAY) {
         return savePath.get();
     } else if (result == NFD_CANCEL) {
-        return "";
     } else {
         std::cerr << "Error: " << NFD::GetError() << std::endl;
     }
+    return "";
 #endif
 }
 
