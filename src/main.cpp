@@ -14,7 +14,7 @@
 #endif
 
 #include "utils.h"
-#include "app.cpp"
+#include "app/app.h"
 #include "imgui/themes.h"
 
 // Main code
