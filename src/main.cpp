@@ -133,7 +133,7 @@ int main(int, char**) {
 #if defined(__EMSCRIPTEN__)
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
     // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    io.IniFilename = NULL;
+    // io.IniFilename = NULL;
     EMSCRIPTEN_MAINLOOP_BEGIN
 #else
     while (alive)

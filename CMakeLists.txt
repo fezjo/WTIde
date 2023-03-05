@@ -82,9 +82,11 @@ if (EMSCRIPTEN)
         # "SHELL:-sEXIT_RUNTIME=1"
 
         "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources@resources"
-        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/zep.cfg@zep.cfg"
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources/config@."
         # "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/shell.html"
     )
 else ()
-    configure_file(zep.cfg zep.cfg COPYONLY)
+    # file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources/config/zep.cfg" DESTINATION ${CMAKE_BINARY_DIR})
+    file(GLOB CONFIGS "${CMAKE_CURRENT_SOURCE_DIR}/resources/config/*")
+    file(COPY ${CONFIGS} DESTINATION ${CMAKE_BINARY_DIR})
 endif ()
