@@ -1,6 +1,6 @@
 #include "breakpoint_manager.h"
 
-void BreakpointManager::addHandler(const BreakpointCallbacks &handler) {
+void BreakpointManager::addHandler(const BreakpointCallbacks& handler) {
     dbg("bpStorage.addHandler", handler.info, handler.id);
     handlers.push_back(handler);
 }
@@ -8,13 +8,13 @@ void BreakpointManager::addHandler(const BreakpointCallbacks &handler) {
 size_t BreakpointManager::removeHandler(size_t id) {
     dbg("bpStorage.removeHandler", id);
     return std::erase_if(handlers,
-                         [id](const BreakpointCallbacks &handler) { return handler.id == id; });
+                         [id](const BreakpointCallbacks& handler) { return handler.id == id; });
 }
 
 void BreakpointManager::synchronizeHandlers() {
     locked = true;
     auto breakpoints = getBreakpoints();
-    for (auto &handler : handlers) {
+    for (auto& handler : handlers) {
         if (!handler.gather)
             continue;
         auto bp_add = breakpoints;
@@ -38,12 +38,12 @@ std::set<Breakpoint> BreakpointManager::getBreakpoints() const {
     if (debugger == nullptr)
         return {};
     std::set<Breakpoint> bps;
-    for (auto &bp : debugger->breakpoints)
+    for (auto& bp : debugger->breakpoints)
         bps.insert(bp);
     return bps;
 }
 
-int BreakpointManager::containsBreakpoint(const Breakpoint &bp) const {
+int BreakpointManager::containsBreakpoint(const Breakpoint& bp) const {
     auto breakpoints = getBreakpoints();
     auto it = std::lower_bound(breakpoints.begin(), breakpoints.end(), bp);
     if (it == breakpoints.end())
@@ -53,13 +53,13 @@ int BreakpointManager::containsBreakpoint(const Breakpoint &bp) const {
     return 1;
 }
 
-bool BreakpointManager::updateBreakpoint(const Breakpoint &bp) {
+bool BreakpointManager::updateBreakpoint(const Breakpoint& bp) {
     if (containsBreakpoint(bp) != 2)
         debugger->setBreakpoint(bp.file, bp.line, bp.enabled, bp.condition);
     return true;
 }
 
-bool BreakpointManager::removeBreakpoint(const Breakpoint &bp) {
+bool BreakpointManager::removeBreakpoint(const Breakpoint& bp) {
     if (containsBreakpoint(bp))
         return debugger->removeBreakpoint(bp.file, bp.line);
     return false;

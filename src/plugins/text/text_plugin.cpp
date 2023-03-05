@@ -46,7 +46,7 @@ void TextPlugin::show() {
 
 void TextPlugin::clear() { data.clear(); }
 
-void TextPlugin::write(const std::string &_data, size_t start) {
+void TextPlugin::write(const std::string& _data, size_t start) {
     start = std::min(start, data.size());
     size_t new_size = std::max(data.size(), start + _data.size());
     data.resize(new_size);

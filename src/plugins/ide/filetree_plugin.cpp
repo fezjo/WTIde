@@ -2,14 +2,14 @@
 
 FileTreeNode::FileTreeNode(fs::path path) : initialized(false), path(path) {}
 
-std::vector<FileTreeNode> &FileTreeNode::listDir() {
+std::vector<FileTreeNode>& FileTreeNode::listDir() {
     if (!initialized) {
         initialized = true;
         std::set<std::pair<bool, std::string>> entries;
-        for (auto &e : fs::directory_iterator(path))
+        for (auto& e : fs::directory_iterator(path))
             entries.insert({!e.is_directory(), e.path().filename()});
         children.reserve(entries.size());
-        for (auto &[is_file, name] : entries)
+        for (auto& [is_file, name] : entries)
             children.push_back(path / name);
     }
     return children;
@@ -26,7 +26,7 @@ FileTreePlugin::FileTreePlugin()
     title = "FileTree";
 }
 
-void updateSelection(fs::path s, std::set<fs::path> &selection) {
+void updateSelection(fs::path s, std::set<fs::path>& selection) {
     if (s.empty())
         return;
     if (ImGui::GetIO().KeyCtrl) // CTRL+click to toggle
@@ -91,18 +91,18 @@ void FileTreePlugin::handleItem(bool is_dir, fs::path path) {
         handlePopupActions();
 }
 
-void FileTreePlugin::showTree(FileTreeNode &node, ImGuiTreeNodeFlags base_flags, uint &node_i) {
+void FileTreePlugin::showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags, uint& node_i) {
     ImGuiTreeNodeFlags node_flags = base_flags;
     if (selection.count(node.path))
         node_flags |= ImGuiTreeNodeFlags_Selected;
 
     if (!node_i)
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    bool rootOpen = ImGui::TreeNodeEx((void *)hash_string(node.path.filename()), node_flags, "%s",
+    bool rootOpen = ImGui::TreeNodeEx((void*)hash_string(node.path.filename()), node_flags, "%s",
                                       node.path.filename().c_str());
     handleItem(true, node.path);
     if (rootOpen) {
-        for (auto &c_node : node.listDir()) {
+        for (auto& c_node : node.listDir()) {
             node_i++;
             node_flags = base_flags;
             if (fs::is_directory(c_node.path)) {
@@ -111,7 +111,7 @@ void FileTreePlugin::showTree(FileTreeNode &node, ImGuiTreeNodeFlags base_flags,
                 node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
                 if (selection.count(c_node.path))
                     node_flags |= ImGuiTreeNodeFlags_Selected;
-                ImGui::TreeNodeEx((void *)(intptr_t)node_i, node_flags, "%s",
+                ImGui::TreeNodeEx((void*)(intptr_t)node_i, node_flags, "%s",
                                   c_node.path.filename().c_str());
                 handleItem(false, c_node.path);
             }
@@ -214,7 +214,7 @@ bool FileTreePlugin::renameFile() {
         return false;
     try {
         fs::rename(target_path, create_path);
-    } catch (const fs::filesystem_error &) {
+    } catch (const fs::filesystem_error&) {
         return false;
     }
     return true;
@@ -263,7 +263,7 @@ void FileTreePlugin::show() {
         ImGui::BeginDisabled(selection.empty());
         {
             if (ImGui::MenuItem("")) {
-                for (auto &p : selection)
+                for (auto& p : selection)
                     fs::remove_all(p);
                 selection.clear();
                 files_changed = true;

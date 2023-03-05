@@ -9,13 +9,13 @@ EditorIctePlugin::EditorIctePlugin() {
     editor.SetLanguageDefinition(lang);
 
     bp_handler = BreakpointCallbacks(
-        [this](const Breakpoint &bp) {
+        [this](const Breakpoint& bp) {
             if (bp.file != editor.GetPath())
                 return false;
             editor.AddBreakpoint(bp.line, !bp.condition.empty(), bp.condition, bp.enabled);
             return true;
         },
-        [this](const Breakpoint &bp) {
+        [this](const Breakpoint& bp) {
             if (bp.file != editor.GetPath())
                 return false;
             editor.RemoveBreakpoint(bp.line);
@@ -33,7 +33,7 @@ EditorIctePlugin::EditorIctePlugin() {
 }
 
 void EditorIctePlugin::update() {
-    auto &io = ImGui::GetIO();
+    auto& io = ImGui::GetIO();
     if (io.KeyMods == ImGuiModFlags_Ctrl && ImGui::IsKeyPressed(ImGuiKey_S))
         saveFile();
 }
@@ -129,12 +129,12 @@ void EditorIctePlugin::show() {
     ImGui::End();
 }
 
-void EditorIctePlugin::setFile(const std::string &filename) {
+void EditorIctePlugin::setFile(const std::string& filename) {
     fn = normalize_path(filename);
     editor.SetPath(fn);
 }
 
-bool EditorIctePlugin::loadFile(const std::string &filename) {
+bool EditorIctePlugin::loadFile(const std::string& filename) {
     std::ifstream t(filename);
     if (!t.good())
         return false;
@@ -163,12 +163,12 @@ bool EditorIctePlugin::saveFile(std::string filename, bool rename) {
 
 bool EditorIctePlugin::isDirty() const { return editor.IsTextChanged(); }
 
-void EditorIctePlugin::setBreakpointCallbacks(const BreakpointCallbacks &callbacks) {
-    editor.OnBreakpointUpdate = [=](TextEditor *te, int line, bool conditioned,
-                                    const std::string &condition, bool enabled) {
+void EditorIctePlugin::setBreakpointCallbacks(const BreakpointCallbacks& callbacks) {
+    editor.OnBreakpointUpdate = [=](TextEditor* te, int line, bool conditioned,
+                                    const std::string& condition, bool enabled) {
         callbacks.update({te->GetPath(), line, enabled, condition});
     };
-    editor.OnBreakpointRemove = [=](TextEditor *te, int line) {
+    editor.OnBreakpointRemove = [=](TextEditor* te, int line) {
         callbacks.remove({te->GetPath(), line});
     };
 }

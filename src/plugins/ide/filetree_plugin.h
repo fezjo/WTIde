@@ -10,7 +10,7 @@ struct FileTreeNode {
 
     FileTreeNode() = default;
     FileTreeNode(fs::path);
-    std::vector<FileTreeNode> &listDir();
+    std::vector<FileTreeNode>& listDir();
     void refresh();
 };
 
@@ -27,7 +27,7 @@ public:
     void refresh();
 
 protected:
-    void showTree(FileTreeNode &node, ImGuiTreeNodeFlags base_flags, uint &node_i);
+    void showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags, uint& node_i);
 
 private:
     bool showFileNameActionPopup(); // returns whether popup_string is valid

@@ -5,7 +5,7 @@
 
 using namespace Zep;
 
-EditorZepPlugin::EditorZepPlugin(const fs::path &rootPath, const Zep::NVec2f &pixelScale,
+EditorZepPlugin::EditorZepPlugin(const fs::path& rootPath, const Zep::NVec2f& pixelScale,
                                  std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB)
     : editor(Zep::ZepPath(rootPath), pixelScale), Callback(fnCommandCB) {
     static std::unordered_set<std::string> keywords(wt_keywords.begin(), wt_keywords.end());
@@ -13,7 +13,7 @@ EditorZepPlugin::EditorZepPlugin(const fs::path &rootPath, const Zep::NVec2f &pi
                                                        wt_identifiers.end());
     editor.RegisterCallback(this);
     editor.RegisterSyntaxFactory({".wt"},
-                                 SyntaxProvider{"wt", Zep::tSyntaxFactory([&](ZepBuffer *pBuffer) {
+                                 SyntaxProvider{"wt", Zep::tSyntaxFactory([&](ZepBuffer* pBuffer) {
                                                     return std::make_shared<ZepSyntax>(
                                                         *pBuffer, keywords, identifiers);
                                                 })});
@@ -22,8 +22,8 @@ EditorZepPlugin::EditorZepPlugin(const fs::path &rootPath, const Zep::NVec2f &pi
     dockId = 0;
 }
 
-Zep::ZepEditor &EditorZepPlugin::GetEditor() const {
-    return static_cast<Zep::ZepEditor &>(const_cast<Zep::ZepEditor_ImGui &>(editor));
+Zep::ZepEditor& EditorZepPlugin::GetEditor() const {
+    return static_cast<Zep::ZepEditor&>(const_cast<Zep::ZepEditor_ImGui&>(editor));
 }
 
 void EditorZepPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message) {
@@ -64,12 +64,12 @@ void EditorZepPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message) {
 
 void EditorZepPlugin::HandleInput() { editor.HandleInput(); }
 
-EditorZepPlugin *EditorZepPlugin::init(const Zep::NVec2f &pixelScale, std::string rootPath) {
-    EditorZepPlugin *ep = new EditorZepPlugin(rootPath.empty() ? "." : rootPath,
+EditorZepPlugin* EditorZepPlugin::init(const Zep::NVec2f& pixelScale, std::string rootPath) {
+    EditorZepPlugin* ep = new EditorZepPlugin(rootPath.empty() ? "." : rootPath,
                                               Zep::NVec2f(pixelScale.x, pixelScale.y),
                                               [](std::shared_ptr<ZepMessage> spMessage) -> void {});
 
-    auto &display = ep->GetEditor().GetDisplay();
+    auto& display = ep->GetEditor().GetDisplay();
     auto pImFont = ImGui::GetIO().Fonts[0].Fonts[0];
     auto pixelHeight = pImFont->FontSize;
     display.SetFont(ZepTextType::UI,
@@ -96,7 +96,7 @@ void EditorZepPlugin::show() {
     windowClass.DockingAlwaysTabBar = true;
     ImGui::SetNextWindowClass(&windowClass);
 
-    auto &zepBuffer = editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
+    auto& zepBuffer = editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
     title = zepBuffer.GetFilePath().filename();
     if (title.empty())
         title = "Untitled";
@@ -154,12 +154,12 @@ void EditorZepPlugin::show() {
     ImGui::End();
 }
 
-void EditorZepPlugin::setFile(const std::string &filename) {
+void EditorZepPlugin::setFile(const std::string& filename) {
     fn = normalize_path(filename);
     getCurrentBuffer().SetFilePath(filename);
 }
 
-bool EditorZepPlugin::loadFile(const std::string &filename) {
+bool EditorZepPlugin::loadFile(const std::string& filename) {
     editor.InitWithFile(filename);
     setFile(filename);
     return true;
@@ -172,7 +172,7 @@ bool EditorZepPlugin::saveFile(std::string filename, bool rename) {
         fn = filename;
     if (filename.empty())
         return false;
-    auto &buffer = getCurrentBuffer();
+    auto& buffer = getCurrentBuffer();
     buffer.SetFilePath(filename);
     editor.SaveBuffer(buffer);
     buffer.SetFilePath(fn);
@@ -185,6 +185,6 @@ bool EditorZepPlugin::isDirty() const {
     return getCurrentBuffer().HasFileFlags(Zep::FileFlags::Dirty);
 }
 
-ZepBuffer &EditorZepPlugin::getCurrentBuffer() const {
+ZepBuffer& EditorZepPlugin::getCurrentBuffer() const {
     return editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
 }

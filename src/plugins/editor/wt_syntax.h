@@ -26,4 +26,4 @@ static std::vector<std::string> wt_identifiers_help = {
     "common Concurrent Read Concurrent Write",
 };
 
-const TextEditor::TextEditor::LanguageDefinition &TextEditor_LanguageDefinition_WTStar();
+const TextEditor::TextEditor::LanguageDefinition& TextEditor_LanguageDefinition_WTStar();

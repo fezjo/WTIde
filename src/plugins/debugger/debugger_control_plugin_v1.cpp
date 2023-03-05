@@ -5,7 +5,7 @@ bool DebuggerControlPluginV1::setSourceAction() {
     return setSourceAction(source_fn);
 }
 
-bool DebuggerControlPluginV1::setSourceAction(const std::string &source) {
+bool DebuggerControlPluginV1::setSourceAction(const std::string& source) {
     if (!setSource(source)) {
         source_fn_color = ImVec4(1.0, 0.25, 0.25, 1.0);
         std::cerr << "Failed to set source" << std::endl;

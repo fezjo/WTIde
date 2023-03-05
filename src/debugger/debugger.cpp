@@ -21,7 +21,7 @@ void Debugger::destroyVm() {
     if (env)
         WTStar::virtual_machine_t_delete(env);
     env = nullptr;
-    for (auto &bp : breakpoints)
+    for (auto& bp : breakpoints)
         bp.vm_bp = nullptr;
 }
 
@@ -30,7 +30,7 @@ bool Debugger::readBinary() {
         return false;
     try {
         binary = readCode(binary_fn);
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
         std::cerr << "Failed to read binary file " << binary_fn << ": " << e.what() << std::endl;
         return false;
     }
@@ -50,13 +50,13 @@ bool Debugger::initialize(bool memory) {
         std::cerr << "Failed to create virtual machine" << std::endl;
         return false;
     }
-    for (auto &bp : breakpoints)
+    for (auto& bp : breakpoints)
         setBreakpoint(bp.file, bp.line, bp.enabled, bp.condition);
     std::cerr << "created virtual machine" << std::endl;
     return true;
 }
 
-bool Debugger::setSource(const std::string &file) {
+bool Debugger::setSource(const std::string& file) {
     if (file.empty()) {
         std::cerr << "empty file" << std::endl;
         destroy();
@@ -72,7 +72,7 @@ bool Debugger::setSource(const std::string &file) {
     return true;
 }
 
-void Debugger::setInput(const std::string &input) { this->input = input; }
+void Debugger::setInput(const std::string& input) { this->input = input; }
 
 bool Debugger::readInput() {
     if (input.empty()) {
@@ -83,7 +83,7 @@ bool Debugger::readInput() {
         std::cerr << "not compiled" << std::endl;
         return false;
     }
-    WTStar::reader_t *in = reader_t_new(WTStar::READER_STRING, input.c_str());
+    WTStar::reader_t* in = reader_t_new(WTStar::READER_STRING, input.c_str());
     if (WTStar::read_input(in, env) != 0)
         destroyVm();
     WTStar::reader_t_delete(in);
@@ -209,13 +209,13 @@ void Debugger::stopExecution() { destroyVm(); }
 int Debugger::stepOver() {
     if (!canRun())
         return -2;
-    auto initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+    auto initial_level = STACK_SIZE(env->frames, WTStar::frame_t*);
     int resp;
     while (true) {
         resp = WTStar::execute(env, -1, trace_on, 2 | stop_on_bp);
         if (resp != -11)
             break;
-        auto current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+        auto current_level = STACK_SIZE(env->frames, WTStar::frame_t*);
         std::cerr << "stepOver resp " << resp << " level " << current_level << "[" << initial_level
                   << "]" << std::endl;
         if (current_level <= initial_level)
@@ -230,7 +230,7 @@ int Debugger::stepInto() {
     if (!canRun())
         return -2;
     int resp = WTStar::execute(env, -1, trace_on, 2 | stop_on_bp);
-    auto current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+    auto current_level = STACK_SIZE(env->frames, WTStar::frame_t*);
     std::cerr << "stepInto execute stopped with resp " << resp << " on line " << env->pc
               << " with level " << current_level << std::endl;
     return resp;
@@ -239,13 +239,13 @@ int Debugger::stepInto() {
 int Debugger::stepOut() {
     if (!canRun())
         return -2;
-    auto initial_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+    auto initial_level = STACK_SIZE(env->frames, WTStar::frame_t*);
     int resp;
     while (true) {
         resp = WTStar::execute(env, -1, trace_on, 4 | stop_on_bp);
         if (resp != -11)
             break;
-        auto current_level = STACK_SIZE(env->frames, WTStar::frame_t *);
+        auto current_level = STACK_SIZE(env->frames, WTStar::frame_t*);
         std::cerr << "stepOut resp " << resp << " level " << current_level << "[" << initial_level
                   << "]" << std::endl;
         if (current_level < initial_level)

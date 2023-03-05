@@ -14,7 +14,7 @@ void App::showDebugWindow() {
                         &show_demo_window); // Edit bools storing our window open/close state
 
         ImGui::ColorEdit3("clear color",
-                          (float *)&clear_color); // Edit 3 floats representing a color
+                          (float*)&clear_color); // Edit 3 floats representing a color
 
         if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return
                                      // true when edited/activated)
@@ -33,10 +33,10 @@ void App::showDebugWindow() {
     }
 }
 
-void App::show(bool *p_open) {
+void App::show(bool* p_open) {
     // Just show it
     bool use_work_area = true;
-    const ImGuiViewport *viewport = ImGui::GetMainViewport();
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
     ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
 
@@ -57,7 +57,7 @@ void App::show(bool *p_open) {
     if (APP_DEBUG)
         showDebugWindow();
 
-    std::vector<IPlugin *> plugins_to_delete;
+    std::vector<IPlugin*> plugins_to_delete;
     for (auto p : plugins) {
         p->show();
         if (!p->alive)

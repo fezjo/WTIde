@@ -22,19 +22,19 @@ struct Variable {
     int level;
 
     ~Variable();
-    Variable(Variable &&other);
-    Variable &operator=(Variable &&other);
-    Variable(WTStar::virtual_machine_t *env, WTStar::variable_info_t *info, bool global);
-    Variable &fillThreadInfo(WTStar::virtual_machine_t *env, WTStar::thread_t *thr = nullptr,
+    Variable(Variable&& other);
+    Variable& operator=(Variable&& other);
+    Variable(WTStar::virtual_machine_t* env, WTStar::variable_info_t* info, bool global);
+    Variable& fillThreadInfo(WTStar::virtual_machine_t* env, WTStar::thread_t* thr = nullptr,
                              uint base_addr = -1u);
 
 protected:
-    Variable &operator=(Variable &other) = default;
+    Variable& operator=(Variable& other) = default;
 };
 
 class DebuggerVariableViewerPlugin : public IPlugin {
 public:
-    DebuggerVariableViewerPlugin(Debugger *debugger);
+    DebuggerVariableViewerPlugin(Debugger* debugger);
     void show() override;
 
     void refresh();
@@ -47,6 +47,6 @@ public:
     std::vector<std::vector<Variable>> getVisibleVariables(int pc = -1);
 
 protected:
-    Debugger *debugger;
+    Debugger* debugger;
     int watching_thr_id = 0;
 };

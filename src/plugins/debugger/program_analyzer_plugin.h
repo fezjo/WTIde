@@ -7,18 +7,18 @@
 
 class ProgramAnalyzerPlugin : public IPlugin {
 public:
-    ProgramAnalyzerPlugin(Debugger *debugger);
+    ProgramAnalyzerPlugin(Debugger* debugger);
     void show() override;
 
     void refresh();
 
 protected:
-    void showBreakpoints(WTStar::virtual_machine_t *env);
+    void showBreakpoints(WTStar::virtual_machine_t* env);
 
 public:
     BreakpointCallbacks bp_callback;
 
 protected:
-    Debugger *debugger;
+    Debugger* debugger;
     VM_Breakpoint edit_bp{};
 };

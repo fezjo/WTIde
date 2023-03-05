@@ -108,7 +108,7 @@ void App::_initializePlugins() {
 
     // Called once the fonts/device is guaranteed setup
     openEditor(fs::path("../resources/sample_project/main.cpp"), false, PluginType::EditorZep);
-    static_cast<EditorZepPlugin *>(editor_plugins[0])
+    static_cast<EditorZepPlugin*>(editor_plugins[0])
         ->GetEditor()
         .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
 

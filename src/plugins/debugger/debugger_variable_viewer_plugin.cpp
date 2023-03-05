@@ -1,6 +1,6 @@
 #include "debugger_variable_viewer_plugin.h"
 
-Variable::Variable(WTStar::virtual_machine_t *env, WTStar::variable_info_t *info, bool global) {
+Variable::Variable(WTStar::virtual_machine_t* env, WTStar::variable_info_t* info, bool global) {
     this->layout = WTStar::get_layout(info, env);
     this->global = global;
     this->addr = info->addr;
@@ -12,12 +12,12 @@ Variable::Variable(WTStar::virtual_machine_t *env, WTStar::variable_info_t *info
 
 Variable::~Variable() { free(layout.elems); }
 
-Variable::Variable(Variable &&other) {
+Variable::Variable(Variable&& other) {
     this->layout.elems = nullptr;
     *this = std::move(other);
 }
 
-Variable &Variable::operator=(Variable &&other) {
+Variable& Variable::operator=(Variable&& other) {
     if (this == &other)
         return *this;
     free(layout.elems);
@@ -28,12 +28,12 @@ Variable &Variable::operator=(Variable &&other) {
     return *this;
 }
 
-Variable &Variable::fillThreadInfo(WTStar::virtual_machine_t *env, WTStar::thread_t *thr,
+Variable& Variable::fillThreadInfo(WTStar::virtual_machine_t* env, WTStar::thread_t* thr,
                                    uint base_addr) {
     if (!env)
         return *this;
     if (!thr)
-        thr = STACK(STACK(env->threads, WTStar::stack_t *)[0], WTStar::thread_t *)[0];
+        thr = STACK(STACK(env->threads, WTStar::stack_t*)[0], WTStar::thread_t*)[0];
     if (base_addr == -1u)
         base_addr = env->frame->base;
 
@@ -46,9 +46,9 @@ Variable &Variable::fillThreadInfo(WTStar::virtual_machine_t *env, WTStar::threa
     }
 
     Writer out;
-    void *addr_data = WTStar::get_addr(thr, this->raddr, 4);
+    void* addr_data = WTStar::get_addr(thr, this->raddr, 4);
     if (this->n_dims == 0)
-        WTStar::print_var(out.w, static_cast<uint8_t *>(addr_data), &this->layout);
+        WTStar::print_var(out.w, static_cast<uint8_t*>(addr_data), &this->layout);
     else {
         out.write("[");
         for (uint d = 0; d < this->n_dims; d++) {
@@ -65,14 +65,14 @@ Variable &Variable::fillThreadInfo(WTStar::virtual_machine_t *env, WTStar::threa
     return *this;
 }
 
-DebuggerVariableViewerPlugin::DebuggerVariableViewerPlugin(Debugger *debugger)
+DebuggerVariableViewerPlugin::DebuggerVariableViewerPlugin(Debugger* debugger)
     : debugger(debugger) {
     pluginType = PluginType::DebuggerVariableViewer;
     title = "Variable Viewer";
 }
 
 int64_t DebuggerVariableViewerPlugin::getThreadParent(uint64_t tid) {
-    auto *t = WTStar::get_thread(tid);
+    auto* t = WTStar::get_thread(tid);
     if (!t)
         return -1;
     if (!t->parent)
@@ -84,7 +84,7 @@ int64_t DebuggerVariableViewerPlugin::getThreadParent(uint64_t tid) {
 std::vector<uint64_t> DebuggerVariableViewerPlugin::getThreadIds() {
     if (!debugger->isRunning())
         return {};
-    auto *env = debugger->env;
+    auto* env = debugger->env;
     std::vector<uint64_t> tids;
     tids.reserve(env->a_thr);
     for (int t = 0; t < env->n_thr; t++)
@@ -96,7 +96,7 @@ std::vector<uint64_t> DebuggerVariableViewerPlugin::getThreadIds() {
 // return name of pardo index variable
 std::string DebuggerVariableViewerPlugin::getThreadIndexVariableName() {
     static const std::string not_found_name = "<index>";
-    auto *env = debugger->env;
+    auto* env = debugger->env;
     auto debug_info = WTStar::getDebugInfo(env);
     if (!debugger->isRunning() || !env->n_thr || !env->thr[0]->parent)
         return "";
@@ -108,7 +108,7 @@ std::string DebuggerVariableViewerPlugin::getThreadIndexVariableName() {
     // go through all parent scopes
     for (uint sid = debug_info->scope_map->val[s]; sid != MAP_SENTINEL;
          sid = debug_info->scopes[sid].parent) {
-        WTStar::scope_info_t *scope = &debug_info->scopes[sid];
+        WTStar::scope_info_t* scope = &debug_info->scopes[sid];
         for (uint i = 0; i < scope->n_vars; i++)
             // check if variable is in current frame and variable is pardo index
             if (env->thr[0]->mem_base >= env->frame->base && //
@@ -121,21 +121,21 @@ std::string DebuggerVariableViewerPlugin::getThreadIndexVariableName() {
 
 // return value of pardo index variable
 int DebuggerVariableViewerPlugin::getThreadIndexVariableValue(uint64_t tid) {
-    auto *t = WTStar::get_thread(tid);
+    auto* t = WTStar::get_thread(tid);
     return t ? lval(t->mem->data, int32_t) : -1;
 }
 
 std::vector<Variable> DebuggerVariableViewerPlugin::getVariablesInScope(uint sid) {
     std::vector<Variable> variables;
-    auto *env = debugger->env;
+    auto* env = debugger->env;
     auto debug_info = WTStar::getDebugInfo(env);
     if (!debug_info)
         return variables;
 
-    auto *scope_info = &env->debug_info->scopes[sid];
+    auto* scope_info = &env->debug_info->scopes[sid];
     bool is_global = scope_info->parent == MAP_SENTINEL;
     for (uint v = 0; v < env->debug_info->scopes[sid].n_vars; v++) {
-        auto *var_info = &scope_info->vars[v];
+        auto* var_info = &scope_info->vars[v];
         variables.push_back(Variable(env, var_info, is_global));
     }
 
@@ -144,7 +144,7 @@ std::vector<Variable> DebuggerVariableViewerPlugin::getVariablesInScope(uint sid
 
 std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVariables(int pc) {
     std::vector<std::vector<Variable>> var_layers;
-    auto *env = debugger->env;
+    auto* env = debugger->env;
     auto debug_info = WTStar::getDebugInfo(env);
     if (!debugger->isRunning() || !debug_info)
         return var_layers;
@@ -157,8 +157,8 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
     for (uint sid = env->debug_info->scope_map->val[s]; sid != MAP_SENTINEL;
          sid = env->debug_info->scopes[sid].parent) {
         var_layers.push_back({});
-        auto *scope_info = &env->debug_info->scopes[sid];
-        for (auto &var : getVariablesInScope(sid)) {
+        auto* scope_info = &env->debug_info->scopes[sid];
+        for (auto& var : getVariablesInScope(sid)) {
             bool visible =
                 static_cast<int>(var.from_code) <
                 (scope_info->parent == MAP_SENTINEL ? env->last_global_pc : env->stored_pc);
@@ -177,7 +177,7 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
 static const ImGuiTreeNodeFlags default_treenode_flags =
     ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
-bool showTableHeader(const std::string &title) {
+bool showTableHeader(const std::string& title) {
     const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
     ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Hideable |
                             ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH |
@@ -197,7 +197,7 @@ bool showTableHeader(const std::string &title) {
     return true;
 }
 
-void showTableVariableRow(const Variable &var) {
+void showTableVariableRow(const Variable& var) {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     ImGui::TextWrapped("%s", var.sname.c_str());
@@ -213,11 +213,11 @@ void showTableVariableRow(const Variable &var) {
     ImGui::TextWrapped("%s", var.svalue.c_str());
 }
 
-void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, uint layer_i,
-                            std::function<void(Variable &var)> actionRow) {
+void showTableVariableLayer(std::vector<std::vector<Variable>>& var_layers, uint layer_i,
+                            std::function<void(Variable& var)> actionRow) {
     if (layer_i >= var_layers.size())
         return;
-    auto &var_layer = var_layers[layer_i];
+    auto& var_layer = var_layers[layer_i];
     if (layer_i && var_layer.empty()) {
         showTableVariableLayer(var_layers, layer_i + 1, actionRow);
         return;
@@ -230,7 +230,7 @@ void showTableVariableLayer(std::vector<std::vector<Variable>> &var_layers, uint
         std::string() + (layer_i ? "parent" : "locals") + "##var_layer" + std::to_string(layer_i);
     if (!ImGui::TreeNodeEx(title.c_str(), default_treenode_flags))
         return;
-    for (auto &var : var_layer) {
+    for (auto& var : var_layer) {
         actionRow(var);
         // ImGui::TextWrapped("lvl=%d addr=%u type=%s ndim=%u%s name=%s val=%s",
         //                    var.level, var.addr, var.stype.c_str(),
@@ -250,7 +250,7 @@ void DebuggerVariableViewerPlugin::show() {
         return;
     }
 
-    WTStar::virtual_machine_t *env = debugger->env;
+    WTStar::virtual_machine_t* env = debugger->env;
     if (!env) {
         ImGui::TextWrapped("No program running");
         ImGui::End();
@@ -264,7 +264,7 @@ void DebuggerVariableViewerPlugin::show() {
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     if (ImGui::CollapsingHeader("Globals")) {
         if (showTableHeader("globals")) {
-            for (auto &var : getVariablesInScope(0)) {
+            for (auto& var : getVariablesInScope(0)) {
                 var.fillThreadInfo(env);
                 showTableVariableRow(var);
             }
@@ -285,18 +285,18 @@ void DebuggerVariableViewerPlugin::show() {
 
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
         if (ImGui::CollapsingHeader("Call stack")) {
-            ulong call_stack_size = STACK_SIZE(env->frames, WTStar::frame_t *);
+            ulong call_stack_size = STACK_SIZE(env->frames, WTStar::frame_t*);
             ImGui::TextWrapped("Size: %lu", call_stack_size);
             int pc = env->stored_pc;
             for (int i = static_cast<int>(call_stack_size) - 1; i >= 0; --i) {
-                auto frame = STACK(env->frames, WTStar::frame_t *)[i];
+                auto frame = STACK(env->frames, WTStar::frame_t*)[i];
                 ImGui::SetNextItemOpen(true, ImGuiCond_Once);
                 if (ImGui::TreeNodeEx(("var_layer" + std::to_string(i)).c_str(),
                                       default_treenode_flags, "%d: %s (base=%d ret_ins=%d)", i,
                                       frame->func_name, frame->base, pc)) {
                     auto var_layers = getVisibleVariables(pc);
                     if (showTableHeader("thread variables")) {
-                        showTableVariableLayer(var_layers, 0, [&](Variable &var) {
+                        showTableVariableLayer(var_layers, 0, [&](Variable& var) {
                             var.fillThreadInfo(env, env->thr[watching_thr_id], frame->base);
                             showTableVariableRow(var);
                         });
@@ -317,7 +317,7 @@ void DebuggerVariableViewerPlugin::show() {
     if (ImGui::CollapsingHeader("Threads")) {
         auto index_name = getThreadIndexVariableName();
         for (auto tid : getThreadIds()) {
-            auto *thr = WTStar::get_thread(tid);
+            auto* thr = WTStar::get_thread(tid);
 
             if (ImGui::Button(("Watch##" + std::to_string(tid)).c_str())) {
                 for (int t = 0; t < env->n_thr; t++)
@@ -334,7 +334,7 @@ void DebuggerVariableViewerPlugin::show() {
             }
             if (open) {
                 if (showTableHeader("thread variables")) {
-                    showTableVariableLayer(var_layers, 0, [&](Variable &var) {
+                    showTableVariableLayer(var_layers, 0, [&](Variable& var) {
                         var.fillThreadInfo(env, thr);
                         showTableVariableRow(var);
                     });

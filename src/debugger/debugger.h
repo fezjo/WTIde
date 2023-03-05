@@ -9,10 +9,10 @@ struct VM_Breakpoint : Breakpoint {
     uint bp_pos;
     std::string error;
     code_t code;
-    WTStar::breakpoint_t *vm_bp;
+    WTStar::breakpoint_t* vm_bp;
 };
 
-inline std::ostream &operator<<(std::ostream &os, const VM_Breakpoint &bp) {
+inline std::ostream& operator<<(std::ostream& os, const VM_Breakpoint& bp) {
     os << "Breakpoint(" << bp.file << ":" << bp.line << ", enabled=" << bp.enabled << ", cond='"
        << bp.condition << "' | active=" << bp.active << ", bp_pos=" << bp.bp_pos
        << ", err=" << bp.error << ")";
@@ -21,7 +21,7 @@ inline std::ostream &operator<<(std::ostream &os, const VM_Breakpoint &bp) {
 
 struct SourcePosition {
     SourcePosition() = default;
-    SourcePosition(WTStar::item_info_t *info, WTStar::virtual_machine_t *env);
+    SourcePosition(WTStar::item_info_t* info, WTStar::virtual_machine_t* env);
 
     uint32_t fileid, //!< index of the source file
         fl,          //!< first line
@@ -33,10 +33,10 @@ struct SourcePosition {
     bool valid = false;
 };
 
-SourcePosition findSourcePosition(WTStar::virtual_machine_t *env, int instruction_number);
+SourcePosition findSourcePosition(WTStar::virtual_machine_t* env, int instruction_number);
 
 extern "C" {
-void error_handler_callback(WTStar::error_t *error, void *data);
+void error_handler_callback(WTStar::error_t* error, void* data);
 }
 
 class Debugger {
@@ -44,11 +44,11 @@ public:
     Debugger();
     ~Debugger();
 
-    bool setSource(const std::string &source_fn);
+    bool setSource(const std::string& source_fn);
     bool compile(bool memory = false);
     bool initialize(bool memory = false);
 
-    void setInput(const std::string &input);
+    void setInput(const std::string& input);
     std::string getOutput() const;
     std::string getCompilationOutput() const;
     void clearCompilationOutput();
@@ -69,11 +69,11 @@ public:
     int stepInto();
     int stepOut();
 
-    std::pair<bool, std::string> setBreakpoint(const std::string &file, uint line,
+    std::pair<bool, std::string> setBreakpoint(const std::string& file, uint line,
                                                bool enabled = true,
-                                               const std::string &condition = "");
-    bool setBreakpointEnabled(const std::string &file, uint line, bool enabled);
-    bool removeBreakpoint(const std::string &file, uint line);
+                                               const std::string& condition = "");
+    bool setBreakpointEnabled(const std::string& file, uint line, bool enabled);
+    bool removeBreakpoint(const std::string& file, uint line);
 
 protected:
     void destroy();
@@ -81,10 +81,10 @@ protected:
     bool readBinary();
     bool readInput();
 
-    uint findInstructionNumber(const std::string &file, uint line) const;
-    VM_Breakpoint *findBreakpoint(const std::string &file, uint line);
-    bool addBreakpointToVm(VM_Breakpoint &bp);
-    VM_Breakpoint &_setBreakpoint(const std::string file, uint line, bool enabled,
+    uint findInstructionNumber(const std::string& file, uint line) const;
+    VM_Breakpoint* findBreakpoint(const std::string& file, uint line);
+    bool addBreakpointToVm(VM_Breakpoint& bp);
+    VM_Breakpoint& _setBreakpoint(const std::string file, uint line, bool enabled,
                                   const std::string condition);
 
 public:
@@ -100,9 +100,9 @@ protected:
     ErrorHandler error_handler;
 
     bool compiled = false;
-    WTStar::include_project_t *ip = nullptr;
-    WTStar::ast_t *ast = nullptr;
-    WTStar::virtual_machine_t *env = nullptr;
+    WTStar::include_project_t* ip = nullptr;
+    WTStar::ast_t* ast = nullptr;
+    WTStar::virtual_machine_t* env = nullptr;
     code_t binary = {};
 
     friend class ProgramAnalyzerPlugin;

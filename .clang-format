@@ -8,7 +8,7 @@ DisableFormat: false
 IndentWidth: 4
 InsertTrailingCommas: None
 KeepEmptyLinesAtTheStartOfBlocks: false
-PointerAlignment: Right
+PointerAlignment: Left
 QualifierAlignment: Left
 ReflowComments: false
 RemoveBracesLLVM: true

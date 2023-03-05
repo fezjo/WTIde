@@ -1,6 +1,6 @@
 #include "program_analyzer_plugin.h"
 
-ProgramAnalyzerPlugin::ProgramAnalyzerPlugin(Debugger *debugger) : debugger(debugger) {
+ProgramAnalyzerPlugin::ProgramAnalyzerPlugin(Debugger* debugger) : debugger(debugger) {
     pluginType = PluginType::ProgramAnalyzer;
     refresh();
 }
@@ -9,17 +9,17 @@ void ProgramAnalyzerPlugin::refresh() {}
 
 static ImGuiTreeNodeFlags default_treenode_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
 
-void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
+void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t* env) {
     ImGui::TextWrapped("Breakpoints: %ld", debugger->breakpoints.size());
     ImGui::TextWrapped("VM Breakpoints: %d", env->bps->full);
-    for (auto &bp : debugger->breakpoints) {
+    for (auto& bp : debugger->breakpoints) {
         bool is_editing = edit_bp.bp_pos == bp.bp_pos;
         bool action_update = false, action_remove = false;
         bool enabled = bp.enabled;
 
-        std::string &file = is_editing ? edit_bp.file : bp.file;
+        std::string& file = is_editing ? edit_bp.file : bp.file;
         int line = static_cast<int>(is_editing ? edit_bp.line : bp.line);
-        std::string &condition = is_editing ? edit_bp.condition : bp.condition;
+        std::string& condition = is_editing ? edit_bp.condition : bp.condition;
         ImGuiInputTextFlags input_flags = ImGuiInputTextFlags_ReadOnly * !is_editing;
 
         auto imgui_id =
@@ -114,7 +114,7 @@ void ProgramAnalyzerPlugin::showBreakpoints(WTStar::virtual_machine_t *env) {
     }
 
     if (std::find_if(debugger->breakpoints.begin(), debugger->breakpoints.end(),
-                     [&](const VM_Breakpoint &bp) { return bp.bp_pos == edit_bp.bp_pos; }) ==
+                     [&](const VM_Breakpoint& bp) { return bp.bp_pos == edit_bp.bp_pos; }) ==
         debugger->breakpoints.end())
         edit_bp = {};
 }
@@ -128,7 +128,7 @@ void ProgramAnalyzerPlugin::show() {
         return;
     }
 
-    WTStar::virtual_machine_t *env = debugger->env;
+    WTStar::virtual_machine_t* env = debugger->env;
     if (!env) {
         std::string fn = debugger->binary_fn;
         if (fn.empty()) {
@@ -140,7 +140,7 @@ void ProgramAnalyzerPlugin::show() {
         code_t code;
         try {
             code = readCode(fn);
-        } catch (const std::exception &e) {
+        } catch (const std::exception& e) {
             ImGui::TextWrapped("Failed to read binary file %s: %s", fn.c_str(), e.what());
             ImGui::End();
             return;
@@ -158,9 +158,9 @@ void ProgramAnalyzerPlugin::show() {
     }
     assert(env);
 
-    auto *debug_info = WTStar::getDebugInfo(env);
+    auto* debug_info = WTStar::getDebugInfo(env);
     Writer outw;
-    static auto writeTextWrappedAndClear = [](Writer &outw) {
+    static auto writeTextWrappedAndClear = [](Writer& outw) {
         ImGui::TextWrapped("%s", outw.read().c_str());
         outw.clear();
     };
@@ -221,7 +221,7 @@ void ProgramAnalyzerPlugin::show() {
             else {
                 for (uint fi = 0; fi < debug_info->n_fn; ++fi) {
                     std::string f_name = debug_info->fn_names[fi];
-                    auto *f_info = &debug_info->items[debug_info->fn_items[fi]];
+                    auto* f_info = &debug_info->items[debug_info->fn_items[fi]];
                     ImGui::TextWrapped("%s (%s:%d.%d)", f_name.c_str(),
                                        debug_info->files[f_info->fileid], f_info->fl, f_info->fc);
                 }

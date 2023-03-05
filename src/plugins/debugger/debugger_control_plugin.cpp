@@ -1,24 +1,24 @@
 #include "debugger_control_plugin.h"
 
-DebuggerControlPlugin::DebuggerControlPlugin(Debugger *debugger) : debugger(debugger) {
+DebuggerControlPlugin::DebuggerControlPlugin(Debugger* debugger) : debugger(debugger) {
     pluginType = PluginType::PluginControl;
 }
 
-bool DebuggerControlPlugin::setSource(const std::string &source) {
+bool DebuggerControlPlugin::setSource(const std::string& source) {
     if (!debugger->setSource(source))
         return false;
     source_fn = source;
     return true;
 }
 
-void DebuggerControlPlugin::setInput(const std::string &input) { debugger->setInput(input); }
+void DebuggerControlPlugin::setInput(const std::string& input) { debugger->setInput(input); }
 
 bool DebuggerControlPlugin::setSourceAction() {
     auto path = std::get<std::string>(callbacks["get_focused_source"](0));
     return setSourceAction(path);
 }
 
-bool DebuggerControlPlugin::setSourceAction(const std::string &source) {
+bool DebuggerControlPlugin::setSourceAction(const std::string& source) {
     if (!setSource(source)) {
         std::cerr << "Failed to set source" << std::endl;
         return false;

@@ -24,7 +24,7 @@ void App::update() {
 }
 
 void App::handleInput() {
-    auto &io = ImGui::GetIO();
+    auto& io = ImGui::GetIO();
     if (io.KeyMods == ImGuiModFlags_Ctrl) {
         if (ImGui::IsKeyPressed(ImGuiKey_N))
             openEditor();
@@ -55,25 +55,24 @@ void App::quit(bool force) {
     unsaved_dialog_editors.clear();
 }
 
-void App::add_plugin(IPlugin *plugin, const std::string &title, const ImVec2 &size) {
+void App::add_plugin(IPlugin* plugin, const std::string& title, const ImVec2& size) {
     plugin->title = title;
     plugin->displaySize = size;
     plugins.push_back(plugin);
 }
 
-void App::delete_plugin(IPlugin *plugin) {
+void App::delete_plugin(IPlugin* plugin) {
     if (isPluginEditor(plugin->getPluginType())) {
         editor_plugins.erase(find(editor_plugins.begin(), editor_plugins.end(), plugin));
         if (plugin->getPluginType() == PluginType::EditorIcte)
-            breakpoint_storage.removeHandler(
-                static_cast<EditorIctePlugin *>(plugin)->bp_handler.id);
+            breakpoint_storage.removeHandler(static_cast<EditorIctePlugin*>(plugin)->bp_handler.id);
     }
     plugins.erase(find(plugins.begin(), plugins.end(), plugin));
     delete plugin;
 }
 
-IEditorPlugin *App::getLastFocusedEditor(bool updateFocus) {
-    std::pair<timepoint, IEditorPlugin *> res = {timepoint::min(), nullptr};
+IEditorPlugin* App::getLastFocusedEditor(bool updateFocus) {
+    std::pair<timepoint, IEditorPlugin*> res = {timepoint::min(), nullptr};
     for (auto editor : editor_plugins) {
         if (updateFocus)
             editor->focused = false;
@@ -88,7 +87,7 @@ IEditorPlugin *App::getLastFocusedEditor(bool updateFocus) {
 void App::openEditor(fs::path path, bool dockAsLastFocused, PluginType type) {
     if (type == PluginType::Unknown)
         type = default_editor_plugin_type;
-    IEditorPlugin *ep = nullptr;
+    IEditorPlugin* ep = nullptr;
     if (type == PluginType::EditorIcte)
         ep = new EditorIctePlugin();
     else
@@ -97,7 +96,7 @@ void App::openEditor(fs::path path, bool dockAsLastFocused, PluginType type) {
         ep->setFile(path); // set anyway
     if (type ==
         PluginType::EditorZep) // we can do this only after loadFile which initializes a zep window
-        static_cast<EditorZepPlugin *>(ep)->GetEditor().SetGlobalMode(
+        static_cast<EditorZepPlugin*>(ep)->GetEditor().SetGlobalMode(
             Zep::ZepMode_Standard::StaticName());
 
     ep->setBreakpointCallbacks(breakpoint_callbacks);

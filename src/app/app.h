@@ -39,26 +39,26 @@ protected:
 #endif
 
     bool initialized = false;
-    std::vector<IEditorPlugin *> unsaved_dialog_editors;
+    std::vector<IEditorPlugin*> unsaved_dialog_editors;
     bool execution_halted_now = false;
     ImGuiWindowFlags flags;
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
 
-    Debugger *debugger;
+    Debugger* debugger;
     BreakpointManager breakpoint_storage;
     BreakpointCallbacks breakpoint_callbacks;
 
-    std::vector<IPlugin *> plugins;
-    std::vector<IEditorPlugin *> editor_plugins;
-    FileTreePlugin *filetree_plugin;
-    PluginControlPlugin *plugin_control_plugin;
-    InputPlugin *input_plugin;
-    OutputPlugin *output_plugin;
-    OutputPlugin *compiler_output_plugin;
-    DebuggerControlPluginV1 *debugger_control_plugin_v1;
-    DebuggerControlPluginV2 *debugger_control_plugin_v2;
-    ProgramAnalyzerPlugin *program_analyzer_plugin;
-    DebuggerVariableViewerPlugin *debugger_variable_viewer_plugin;
+    std::vector<IPlugin*> plugins;
+    std::vector<IEditorPlugin*> editor_plugins;
+    FileTreePlugin* filetree_plugin;
+    PluginControlPlugin* plugin_control_plugin;
+    InputPlugin* input_plugin;
+    OutputPlugin* output_plugin;
+    OutputPlugin* compiler_output_plugin;
+    DebuggerControlPluginV1* debugger_control_plugin_v1;
+    DebuggerControlPluginV2* debugger_control_plugin_v2;
+    ProgramAnalyzerPlugin* program_analyzer_plugin;
+    DebuggerVariableViewerPlugin* debugger_variable_viewer_plugin;
 
 public:
     App() = default;
@@ -66,7 +66,7 @@ public:
     void init();
     void switchAppDebugMode();
     void update();
-    void show(bool *p_open);
+    void show(bool* p_open);
     void quit(bool force = false);
 
 protected:
@@ -79,11 +79,11 @@ protected:
 
     void handleInput();
 
-    void add_plugin(IPlugin *plugin, const std::string &title = "",
-                    const ImVec2 &size = ImVec2(300, 400));
-    void delete_plugin(IPlugin *plugin);
+    void add_plugin(IPlugin* plugin, const std::string& title = "",
+                    const ImVec2& size = ImVec2(300, 400));
+    void delete_plugin(IPlugin* plugin);
 
-    IEditorPlugin *getLastFocusedEditor(bool updateFocus = false);
+    IEditorPlugin* getLastFocusedEditor(bool updateFocus = false);
     // dockAsLastFocused: if true, the new editor will be opened in the same dockspace as the last
     void openEditor(fs::path path = "", bool dockAsLastFocused = true,
                     PluginType type = PluginType::Unknown);
