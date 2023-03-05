@@ -71,13 +71,13 @@ void App::show(bool* p_open) {
     if (ImGui::BeginPopupModal("Unsaved changes", NULL,
                                ImGuiWindowFlags_AlwaysAutoResize |
                                    ImGuiWindowFlags_NoSavedSettings)) {
-        ImGui::Text("You have unsaved changes.\nDo you want to save them?\n\n");
+        ImGui::Text("You have %zu unsaved change%s\nDo you want to save them?\n\n",
+                    unsaved_dialog_editors.size(),
+                    unsaved_dialog_editors.size() > 1
+                        ? "s."
+                        : (":\n" + unsaved_dialog_editors[0]->getFileName()).c_str());
         ImGui::Separator();
-
-        auto msg = unsaved_dialog_editors.size() > 1
-                       ? "Save all"
-                       : "Save " + unsaved_dialog_editors[0]->getFileName();
-        if (ImGui::Button(msg.c_str(), ImVec2(120, 0))) {
+        if (ImGui::Button("Save all", ImVec2(120, 0))) {
             ImGui::CloseCurrentPopup();
             bool ok = true;
             for (auto p : unsaved_dialog_editors)
