@@ -2,6 +2,7 @@ set(_CMAKE_TOOLCHAIN_PREFIX "llvm-")
 message(STATUS "CMake is configured to use the ${_CMAKE_TOOLCHAIN_PREFIX} toolchain")
 
 string(APPEND CMAKE_CXX_FLAGS " -g")
+string(APPEND CMAKE_C_FLAGS " -g")
 add_link_options(-fuse-ld=lld)
 
 # Ensure Debug Flags
@@ -88,4 +89,4 @@ message(STATUS "Debug Flags: ${CMAKE_CXX_FLAGS_DEBUG}")
 message(STATUS "Release Flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 message(STATUS "RelWithDebInfo Flags: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 message(STATUS "Arch: ${PROCESSOR_ARCH}")
-
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
