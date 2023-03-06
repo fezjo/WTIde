@@ -1,18 +1,18 @@
-From 3cd7c581ab8db20f0fbbb1ed9a2ac2e24dbfeac7 Mon Sep 17 00:00:00 2001
+From 863bbb049b9b2ea504cd1a1cd0a92df4a0a8b8ce Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Sun, 5 Mar 2023 21:25:36 +0100
 Subject: [PATCH] Fix holding shortucts
 
 ---
- TextEditor.cpp | 605 +++++++++++++++++++++++++------------------------
+ TextEditor.cpp | 600 +++++++++++++++++++++++++------------------------
  TextEditor.h   |   5 +-
- 2 files changed, 307 insertions(+), 303 deletions(-)
+ 2 files changed, 305 insertions(+), 300 deletions(-)
 
 diff --git a/TextEditor.cpp b/TextEditor.cpp
-index efc55bb..3882874 100644
+index efc55bb..bf18ac4 100644
 --- a/TextEditor.cpp
 +++ b/TextEditor.cpp
-@@ -1159,316 +1159,331 @@ TextEditor::Coordinates TextEditor::FindFirst(const std::string& what, const Coo
+@@ -1159,316 +1159,332 @@ TextEditor::Coordinates TextEditor::FindFirst(const std::string& what, const Coo
  	return Coordinates(mLines.size(), 0);
  }
  
@@ -22,12 +22,19 @@ index efc55bb..3882874 100644
 -	auto shift = io.KeyShift;
 -	auto ctrl = io.ConfigMacOSXBehaviors ? io.KeySuper : io.KeyCtrl;
 -	auto alt = io.ConfigMacOSXBehaviors ? io.KeyCtrl : io.KeyAlt;
- 
+-
 -	if (ImGui::IsWindowFocused())
 -	{
 -		if (ImGui::IsWindowHovered())
 -			ImGui::SetMouseCursor(ImGuiMouseCursor_TextInput);
 -		//ImGui::CaptureKeyboardFromApp(true);
+-
+-		io.WantCaptureKeyboard = true;
+-		io.WantTextInput = true;
+ 
+-		ShortcutID actionID = ShortcutID::Count;
+-		for (ShortcutAction &action : m_shortcuts) {
+-			auto sct = action.second;
 +std::vector<std::pair<TextEditor::ShortcutID, bool>> TextEditor::getActiveShortcutActions() {
 +    auto isScancodeActive = [&](ImGuiKey key, bool now) {
 +        return now ? ImGui::IsKeyPressed(key) : ImGui::IsKeyDown(key);
@@ -57,8 +64,10 @@ index efc55bb..3882874 100644
 +    return activeShortcuts;
 +}
  
--		io.WantCaptureKeyboard = true;
--		io.WantTextInput = true;
+-			if (sct.Key1 == -1)
+-				continue;
+-				
+-			ShortcutID curActionID = ShortcutID::Count;
 +void TextEditor::HandleKeyboardInputs() {
 +    ImGuiIO& io = ImGui::GetIO();
 +    auto shift = io.KeyShift;
@@ -76,59 +85,9 @@ index efc55bb..3882874 100644
 +
 +    auto actions = getActiveShortcutActions();
 +	ShortcutID actionID = ShortcutID::TypeCharacter;
-+	assert(actions.size() <= 1);
 +	if (!actions.empty()) {
-+		actionID = actions[0].second ? actions[0].first : ShortcutID::Nothing;
-+		bool additionalChecks = true;
-+
-+		switch (actionID) {
-+		case ShortcutID::Paste:
-+		case ShortcutID::Cut:
-+		case ShortcutID::Redo:
-+		case ShortcutID::Undo:
-+		case ShortcutID::ForwardDelete:
-+		case ShortcutID::BackwardDelete:
-+		case ShortcutID::DeleteLeft:
-+		case ShortcutID::DeleteRight:
-+		case ShortcutID::ForwardDeleteWord:
-+		case ShortcutID::BackwardDeleteWord:
-+			additionalChecks = !IsReadOnly();
-+			break;
-+		case ShortcutID::MoveUp:
-+		case ShortcutID::MoveDown:
-+		case ShortcutID::SelectUp:
-+		case ShortcutID::SelectDown:
-+			additionalChecks = !mACOpened;
-+			break;
-+		case ShortcutID::AutocompleteUp:
-+		case ShortcutID::AutocompleteDown:
-+		case ShortcutID::AutocompleteSelect:
-+			additionalChecks = mACOpened;
-+			break;
-+		case ShortcutID::AutocompleteSelectActive:
-+			additionalChecks = mACOpened && mACSwitched;
-+			break;
-+		case ShortcutID::NewLine:
-+		case ShortcutID::Indent:
-+		case ShortcutID::Unindent:
-+			additionalChecks = !IsReadOnly() && !mACOpened;
-+			break;
-+		default:
-+			break;
-+		}
- 
--		ShortcutID actionID = ShortcutID::Count;
--		for (ShortcutAction &action : m_shortcuts) {
--			auto sct = action.second;
-+        if (!additionalChecks)
-+            actionID = ShortcutID::TypeCharacter;
-+    }
- 
--			if (sct.Key1 == -1)
--				continue;
--				
--			ShortcutID curActionID = ShortcutID::Count;
--			bool additionalChecks = true;
++		for (auto& action : actions) {
+ 			bool additionalChecks = true;
 -
 -			SDL_Scancode sc1 = SDL_GetScancodeFromKey(sct.Key1);
 -
@@ -174,6 +133,179 @@ index efc55bb..3882874 100644
 -						default: break;
 -					}
 -				}
+-			}
+-
+-			if (additionalChecks && curActionID != ShortcutID::Count)
+-				actionID = curActionID;
+-		}
+-
+-		int keyCount = 0;
+-		bool keepACOpened = false, functionTooltipState = mFunctionDeclarationTooltip;
+-		bool hasWrittenALetter = false;
+-		if (actionID != ShortcutID::Count) {
+-			if (actionID != ShortcutID::Indent)
+-				mIsSnippet = false;
+-			
+-			switch (actionID) {
+-				case ShortcutID::Undo: Undo(); break;
+-				case ShortcutID::Redo: Redo(); break;
+-				case ShortcutID::MoveUp: MoveUp(1, false); break;
+-				case ShortcutID::SelectUp: MoveUp(1, true); break;
+-				case ShortcutID::MoveDown: MoveDown(1, false); break;
+-				case ShortcutID::SelectDown: MoveDown(1, true); break;
+-				case ShortcutID::MoveLeft: MoveLeft(1, false, false); break;
+-				case ShortcutID::SelectLeft: MoveLeft(1, true, false); break;
+-				case ShortcutID::MoveWordLeft: MoveLeft(1, false, true); break;
+-				case ShortcutID::SelectWordLeft: MoveLeft(1, true, true); break;
+-				case ShortcutID::MoveRight: MoveRight(1, false, false); break;
+-				case ShortcutID::SelectRight: MoveRight(1, true, false); break;
+-				case ShortcutID::MoveWordRight: MoveRight(1, false, true); break;
+-				case ShortcutID::SelectWordRight: MoveRight(1, true, true); break;
+-				case ShortcutID::MoveTop: MoveTop(false); break;
+-				case ShortcutID::SelectTop: MoveTop(true); break;
+-				case ShortcutID::MoveBottom: MoveBottom(false); break;
+-				case ShortcutID::SelectBottom: MoveBottom(true); break;
+-				case ShortcutID::MoveUpBlock: MoveUp(GetPageSize() - 4, false); break;
+-				case ShortcutID::MoveDownBlock: MoveDown(GetPageSize() - 4, false); break;
+-				case ShortcutID::SelectUpBlock: MoveUp(GetPageSize() - 4, true); break;
+-				case ShortcutID::SelectDownBlock: MoveDown(GetPageSize() - 4, true); break;
+-				case ShortcutID::MoveEndLine: MoveEnd(false); break;
+-				case ShortcutID::SelectEndLine: MoveEnd(true); break;
+-				case ShortcutID::MoveStartLine: MoveHome(false); break;
+-				case ShortcutID::SelectStartLine: MoveHome(true); break;
+-				case ShortcutID::DeleteRight:
+-				case ShortcutID::ForwardDelete: Delete(); break;
+-				case ShortcutID::ForwardDeleteWord:
+-					if (ctrl && mState.mSelectionStart == mState.mSelectionEnd)
+-						MoveRight(1, true, true);
+-					Delete();
+-				break;
+-				case ShortcutID::DeleteLeft:
+-				case ShortcutID::BackwardDelete: Backspace(); break;
+-				case ShortcutID::BackwardDeleteWord:
+-					if (ctrl && (mState.mSelectionStart == mState.mSelectionEnd || mState.mSelectionStart == mState.mCursorPosition))
+-						MoveLeft(1, true, true);
+-					Backspace();
+-				break;
+-				case ShortcutID::OverwriteCursor: mOverwrite ^= true; break;
+-				case ShortcutID::Copy: Copy(); break;
+-				case ShortcutID::Paste: Paste(); break;
+-				case ShortcutID::Cut: Cut(); break;
+-				case ShortcutID::SelectAll: SelectAll(); break;
+-				case ShortcutID::AutocompleteOpen: 
+-				{
+-					if (mAutocomplete && !mIsSnippet)
+-						m_buildSuggestions(&keepACOpened);
+-				} break;
+-				case ShortcutID::AutocompleteSelect: 
+-				case ShortcutID::AutocompleteSelectActive:
+-				{
+-					mAutocompleteSelect();
+-				}
+-				break;
+-				case ShortcutID::AutocompleteUp:
+-					mACIndex = std::max<int>(mACIndex - 1, 0), mACSwitched = true;
+-					keepACOpened = true;
++			switch (action.first) {
++			case ShortcutID::Paste:
++			case ShortcutID::Cut:
++			case ShortcutID::Redo:
++			case ShortcutID::Undo:
++			case ShortcutID::ForwardDelete:
++			case ShortcutID::BackwardDelete:
++			case ShortcutID::DeleteLeft:
++			case ShortcutID::DeleteRight:
++			case ShortcutID::ForwardDeleteWord:
++			case ShortcutID::BackwardDeleteWord:
++				additionalChecks = !IsReadOnly();
+ 				break;
+-				case ShortcutID::AutocompleteDown:
+-					mACIndex = std::min<int>(mACIndex + 1, (int)mACSuggestions.size()-1), mACSwitched = true;
+-					keepACOpened = true;
+-				break;
+-				case ShortcutID::NewLine:
+-					EnterCharacter('\n', false);
+-				break;
+-				case ShortcutID::Indent:
+-					if (mIsSnippet) {
+-						do {
+-							mSnippetTagSelected++;
+-							if (mSnippetTagSelected >= mSnippetTagStart.size())
+-								mSnippetTagSelected = 0;
+-						} while (!mSnippetTagHighlight[mSnippetTagSelected]);
+-
+-						mSnippetTagLength = 0;
+-						mSnippetTagPreviousLength = mSnippetTagEnd[mSnippetTagSelected].mColumn - mSnippetTagStart[mSnippetTagSelected].mColumn;
+-
+-						SetSelection(mSnippetTagStart[mSnippetTagSelected], mSnippetTagEnd[mSnippetTagSelected]);
+-						SetCursorPosition(mSnippetTagEnd[mSnippetTagSelected]);
+-					} else
+-						EnterCharacter('\t', false);
++			case ShortcutID::MoveUp:
++			case ShortcutID::MoveDown:
++			case ShortcutID::SelectUp:
++			case ShortcutID::SelectDown:
++				additionalChecks = !mACOpened;
+ 				break;
+-				case ShortcutID::Unindent:
+-					EnterCharacter('\t', true);
++			case ShortcutID::AutocompleteUp:
++			case ShortcutID::AutocompleteDown:
++			case ShortcutID::AutocompleteSelect:
++				additionalChecks = mACOpened;
+ 				break;
+-				case ShortcutID::Find: mFindOpened = mHasSearch; mFindJustOpened = mHasSearch; mReplaceOpened = false; break;
+-				case ShortcutID::Replace: mFindOpened = mHasSearch; mFindJustOpened = mHasSearch; mReplaceOpened = mHasSearch; break;
+-				case ShortcutID::DebugStep:
+-					if (OnDebuggerAction)
+-						OnDebuggerAction(this, TextEditor::DebugAction::Step);
++			case ShortcutID::AutocompleteSelectActive:
++				additionalChecks = mACOpened && mACSwitched;
+ 				break;
+-				case ShortcutID::DebugStepInto:
+-					if (OnDebuggerAction)
+-						OnDebuggerAction(this, TextEditor::DebugAction::StepInto);
++			case ShortcutID::NewLine:
++			case ShortcutID::Indent:
++			case ShortcutID::Unindent:
++				additionalChecks = !IsReadOnly() && !mACOpened;
+ 				break;
+-				case ShortcutID::DebugStepOut:
+-					if (OnDebuggerAction)
+-						OnDebuggerAction(this, TextEditor::DebugAction::StepOut);
++			default:
+ 				break;
+-				case ShortcutID::DebugContinue:
+-					if (OnDebuggerAction)
+-						OnDebuggerAction(this, TextEditor::DebugAction::Continue);
+-				break;
+-				case ShortcutID::DebugStop:
+-					if (OnDebuggerAction)
+-						OnDebuggerAction(this, TextEditor::DebugAction::Stop);
+-				break;
+-				case ShortcutID::DebugJumpHere:
+-					if (OnDebuggerJump)
+-						OnDebuggerJump(this, GetCursorPosition().mLine);
+-				break;
+-				case ShortcutID::DebugBreakpoint:
+-					if (OnBreakpointUpdate) {
+-						int line = GetCursorPosition().mLine + 1;
+-						if (HasBreakpoint(line))
+-							RemoveBreakpoint(line);
+-						else AddBreakpoint(line);
+-					}
++			}
++
++			if (additionalChecks) {
++				actionID = action.second ? action.first : ShortcutID::Nothing;
+ 				break;
+-				case ShortcutID::DuplicateLine: {
+-					TextEditor::UndoRecord undo;
+-					undo.mBefore = mState;
++			}
++		}
++    }
++
 +    int keyCount = 0;
 +    bool keepACOpened = false, functionTooltipState = mFunctionDeclarationTooltip;
 +    bool hasWrittenALetter = false;
@@ -236,7 +368,7 @@ index efc55bb..3882874 100644
 +			case ShortcutID::AutocompleteSelectActive:
 +			{
 +				mAutocompleteSelect();
- 			}
++			}
 +			break;
 +			case ShortcutID::AutocompleteUp:
 +				mACIndex = std::max<int>(mACIndex - 1, 0), mACSwitched = true;
@@ -306,195 +438,31 @@ index efc55bb..3882874 100644
 +				TextEditor::UndoRecord undo;
 +				undo.mBefore = mState;
  
--			if (additionalChecks && curActionID != ShortcutID::Count)
--				actionID = curActionID;
--		}
-+				auto oldLine = mLines[mState.mCursorPosition.mLine];
-+				auto& line = InsertLine(mState.mCursorPosition.mLine, mState.mCursorPosition.mColumn);
- 
--		int keyCount = 0;
--		bool keepACOpened = false, functionTooltipState = mFunctionDeclarationTooltip;
--		bool hasWrittenALetter = false;
--		if (actionID != ShortcutID::Count) {
--			if (actionID != ShortcutID::Indent)
--				mIsSnippet = false;
--			
--			switch (actionID) {
--				case ShortcutID::Undo: Undo(); break;
--				case ShortcutID::Redo: Redo(); break;
--				case ShortcutID::MoveUp: MoveUp(1, false); break;
--				case ShortcutID::SelectUp: MoveUp(1, true); break;
--				case ShortcutID::MoveDown: MoveDown(1, false); break;
--				case ShortcutID::SelectDown: MoveDown(1, true); break;
--				case ShortcutID::MoveLeft: MoveLeft(1, false, false); break;
--				case ShortcutID::SelectLeft: MoveLeft(1, true, false); break;
--				case ShortcutID::MoveWordLeft: MoveLeft(1, false, true); break;
--				case ShortcutID::SelectWordLeft: MoveLeft(1, true, true); break;
--				case ShortcutID::MoveRight: MoveRight(1, false, false); break;
--				case ShortcutID::SelectRight: MoveRight(1, true, false); break;
--				case ShortcutID::MoveWordRight: MoveRight(1, false, true); break;
--				case ShortcutID::SelectWordRight: MoveRight(1, true, true); break;
--				case ShortcutID::MoveTop: MoveTop(false); break;
--				case ShortcutID::SelectTop: MoveTop(true); break;
--				case ShortcutID::MoveBottom: MoveBottom(false); break;
--				case ShortcutID::SelectBottom: MoveBottom(true); break;
--				case ShortcutID::MoveUpBlock: MoveUp(GetPageSize() - 4, false); break;
--				case ShortcutID::MoveDownBlock: MoveDown(GetPageSize() - 4, false); break;
--				case ShortcutID::SelectUpBlock: MoveUp(GetPageSize() - 4, true); break;
--				case ShortcutID::SelectDownBlock: MoveDown(GetPageSize() - 4, true); break;
--				case ShortcutID::MoveEndLine: MoveEnd(false); break;
--				case ShortcutID::SelectEndLine: MoveEnd(true); break;
--				case ShortcutID::MoveStartLine: MoveHome(false); break;
--				case ShortcutID::SelectStartLine: MoveHome(true); break;
--				case ShortcutID::DeleteRight:
--				case ShortcutID::ForwardDelete: Delete(); break;
--				case ShortcutID::ForwardDeleteWord:
--					if (ctrl && mState.mSelectionStart == mState.mSelectionEnd)
--						MoveRight(1, true, true);
--					Delete();
--				break;
--				case ShortcutID::DeleteLeft:
--				case ShortcutID::BackwardDelete: Backspace(); break;
--				case ShortcutID::BackwardDeleteWord:
--					if (ctrl && (mState.mSelectionStart == mState.mSelectionEnd || mState.mSelectionStart == mState.mCursorPosition))
--						MoveLeft(1, true, true);
--					Backspace();
--				break;
--				case ShortcutID::OverwriteCursor: mOverwrite ^= true; break;
--				case ShortcutID::Copy: Copy(); break;
--				case ShortcutID::Paste: Paste(); break;
--				case ShortcutID::Cut: Cut(); break;
--				case ShortcutID::SelectAll: SelectAll(); break;
--				case ShortcutID::AutocompleteOpen: 
--				{
--					if (mAutocomplete && !mIsSnippet)
--						m_buildSuggestions(&keepACOpened);
--				} break;
--				case ShortcutID::AutocompleteSelect: 
--				case ShortcutID::AutocompleteSelectActive:
--				{
--					mAutocompleteSelect();
-+				undo.mAdded += '\n';
-+				for (auto& glyph : oldLine) {
-+					line.push_back(glyph);
-+					undo.mAdded += glyph.mChar;
- 				}
--				break;
--				case ShortcutID::AutocompleteUp:
--					mACIndex = std::max<int>(mACIndex - 1, 0), mACSwitched = true;
--					keepACOpened = true;
--				break;
--				case ShortcutID::AutocompleteDown:
--					mACIndex = std::min<int>(mACIndex + 1, (int)mACSuggestions.size()-1), mACSwitched = true;
--					keepACOpened = true;
--				break;
--				case ShortcutID::NewLine:
--					EnterCharacter('\n', false);
--				break;
--				case ShortcutID::Indent:
--					if (mIsSnippet) {
--						do {
--							mSnippetTagSelected++;
--							if (mSnippetTagSelected >= mSnippetTagStart.size())
--								mSnippetTagSelected = 0;
--						} while (!mSnippetTagHighlight[mSnippetTagSelected]);
--
--						mSnippetTagLength = 0;
--						mSnippetTagPreviousLength = mSnippetTagEnd[mSnippetTagSelected].mColumn - mSnippetTagStart[mSnippetTagSelected].mColumn;
--
--						SetSelection(mSnippetTagStart[mSnippetTagSelected], mSnippetTagEnd[mSnippetTagSelected]);
--						SetCursorPosition(mSnippetTagEnd[mSnippetTagSelected]);
--					} else
--						EnterCharacter('\t', false);
--				break;
--				case ShortcutID::Unindent:
--					EnterCharacter('\t', true);
--				break;
--				case ShortcutID::Find: mFindOpened = mHasSearch; mFindJustOpened = mHasSearch; mReplaceOpened = false; break;
--				case ShortcutID::Replace: mFindOpened = mHasSearch; mFindJustOpened = mHasSearch; mReplaceOpened = mHasSearch; break;
--				case ShortcutID::DebugStep:
--					if (OnDebuggerAction)
--						OnDebuggerAction(this, TextEditor::DebugAction::Step);
--				break;
--				case ShortcutID::DebugStepInto:
--					if (OnDebuggerAction)
--						OnDebuggerAction(this, TextEditor::DebugAction::StepInto);
--				break;
--				case ShortcutID::DebugStepOut:
--					if (OnDebuggerAction)
--						OnDebuggerAction(this, TextEditor::DebugAction::StepOut);
--				break;
--				case ShortcutID::DebugContinue:
--					if (OnDebuggerAction)
--						OnDebuggerAction(this, TextEditor::DebugAction::Continue);
--				break;
--				case ShortcutID::DebugStop:
--					if (OnDebuggerAction)
--						OnDebuggerAction(this, TextEditor::DebugAction::Stop);
--				break;
--				case ShortcutID::DebugJumpHere:
--					if (OnDebuggerJump)
--						OnDebuggerJump(this, GetCursorPosition().mLine);
--				break;
--				case ShortcutID::DebugBreakpoint:
--					if (OnBreakpointUpdate) {
--						int line = GetCursorPosition().mLine + 1;
--						if (HasBreakpoint(line))
--							RemoveBreakpoint(line);
--						else AddBreakpoint(line);
--					}
--				break;
--				case ShortcutID::DuplicateLine: {
--					TextEditor::UndoRecord undo;
--					undo.mBefore = mState;
-+				mState.mCursorPosition.mLine++;
- 
 -					auto oldLine = mLines[mState.mCursorPosition.mLine];
 -					auto& line = InsertLine(mState.mCursorPosition.mLine, mState.mCursorPosition.mColumn);
-+				undo.mAddedStart = TextEditor::Coordinates(mState.mCursorPosition.mLine-1, mState.mCursorPosition.mColumn);
-+				undo.mAddedEnd = mState.mCursorPosition;
++				auto oldLine = mLines[mState.mCursorPosition.mLine];
++				auto& line = InsertLine(mState.mCursorPosition.mLine, mState.mCursorPosition.mColumn);
  
 -					undo.mAdded += '\n';
 -					for (auto& glyph : oldLine) {
 -						line.push_back(glyph);
 -						undo.mAdded += glyph.mChar;
-+				undo.mAfter = mState;
-+
-+				AddUndo(undo);
-+			} break;
-+			case ShortcutID::CommentLines: {
-+				for (int l = mState.mSelectionStart.mLine; l <= mState.mSelectionEnd.mLine && l < mLines.size(); l++) {
-+					mLines[l].insert(mLines[l].begin(), TextEditor::Glyph('/', TextEditor::PaletteIndex::Comment));
-+					mLines[l].insert(mLines[l].begin(), TextEditor::Glyph('/', TextEditor::PaletteIndex::Comment));
-+				}
-+				Colorize(mState.mSelectionStart.mLine, mState.mSelectionEnd.mLine);
-+			} break;
-+			case ShortcutID::UncommentLines: {
-+				for (int l = mState.mSelectionStart.mLine; l <= mState.mSelectionEnd.mLine && l < mLines.size(); l++) {
-+					if (mLines[l].size() >= 2) {
-+						if (mLines[l][0].mChar == '/' && mLines[l][1].mChar == '/')
-+							mLines[l].erase(mLines[l].begin(), mLines[l].begin() + 2);
- 					}
+-					}
 -					mState.mCursorPosition.mLine++;
++				undo.mAdded += '\n';
++				for (auto& glyph : oldLine) {
++					line.push_back(glyph);
++					undo.mAdded += glyph.mChar;
 +				}
-+				Colorize(mState.mSelectionStart.mLine, mState.mSelectionEnd.mLine);
-+			} break;
-+		}
-+	} else if (!IsReadOnly()) {
-+		for (int i = 0; i < io.InputQueueCharacters.Size; i++)
-+		{
-+			auto c = (unsigned char)io.InputQueueCharacters[i];
-+			if (c != 0 && (c == '\n' || c >= 32)) {
-+				EnterCharacter((char)c, shift);
++				mState.mCursorPosition.mLine++;
  
 -					undo.mAddedStart = TextEditor::Coordinates(mState.mCursorPosition.mLine-1, mState.mCursorPosition.mColumn);
 -					undo.mAddedEnd = mState.mCursorPosition;
-+				if (c == '.')
-+					m_buildMemberSuggestions(&keepACOpened);
++				undo.mAddedStart = TextEditor::Coordinates(mState.mCursorPosition.mLine-1, mState.mCursorPosition.mColumn);
++				undo.mAddedEnd = mState.mCursorPosition;
  
 -					undo.mAfter = mState;
-+				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-+					hasWrittenALetter = true;
++				undo.mAfter = mState;
  
 -					AddUndo(undo);
 -				} break;
@@ -510,6 +478,52 @@ index efc55bb..3882874 100644
 -						if (mLines[l].size() >= 2) {
 -							if (mLines[l][0].mChar == '/' && mLines[l][1].mChar == '/')
 -								mLines[l].erase(mLines[l].begin(), mLines[l].begin() + 2);
+-						}
++				AddUndo(undo);
++			} break;
++			case ShortcutID::CommentLines: {
++				for (int l = mState.mSelectionStart.mLine; l <= mState.mSelectionEnd.mLine && l < mLines.size(); l++) {
++					mLines[l].insert(mLines[l].begin(), TextEditor::Glyph('/', TextEditor::PaletteIndex::Comment));
++					mLines[l].insert(mLines[l].begin(), TextEditor::Glyph('/', TextEditor::PaletteIndex::Comment));
++				}
++				Colorize(mState.mSelectionStart.mLine, mState.mSelectionEnd.mLine);
++			} break;
++			case ShortcutID::UncommentLines: {
++				for (int l = mState.mSelectionStart.mLine; l <= mState.mSelectionEnd.mLine && l < mLines.size(); l++) {
++					if (mLines[l].size() >= 2) {
++						if (mLines[l][0].mChar == '/' && mLines[l][1].mChar == '/')
++							mLines[l].erase(mLines[l].begin(), mLines[l].begin() + 2);
+ 					}
+-					Colorize(mState.mSelectionStart.mLine, mState.mSelectionEnd.mLine);
+-				} break;
+-			}
+-		} else if (!IsReadOnly()) {
+-			for (int i = 0; i < io.InputQueueCharacters.Size; i++)
+-			{
+-				auto c = (unsigned char)io.InputQueueCharacters[i];
+-				if (c != 0 && (c == '\n' || c >= 32)) {
+-					EnterCharacter((char)c, shift);
++				}
++				Colorize(mState.mSelectionStart.mLine, mState.mSelectionEnd.mLine);
++			} break;
++		}
++	} else if (!IsReadOnly()) {
++		for (int i = 0; i < io.InputQueueCharacters.Size; i++)
++		{
++			auto c = (unsigned char)io.InputQueueCharacters[i];
++			if (c != 0 && (c == '\n' || c >= 32)) {
++				EnterCharacter((char)c, shift);
+ 
+-					if (c == '.')
+-						m_buildMemberSuggestions(&keepACOpened);
++				if (c == '.')
++					m_buildMemberSuggestions(&keepACOpened);
+ 
+-					if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+-						hasWrittenALetter = true;
++				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
++					hasWrittenALetter = true;
++
 +				if (mIsSnippet) {
 +					mSnippetTagLength++;
 +					mSnippetTagEnd[mSnippetTagSelected].mColumn = mSnippetTagStart[mSnippetTagSelected].mColumn + mSnippetTagLength;
@@ -523,23 +537,7 @@ index efc55bb..3882874 100644
 +						if (j != mSnippetTagSelected) {
 +							mSnippetTagStart[j].mColumn += modif[mSnippetTagStart[j].mLine];
 +							mSnippetTagEnd[j].mColumn += modif[mSnippetTagStart[j].mLine];
- 						}
--					}
--					Colorize(mState.mSelectionStart.mLine, mState.mSelectionEnd.mLine);
--				} break;
--			}
--		} else if (!IsReadOnly()) {
--			for (int i = 0; i < io.InputQueueCharacters.Size; i++)
--			{
--				auto c = (unsigned char)io.InputQueueCharacters[i];
--				if (c != 0 && (c == '\n' || c >= 32)) {
--					EnterCharacter((char)c, shift);
--
--					if (c == '.')
--						m_buildMemberSuggestions(&keepACOpened);
--
--					if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
--						hasWrittenALetter = true;
++						}
 +						if (mSnippetTagID[j] == mSnippetTagID[mSnippetTagSelected]) {
 +							modif[mSnippetTagStart[j].mLine] += mSnippetTagLength - mSnippetTagPreviousLength;
  
@@ -628,7 +626,7 @@ index efc55bb..3882874 100644
  		}
  	}
  }
-@@ -3299,24 +3314,10 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
+@@ -3299,24 +3315,10 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
  		ImGui::BeginChild(("##ted_findwnd" + std::string(aTitle)).c_str(), ImVec2(mUICalculateSize(220), mUICalculateSize(mReplaceOpened ? 90 : 40)), true, ImGuiWindowFlags_NoScrollbar);
  
  		// check for findnext shortcut here...
