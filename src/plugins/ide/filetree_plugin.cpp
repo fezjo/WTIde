@@ -91,16 +91,22 @@ void FileTreePlugin::handleItem(bool is_dir, fs::path path) {
         handlePopupActions();
 }
 
-void FileTreePlugin::showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags, uint& node_i) {
+void FileTreePlugin::showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags, uint& node_i,
+                              int show_type) {
     ImGuiTreeNodeFlags node_flags = base_flags;
     if (selection.count(node.path))
         node_flags |= ImGuiTreeNodeFlags_Selected;
 
-    if (!node_i)
-        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    bool rootOpen = ImGui::TreeNodeEx((void*)hash_string(node.path.filename()), node_flags, "%s",
-                                      node.path.filename().c_str());
-    handleItem(true, node.path);
+    bool rootOpen = !show_type;
+    if (show_type) {
+        if (!node_i)
+            ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        auto title = show_type == 2 ? fs::absolute(node.path).parent_path().filename()
+                                    : node.path.filename();
+        rootOpen = ImGui::TreeNodeEx((void*)hash_string(node.path.filename()), node_flags, "%s",
+                                     title.c_str());
+        handleItem(true, node.path);
+    }
     if (rootOpen) {
         for (auto& c_node : node.listDir()) {
             node_i++;
@@ -116,7 +122,8 @@ void FileTreePlugin::showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags,
                 handleItem(false, c_node.path);
             }
         }
-        ImGui::TreePop();
+        if (show_type)
+            ImGui::TreePop();
     }
 }
 
@@ -281,7 +288,7 @@ void FileTreePlugin::show() {
     }
 
     uint node_i = 0;
-    FileTreePlugin::showTree(root, ImGuiTreeNodeFlags_SpanAvailWidth, node_i);
+    FileTreePlugin::showTree(root, ImGuiTreeNodeFlags_SpanAvailWidth, node_i, 2);
 
     refresh();
 

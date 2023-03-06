@@ -27,7 +27,8 @@ public:
     void refresh();
 
 protected:
-    void showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags, uint& node_i);
+    void showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags, uint& node_i,
+                  int show_type = 1);
 
 private:
     bool showFileNameActionPopup(); // returns whether popup_string is valid

@@ -63,6 +63,7 @@ target_compile_options(
 if (EMSCRIPTEN)
     # Documentation for Emscripten options:
     # https://github.com/emscripten-core/emscripten/blob/main/src/settings.js
+    set(EMSCRIPTEN_HOME_DIR "/home/web_user")
 
     target_link_options(${TARGET_NAME} PUBLIC
         "SHELL:-sUSE_SDL=2"
@@ -81,12 +82,16 @@ if (EMSCRIPTEN)
         # "SHELL:-sDISABLE_EXCEPTION_CATCHING=0"
         # "SHELL:-sEXIT_RUNTIME=1"
 
-        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources@resources"
-        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources/config@."
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources/config@${EMSCRIPTEN_HOME_DIR}"
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources/@${EMSCRIPTEN_HOME_DIR}/resources"
+        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/resources/sample_project@${EMSCRIPTEN_HOME_DIR}/project"
         "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/lib/emscripten/shell.html"
     )
 else ()
     # file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources/config/zep.cfg" DESTINATION ${CMAKE_BINARY_DIR})
     file(GLOB CONFIGS "${CMAKE_CURRENT_SOURCE_DIR}/resources/config/*")
     file(COPY ${CONFIGS} DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources" DESTINATION "${CMAKE_BINARY_DIR}")
+    file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/resources/sample_project" DESTINATION "${CMAKE_BINARY_DIR}")
+    file(RENAME "${CMAKE_BINARY_DIR}/sample_project" "${CMAKE_BINARY_DIR}/project")
 endif ()

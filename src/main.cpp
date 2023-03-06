@@ -19,6 +19,10 @@
 
 // Main code
 int main(int, char**) {
+#if defined(__EMSCRIPTEN__)
+    chdir("/home/web_user/");
+#endif
+
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a
     // minority of Windows systems, depending on whether SDL_INIT_GAMECONTROLLER is enabled or
@@ -107,7 +111,7 @@ int main(int, char**) {
     {
         // io.Fonts->AddFontDefault();
         float fontSize = 16.0f;
-        fs::path fontPath, fontDirPath = fs::path("../resources/fonts");
+        fs::path fontPath, fontDirPath = fs::path("resources/fonts");
         ImFontConfig config;
         config.MergeMode = true;
 

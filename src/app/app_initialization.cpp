@@ -107,10 +107,10 @@ void App::_initializePlugins() {
     add_plugin(debugger_variable_viewer_plugin, "Variable Viewer");
 
     // Called once the fonts/device is guaranteed setup
-    openEditor(fs::path("../resources/sample_project/main.cpp"), false, PluginType::EditorZep);
+    openEditor(fs::path("project/main.cpp"), false, PluginType::EditorZep);
     static_cast<EditorZepPlugin*>(editor_plugins[0])
         ->GetEditor()
         .SetGlobalMode(Zep::ZepMode_Vim::StaticName());
 
-    openEditor(fs::path("../resources/sample_project/test.wt"), false, PluginType::EditorIcte);
+    openEditor(fs::path("project/test.wt"), false, PluginType::EditorIcte);
 }
