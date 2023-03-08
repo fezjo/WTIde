@@ -40,6 +40,7 @@ public:
     virtual ~IPlugin() = default;
     virtual void update(){};
     virtual void show() = 0;
+    virtual void bringToFront() { ImGui::SetWindowFocus(getWindowName().c_str()); };
     virtual void setCallback(const std::string& name, CallbackFunction callback) {
         callbacks[name] = callback;
     }

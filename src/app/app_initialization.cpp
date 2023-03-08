@@ -69,12 +69,14 @@ void App::_initializePlugins() {
          [&](CallbackData data) {
              output_plugin->clear();
              output_plugin->write(std::get<std::string>(data));
+             output_plugin->bringToFront();
              return true;
          }},
         {"set_compilation_output",
          [&](CallbackData data) {
              compiler_output_plugin->write(std::get<std::string>(data));
              compiler_output_plugin->write("\n\n-----\n\n");
+             compiler_output_plugin->bringToFront();
              return true;
          }},
         {"refresh_analyzer",
