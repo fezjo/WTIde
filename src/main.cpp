@@ -111,19 +111,21 @@ int main(int, char**) {
     {
         // io.Fonts->AddFontDefault();
         float fontSize = 16.0f;
-        fs::path fontPath, fontDirPath = fs::path("resources/fonts");
+        fs::path fontDirPath = fs::path("resources/fonts");
         ImFontConfig config;
         config.MergeMode = true;
 
         ImWchar glyph_ranges_roboto[] = {1, 0x10FFFF, 0};
-        fontPath = fontDirPath / "Roboto Mono Nerd Font Complete Mono.ttf";
-        assert(NULL != io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, NULL,
-                                                    glyph_ranges_roboto));
+        auto fontPath = fontDirPath / "Roboto Mono Nerd Font Complete Mono.ttf";
+        auto success =
+            io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize, NULL, glyph_ranges_roboto);
+        assert(success != NULL);
 
         ImWchar glyph_ranges_codicon[] = {0xEA60, 0xEC10, 0};
         fontPath = fontDirPath / "codicon" / "codicon.ttf";
-        assert(NULL != io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), fontSize, &config,
-                                                    glyph_ranges_codicon));
+        success =
+            io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize, &config, glyph_ranges_codicon);
+        assert(success != NULL);
 
         io.Fonts->Build();
     }

@@ -92,10 +92,12 @@ void App::openEditor(fs::path path, bool dockAsLastFocused, PluginType type) {
         ep = new EditorIctePlugin();
     else
         ep = EditorZepPlugin::init(Zep::NVec2f(1.0f, 1.0f));
+
     if (!ep->loadFile(path))
         ep->setFile(path); // set anyway
-    if (type ==
-        PluginType::EditorZep) // we can do this only after loadFile which initializes a zep window
+
+    // we can do this only after loadFile which initializes a zep window
+    if (type == PluginType::EditorZep)
         static_cast<EditorZepPlugin*>(ep)->GetEditor().SetGlobalMode(
             Zep::ZepMode_Standard::StaticName());
 
