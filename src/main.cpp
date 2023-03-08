@@ -20,7 +20,7 @@
 // Main code
 int main(int, char**) {
 #if defined(__EMSCRIPTEN__)
-    chdir("/home/web_user/");
+    fs::current_path("/home/web_user/");
 #endif
 
     // Setup SDL
