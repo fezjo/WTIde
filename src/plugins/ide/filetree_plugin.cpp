@@ -177,7 +177,7 @@ void FileTreePlugin::handlePopupActions() {
                     selection.clear();
                 break;
             default:
-                assert(!"Invalid popup type");
+                assert(!(bool)"Invalid popup type");
             }
         }
         if (ok) {

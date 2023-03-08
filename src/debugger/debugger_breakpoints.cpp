@@ -207,7 +207,7 @@ VM_Breakpoint& Debugger::_setBreakpoint(const std::string file, uint line, bool 
         it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
                               [](uint pos, const VM_Breakpoint& bp) { return pos < bp.bp_pos; });
     VM_Breakpoint& bp = *breakpoints.insert(
-        it, {{file, (int)line, enabled, condition}, false, bp_pos, "not compiled", {}, NULL});
+        it, {{file, line, enabled, condition}, false, bp_pos, "not compiled", {}, NULL});
 
     std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp.bp_pos
               << std::endl;

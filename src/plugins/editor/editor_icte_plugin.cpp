@@ -26,7 +26,7 @@ EditorIctePlugin::EditorIctePlugin() {
             std::set<Breakpoint> res;
             auto file = editor.GetPath();
             for (auto bp : breakpoints)
-                res.insert({file, bp.mLine, bp.mEnabled, bp.mCondition});
+                res.insert({file, static_cast<uint>(bp.mLine), bp.mEnabled, bp.mCondition});
             return res;
         },
         "handler icte");
@@ -166,15 +166,16 @@ bool EditorIctePlugin::isDirty() const { return editor.IsTextChanged(); }
 void EditorIctePlugin::setBreakpointCallbacks(const BreakpointCallbacks& callbacks) {
     editor.OnBreakpointUpdate = [=](TextEditor* te, int line, bool conditioned,
                                     const std::string& condition, bool enabled) {
-        callbacks.update({te->GetPath(), line, enabled, condition});
+        callbacks.update({te->GetPath(), static_cast<uint>(line), enabled, condition});
     };
     editor.OnBreakpointRemove = [=](TextEditor* te, int line) {
-        callbacks.remove({te->GetPath(), line});
+        callbacks.remove({te->GetPath(), static_cast<uint>(line)});
     };
 }
 
 void EditorIctePlugin::setDebuggerLine(size_t line, bool focus) {
-    editor.SetCurrentLineIndicator(line * focus, false);
-    std::vector<int> lines = {(int)line};
+    int iline = static_cast<int>(line);
+    editor.SetCurrentLineIndicator(iline * focus, false);
+    std::vector<int> lines = {iline};
     editor.SetHighlightedLines(lines);
 }

@@ -4,9 +4,14 @@
 
 struct Breakpoint {
     std::string file;
-    int line;
+    uint line;
     bool enabled;
     std::string condition;
+
+    Breakpoint() : line(-1u) {}
+    Breakpoint(const std::string& file, uint line, bool enabled = true,
+               const std::string& condition = "")
+        : file(file), line(line), enabled(enabled), condition(condition) {}
 
     std::weak_ordering operator<=>(const Breakpoint& other) const {
         if (auto cmp = file.compare(other.file) <=> 0; cmp != 0)

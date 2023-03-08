@@ -117,7 +117,7 @@ int main(int, char**) {
 
         ImWchar glyph_ranges_roboto[] = {1, 0x10FFFF, 0};
         auto fontPath = fontDirPath / "Roboto Mono Nerd Font Complete Mono.ttf";
-        auto success =
+        [[maybe_unused]] auto success =
             io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize, NULL, glyph_ranges_roboto);
         assert(success != NULL);
 
