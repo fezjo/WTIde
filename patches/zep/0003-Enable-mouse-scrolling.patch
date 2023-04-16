@@ -1,0 +1,29 @@
+From 5a935a238d4dcdf2928cfc4c4bd2d05f4ad61dd8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Sun, 16 Apr 2023 14:39:48 +0200
+Subject: [PATCH] Enable mouse scrolling
+
+---
+ src/window.cpp | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/src/window.cpp b/src/window.cpp
+index bc8d026d..f44659e6 100644
+--- a/src/window.cpp
++++ b/src/window.cpp
+@@ -243,11 +243,10 @@ void ZepWindow::Notify(std::shared_ptr<ZepMessage> payload)
+     else if (payload->messageId == Msg::MouseWheel)
+     {
+         /* TBD: From PR #106: this does not work correctly: It scrolls the text off the page
+-        * completely at the bottom
++        * completely at the bottom */
+         m_textOffsetPx = std::min(m_textSizePx.y, std::max(0.0f, m_textOffsetPx - 5 * stof(payload->str) * GetEditor().GetDisplay().GetFont(ZepTextType::Text).GetPixelHeight()));
+         UpdateVisibleLineRange();
+         DisableToolTipTillMove();
+-        */
+     }
+ }
+ 
+-- 
+2.40.0
+

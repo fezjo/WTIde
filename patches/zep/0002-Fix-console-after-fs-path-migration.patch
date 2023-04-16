@@ -1,0 +1,25 @@
+From 06bf288336614c08941ece902a2267175d284a18 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Sun, 16 Apr 2023 14:39:35 +0200
+Subject: [PATCH] Fix console after fs::path migration
+
+---
+ include/zep/imgui/console_imgui.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/zep/imgui/console_imgui.h b/include/zep/imgui/console_imgui.h
+index 4390c3dc..b817789d 100644
+--- a/include/zep/imgui/console_imgui.h
++++ b/include/zep/imgui/console_imgui.h
+@@ -28,7 +28,7 @@ struct ZepConsole : Zep::IZepComponent
+         return (Zep::ZepEditor&)zepEditor;
+     }
+ 
+-    ZepConsole(fs::path& p)
++    ZepConsole(Zep::fs::path& p)
+         : zepEditor(p, Zep::NVec2f(1.0f))
+     {
+         zepEditor.RegisterCallback(this);
+-- 
+2.40.0
+

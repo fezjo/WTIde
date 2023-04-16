@@ -7,7 +7,7 @@ using namespace Zep;
 
 EditorZepPlugin::EditorZepPlugin(const fs::path& rootPath, const Zep::NVec2f& pixelScale,
                                  std::function<void(std::shared_ptr<Zep::ZepMessage>)> fnCommandCB)
-    : editor(Zep::ZepPath(rootPath), pixelScale), Callback(fnCommandCB) {
+    : editor(fs::path(rootPath), pixelScale), Callback(fnCommandCB) {
     static std::unordered_set<std::string> keywords(wt_keywords.begin(), wt_keywords.end());
     static std::unordered_set<std::string> identifiers(wt_identifiers.begin(),
                                                        wt_identifiers.end());
