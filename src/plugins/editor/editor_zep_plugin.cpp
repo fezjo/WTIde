@@ -107,6 +107,8 @@ void EditorZepPlugin::show() {
         ImGui::End();
         return;
     }
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+        ImGui::SetTooltip("%s", zepBuffer.GetFilePath().c_str());
     dockId = ImGui::GetWindowDockID();
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
         lastFocusedTime = get_time();
