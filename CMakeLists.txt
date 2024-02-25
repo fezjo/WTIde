@@ -19,6 +19,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static on
 include(cmake/compiler.cmake)
 
 if (EMSCRIPTEN)
+    message(STATUS "Building for Emscripten")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set(BUILD_SHARED_LIBS OFF)
     add_definitions(-D__EMSCRIPTEN__)

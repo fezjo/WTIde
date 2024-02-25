@@ -17,8 +17,8 @@ void DebuggerControlPluginV2::show() {
         float spacing = 5.f, spacing2 = spacing * 2;
 
         if (ImGui::Button("")) {
-            if (setSourceAction())
-                compileAction();
+            if (setSourceAction())      // try to compile in memory
+                resp = compileAction(); // if successful, recompile and initialize
         }
         tooltip(
             "Set source file to currently focused editor tab and compile\nCurrent source file: " +
