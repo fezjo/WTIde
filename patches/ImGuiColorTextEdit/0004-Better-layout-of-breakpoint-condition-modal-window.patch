@@ -1,6 +1,6 @@
-From a358a2d206d82995fdd0b52615baadc3d6512588 Mon Sep 17 00:00:00 2001
+From 89a3bc88657b9291a136a7ff943abb0ac752355d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Mon, 13 Feb 2023 19:04:11 +0100
+Date: Sun, 25 Feb 2024 23:46:59 +0100
 Subject: [PATCH] Better layout of breakpoint condition modal window
 
 ---
@@ -64,5 +64,5 @@ index 224358e..2beba51 100644
  	bool mCheckComments;
  	ErrorMarkers mErrorMarkers;
 -- 
-2.39.1
+2.44.0
 

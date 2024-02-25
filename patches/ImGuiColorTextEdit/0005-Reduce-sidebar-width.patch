@@ -1,6 +1,6 @@
-From 4cec05a8da8dc1f681c989b3ec02a77f8c718595 Mon Sep 17 00:00:00 2001
+From 2b1ef97065befff5f81cf1d34d715b6e8afe7b86 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Wed, 22 Feb 2023 23:02:32 +0100
+Date: Sun, 25 Feb 2024 23:46:59 +0100
 Subject: [PATCH] Reduce sidebar width
 
 ---
@@ -24,5 +24,5 @@ index bfff42d..323ee1f 100644
  
  	// render
 -- 
-2.39.2
+2.44.0
 

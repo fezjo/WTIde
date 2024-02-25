@@ -1,6 +1,6 @@
-From 58b331b5ce5a0913fc8938777df9229e8bf03b6a Mon Sep 17 00:00:00 2001
+From e7ae0ee49f77108e02106d838d933840974e2004 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Sun, 12 Feb 2023 13:14:54 +0100
+Date: Sun, 25 Feb 2024 23:46:59 +0100
 Subject: [PATCH] Fix keycodes after Imgui update, simplify keycode checks
 
 ---
@@ -52,5 +52,5 @@ index 3ee620f..cef93b9 100644
  
  		if (mFindJustOpened) {
 -- 
-2.39.1
+2.44.0
 

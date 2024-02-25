@@ -1,6 +1,6 @@
-From 88de432e84fc65c606b5544f9001b72c86d2be3a Mon Sep 17 00:00:00 2001
+From fb8f7b835e086fe8d875d064f62bd613c00669ce Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Thu, 23 Feb 2023 19:37:54 +0100
+Date: Sun, 25 Feb 2024 23:47:00 +0100
 Subject: [PATCH] Add replace to undo history
 
 ---
@@ -39,5 +39,5 @@ index 7474fec..efc55bb 100644
  			};
  
 -- 
-2.39.2
+2.44.0
 

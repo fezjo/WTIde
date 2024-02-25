@@ -1,0 +1,23 @@
+From 6a62b2c323d3da2f8cf655ac45744236ab6aea29 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Sun, 25 Feb 2024 23:59:04 +0100
+Subject: [PATCH] Fix missing include in stringutils
+
+---
+ include/zep/mcommon/string/stringutils.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/zep/mcommon/string/stringutils.h b/include/zep/mcommon/string/stringutils.h
+index 9a74bc7f..1ae4c5e7 100644
+--- a/include/zep/mcommon/string/stringutils.h
++++ b/include/zep/mcommon/string/stringutils.h
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include <cstdint>
+ #include <functional>
+ #include <ostream>
+ #include <sstream>
+-- 
+2.44.0
+

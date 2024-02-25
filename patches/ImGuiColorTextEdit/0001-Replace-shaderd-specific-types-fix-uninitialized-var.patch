@@ -1,6 +1,6 @@
-From 65c8d4ff12fa9dc0ed7f1ef80a350519c2974971 Mon Sep 17 00:00:00 2001
+From f6e77ca450d77bd64587cbadb7dc4fac4285145d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Sun, 1 May 2022 15:12:33 +0200
+Date: Sun, 25 Feb 2024 23:46:59 +0100
 Subject: [PATCH] Replace shaderd specific types, fix uninitialized variables
 
 ---
@@ -208,5 +208,5 @@ index 55e5745..c61eb59 100644
  	std::vector<std::pair<std::string, std::string>> mACSuggestions;
  	int mACIndex;
 -- 
-2.36.0
+2.44.0
 

@@ -1,6 +1,6 @@
-From 3edaabb3193f9a17eba82a6b7a88359a6cf7aaff Mon Sep 17 00:00:00 2001
+From f5e2916ef14b8641470fe209d51bdbc19cf830b7 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Sat, 30 Apr 2022 17:05:03 +0200
+Date: Sun, 25 Feb 2024 23:47:01 +0100
 Subject: [PATCH] Fix bugs and replace windows specific functions
 
 ---
@@ -108,5 +108,5 @@ index 1a48115..49642d9 100644
  			//PushStyleColor(ImGuiCol_Text, text_color);
  			SetNextWindowBgAlpha(opacity);
 -- 
-2.36.0
+2.44.0
 

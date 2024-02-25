@@ -1,6 +1,6 @@
-From e73228c87c338a9a8fbaa30f8bca9f0eecd61214 Mon Sep 17 00:00:00 2001
+From a2bc94cf0249b859ad63eb16b8dedb3e97ed4f7a Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Thu, 23 Feb 2023 16:20:08 +0100
+Date: Sun, 25 Feb 2024 23:47:00 +0100
 Subject: [PATCH] Fix focus issues with find window
 
 ---
@@ -46,5 +46,5 @@ index 9108ff0..bc7cb76 100644
  
  	/* DEBUGGER CONTROLS */
 -- 
-2.39.2
+2.44.0
 

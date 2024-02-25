@@ -1,0 +1,25 @@
+From d55c3ac557f44a10cd44893084a9381c1888be6a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Wed, 8 Mar 2023 22:10:57 +0100
+Subject: [PATCH] Fix warning lambda implicit use of this via =
+
+---
+ src/indexer.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/indexer.cpp b/src/indexer.cpp
+index 0f039b25..8b80315e 100644
+--- a/src/indexer.cpp
++++ b/src/indexer.cpp
+@@ -231,7 +231,7 @@ void Indexer::Notify(std::shared_ptr<ZepMessage> message)
+ 
+ void Indexer::StartSymbolSearch()
+ {
+-    GetEditor().GetThreadPool().enqueue([=]() {
++    GetEditor().GetThreadPool().enqueue([=, this]() {
+         for (;;)
+         {
+             fs::path path;
+-- 
+2.44.0
+

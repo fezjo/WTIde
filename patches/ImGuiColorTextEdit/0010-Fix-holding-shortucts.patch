@@ -1,6 +1,6 @@
-From 863bbb049b9b2ea504cd1a1cd0a92df4a0a8b8ce Mon Sep 17 00:00:00 2001
+From 20cd7b26f8b32de3024ca6871dd5f1aece63d0a3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Sun, 5 Mar 2023 21:25:36 +0100
+Date: Sun, 25 Feb 2024 23:47:00 +0100
 Subject: [PATCH] Fix holding shortucts
 
 ---
@@ -686,5 +686,5 @@ index 2beba51..72be8b9 100644
  	void HandleMouseInputs();
  	void RenderInternal(const char* aTitle);
 -- 
-2.39.2
+2.44.0
 

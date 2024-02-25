@@ -1,6 +1,6 @@
-From 329a78ee49f92a9ee345df143981bf4b06bb9dab Mon Sep 17 00:00:00 2001
+From e951b30c94e6aefc64b2750e6679fd5a69f23216 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Wed, 22 Feb 2023 23:02:17 +0100
+Date: Sun, 25 Feb 2024 23:46:58 +0100
 Subject: [PATCH] Fix typos
 
 ---
@@ -8,10 +8,10 @@ Subject: [PATCH] Fix typos
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/imgui.h b/imgui.h
-index 9f8a5711a..de456ae0b 100644
+index c2df6703..ba011307 100644
 --- a/imgui.h
 +++ b/imgui.h
-@@ -663,7 +663,7 @@ namespace ImGui
+@@ -687,7 +687,7 @@ namespace ImGui
      // - Use BeginMenuBar() on a window ImGuiWindowFlags_MenuBar to append to its menu bar.
      // - Use BeginMainMenuBar() to create a menu bar at the top of the screen and append to it.
      // - Use BeginMenu() to create a menu. You can call BeginMenu() multiple time with the same identifier to append more items to it.
@@ -21,5 +21,5 @@ index 9f8a5711a..de456ae0b 100644
      IMGUI_API void          EndMenuBar();                                                       // only call EndMenuBar() if BeginMenuBar() returns true!
      IMGUI_API bool          BeginMainMenuBar();                                                 // create and append to a full screen menu-bar.
 -- 
-2.40.0
+2.44.0
 

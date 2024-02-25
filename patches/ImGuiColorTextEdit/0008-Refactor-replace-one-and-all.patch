@@ -1,6 +1,6 @@
-From 26f703d5226d0e8b1dca1f10ebecd2795239fa01 Mon Sep 17 00:00:00 2001
+From c64b86980bd576c2411512b8df71fa94df47b141 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Thu, 23 Feb 2023 19:37:32 +0100
+Date: Sun, 25 Feb 2024 23:47:00 +0100
 Subject: [PATCH] Refactor replace one and all
 
 ---
@@ -140,5 +140,5 @@ index bc7cb76..7474fec 100644
  			}
  		}
 -- 
-2.39.2
+2.44.0
 

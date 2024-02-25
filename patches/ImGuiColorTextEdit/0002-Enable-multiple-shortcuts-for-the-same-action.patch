@@ -1,6 +1,6 @@
-From f411a480799dac639ab7ed4e2148da019519d65f Mon Sep 17 00:00:00 2001
+From 4682a9391da3330781e3b3124fb18417976cc7f7 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
-Date: Thu, 5 May 2022 15:46:02 +0200
+Date: Sun, 25 Feb 2024 23:46:59 +0100
 Subject: [PATCH] Enable multiple shortcuts for the same action
 
 ---
@@ -249,5 +249,5 @@ index c61eb59..224358e 100644
  	bool mScrollbarMarkers;
  	std::vector<int> mChangedLines;
 -- 
-2.36.0
+2.44.0
 

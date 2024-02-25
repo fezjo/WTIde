@@ -1,4 +1,4 @@
-From f2d031c7cce027c0a6873dbe20c9ad67995f5f73 Mon Sep 17 00:00:00 2001
+From 2ad9e19fb8c090db7dc0bb059a9d9c10a445aeeb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Sun, 16 Apr 2023 14:39:02 +0200
 Subject: [PATCH] Fix clipboard
@@ -8,7 +8,7 @@ Subject: [PATCH] Fix clipboard
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/src/mode.cpp b/src/mode.cpp
-index 9fd732f6..b731979f 100644
+index 5093b9d0..873b8c5f 100644
 --- a/src/mode.cpp
 +++ b/src/mode.cpp
 @@ -368,7 +368,7 @@ void ZepMode::AddKeyPress(uint32_t key, uint32_t modifierKeys)
@@ -20,23 +20,23 @@ index 9fd732f6..b731979f 100644
      if (key >= 127 && key <= 255)
      {
  
-@@ -1392,6 +1392,7 @@ bool ZepMode::GetCommand(CommandContext& context)
-     }
+@@ -1403,6 +1403,7 @@ bool ZepMode::GetCommand(CommandContext& context)
      else if (mappedCommand == id_StandardPaste)
      {
+         GetEditor().ReadClipboard();
 +        context.pRegister = &GetEditor().GetRegister('+');
+ 
          if (context.currentMode == EditorMode::Visual)
          {
-             auto range = GetInclusiveVisualRange();
-@@ -1416,6 +1417,7 @@ bool ZepMode::GetCommand(CommandContext& context)
-     }
+@@ -1430,6 +1431,7 @@ bool ZepMode::GetCommand(CommandContext& context)
      else if (mappedCommand == id_PasteAfter)
      {
+         GetEditor().ReadClipboard();
 +        context.pRegister = &GetEditor().GetRegister('+');
+ 
          if (!context.pRegister->text.empty())
          {
-             // Already in visual mode, so replace the selection
-@@ -1452,6 +1454,7 @@ bool ZepMode::GetCommand(CommandContext& context)
+@@ -1467,6 +1469,7 @@ bool ZepMode::GetCommand(CommandContext& context)
      }
      else if (mappedCommand == id_PasteBefore)
      {
@@ -45,5 +45,5 @@ index 9fd732f6..b731979f 100644
          {
              // Already in visual mode, so replace the selection with whatever we copied
 -- 
-2.40.0
+2.44.0
 
