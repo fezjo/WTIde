@@ -26,18 +26,21 @@ public:
 
     void refresh();
 
-protected:
+private:
     void showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags, uint& node_i,
                   int show_type = 1);
-
-private:
+    void showMenuBar();
     bool showFileNameActionPopup(); // returns whether popup_string is valid
-    bool showFileMenu();
+    void showTreeNodeMenu();
+    void showDeleteConfirmation();
+    // void showPopup();
+    // void showPopup(PopupType type, fs::path location);
     void handleItem(bool is_dir, fs::path path);
     bool createFile();
     bool createDirectory();
-    bool renameFile();
+    bool deleteAllSelected();
     void openAllSelected();
+    bool renameFile();
     void handlePopupActions();
 
 private:
