@@ -107,6 +107,7 @@ std::string Debugger::getCompilationOutput() const { return error_handler.read()
 void Debugger::clearCompilationOutput() { error_handler.clear(); }
 
 bool Debugger::compile(bool memory) {
+    clearCompilationOutput();
     if (source_fn.empty())
         return false;
 

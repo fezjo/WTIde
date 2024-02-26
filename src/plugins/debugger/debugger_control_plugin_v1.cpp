@@ -1,26 +1,26 @@
 #include "debugger_control_plugin_v1.h"
 
-bool DebuggerControlPluginV1::setSourceAction() {
+DebuggerActionResult DebuggerControlPluginV1::setSourceAction() {
     source_fn = std::get<std::string>(callbacks["get_focused_source"](0));
     return setSourceAction(source_fn);
 }
 
-bool DebuggerControlPluginV1::setSourceAction(const std::string& source) {
-    if (!setSource(source)) {
+DebuggerActionResult DebuggerControlPluginV1::setSourceAction(const std::string& source) {
+    if (setSource(source) != DebuggerActionResult::Success) {
         source_fn_color = ImVec4(1.0, 0.25, 0.25, 1.0);
         std::cerr << "Failed to set source" << std::endl;
-        return false;
+        return DebuggerActionResult::FailedToSetSource;
     }
     callbacks["refresh_analyzer"](0);
     if (!debugger->compile(true)) {
         std::cerr << "Failed to compile source" << std::endl;
-        return false;
+        return DebuggerActionResult::FailedToCompile;
     }
     if (!debugger->initialize(true)) {
         std::cerr << "Failed to initialize" << std::endl;
-        return false;
+        return DebuggerActionResult::FailedToInitialize;
     }
-    return true;
+    return DebuggerActionResult::Success;
 }
 
 void DebuggerControlPluginV1::show() {
@@ -118,7 +118,8 @@ return bn;";
                     ImGui::InsertNotification(
                         {ImGuiToastType_Error, 5000,
                          "Failed to set breakpoint\nSee console for details"});
-                    callbacks["set_compilation_output"]("Failed to set breakpoint\n" + res.second);
+                    callbacks["set_compilation_output"](
+                        make_pair(-1, "Failed to set breakpoint\n" + res.second));
                 }
             }
             ImGui::EndPopup();
