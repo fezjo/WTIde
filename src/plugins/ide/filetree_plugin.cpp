@@ -51,6 +51,9 @@ void FileTreePlugin::openAllSelected() {
 
 bool FileTreePlugin::showFileMenu() {
     if (ImGui::BeginPopupContextItem()) {
+        if (selection.size() <= 1)
+            selection = {menu_node};
+
         if (ImGui::Selectable("Rename")) {
             popup_type = PopupType::Rename;
             target_path = menu_node;
@@ -61,6 +64,9 @@ bool FileTreePlugin::showFileMenu() {
             ImGui::SetNextWindowPos(pos);
             return true;
         }
+
+        if (ImGui::Selectable("Delete"))
+            popup_type = PopupType::Delete;
 
         if (ImGui::Selectable("Nothing")) {
         }
@@ -136,6 +142,7 @@ bool FileTreePlugin::showFileNameActionPopup() {
                              ImGuiInputTextFlags_EnterReturnsTrue)) {
             res = true;
         }
+        // TODO close popup on escape
         ImGui::PopStyleColor();
         if (ImGui::IsItemEdited())
             popup_color = ImGui::GetStyleColorVec4(ImGuiCol_FrameBg);
@@ -264,17 +271,13 @@ void FileTreePlugin::show() {
         }
         ImGui::EndDisabled();
 
-        if ("" == popup_location)
+        if (popup_location == "")
             handlePopupActions();
 
         ImGui::BeginDisabled(selection.empty());
         {
-            if (ImGui::MenuItem("")) {
-                for (auto& p : selection)
-                    fs::remove_all(p);
-                selection.clear();
-                files_changed = true;
-            }
+            if (ImGui::MenuItem(""))
+                popup_type = PopupType::Delete;
         }
         ImGui::EndDisabled();
         if (ImGui::MenuItem(""))
@@ -289,6 +292,35 @@ void FileTreePlugin::show() {
 
     uint node_i = 0;
     FileTreePlugin::showTree(root, ImGuiTreeNodeFlags_SpanAvailWidth, node_i, 2);
+
+    if (popup_type == PopupType::Delete) {
+        if (selection.empty())
+            popup_type = PopupType::None;
+        else
+            ImGui::OpenPopup("Confirm delete");
+    }
+    if (ImGui::BeginPopup("Confirm delete",
+                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings)) {
+        ImGui::Text("Are you sure you want to delete the following files?");
+        for (auto p : selection)
+            ImGui::Text("%s", p.c_str());
+        if (ImGui::Button("OK", ImVec2(120, 0))) {
+            for (auto p : selection)
+                fs::remove_all(p);
+            selection.clear();
+            ImGui::CloseCurrentPopup();
+            popup_type = PopupType::None;
+            files_changed = true;
+        }
+        ImGui::SameLine();
+        ImGui::SetItemDefaultFocus();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            dbg("pressed Cancel");
+            ImGui::CloseCurrentPopup();
+            popup_type = PopupType::None;
+        }
+        ImGui::EndPopup();
+    }
 
     refresh();
 

@@ -14,7 +14,7 @@ struct FileTreeNode {
     void refresh();
 };
 
-enum class PopupType { None = 0, NewFile, NewDirectory, Rename };
+enum class PopupType { None = 0, NewFile, NewDirectory, Rename, Delete };
 
 class FileTreePlugin : public IPlugin {
 public:
@@ -41,15 +41,15 @@ private:
     void handlePopupActions();
 
 private:
-    fs::path node_selected;
-    fs::path menu_node;
-    std::set<fs::path> selection;
-    FileTreeNode root;
-    bool files_changed;
+    fs::path node_selected;       // mid frame selected node
+    fs::path menu_node;           // node for which the menu is open
+    std::set<fs::path> selection; // selected nodes
+    FileTreeNode root; // root node of the file tree, initialized with the current working directory
+    bool files_changed; // mid frame file changes
 
-    fs::path target_path;
+    fs::path target_path; // path for single file menu actions (new file, new directory, rename)
     PopupType popup_type;
-    std::string popup_location;
-    std::string popup_string;
-    ImVec4 popup_color;
+    std::string popup_location; // path of file for which the popup is open
+    std::string popup_string;   // new name for rename, new file, new directory
+    ImVec4 popup_color;         // may be red because of error
 };
