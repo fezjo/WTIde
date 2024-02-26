@@ -1,0 +1,24 @@
+From accb116064d281bee6e6f19dc9fccca92416d705 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Mon, 26 Feb 2024 01:36:53 +0100
+Subject: [PATCH] Fix missing virtual destructor
+
+---
+ include/zep/editor.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/zep/editor.h b/include/zep/editor.h
+index f9dbb473..783bc412 100644
+--- a/include/zep/editor.h
++++ b/include/zep/editor.h
+@@ -156,6 +156,7 @@ public:
+ 
+ struct IZepComponent
+ {
++    virtual ~IZepComponent() = default;
+     virtual void Notify(std::shared_ptr<ZepMessage> message)
+     {
+         ZEP_UNUSED(message);
+-- 
+2.44.0
+

@@ -1,11 +1,13 @@
-From d55c3ac557f44a10cd44893084a9381c1888be6a Mon Sep 17 00:00:00 2001
+From b1d85856067de1ade5776d959849b235900cc72c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Wed, 8 Mar 2023 22:10:57 +0100
 Subject: [PATCH] Fix warning lambda implicit use of this via =
 
 ---
- src/indexer.cpp | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/indexer.cpp       | 2 +-
+ src/mode.cpp          | 2 +-
+ src/range_markers.cpp | 4 ++--
+ 3 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/src/indexer.cpp b/src/indexer.cpp
 index 0f039b25..8b80315e 100644
@@ -20,6 +22,36 @@ index 0f039b25..8b80315e 100644
          for (;;)
          {
              fs::path path;
+diff --git a/src/mode.cpp b/src/mode.cpp
+index 873b8c5f..c28bf12e 100644
+--- a/src/mode.cpp
++++ b/src/mode.cpp
+@@ -453,7 +453,7 @@ void ZepMode::HandleMappedInput(const std::string& input)
+     }
+ 
+     // A lambda to check for a pending mode switch after the command
+-    auto enteringMode = [=](auto mode) {
++    auto enteringMode = [=, this](auto mode) {
+         if (m_currentMode != spContext->commandResult.modeSwitch && spContext->commandResult.modeSwitch == mode)
+         {
+             return true;
+diff --git a/src/range_markers.cpp b/src/range_markers.cpp
+index 58923efb..8a7975c2 100644
+--- a/src/range_markers.cpp
++++ b/src/range_markers.cpp
+@@ -8,10 +8,10 @@ namespace Zep
+ RangeMarker::RangeMarker(ZepBuffer& buffer)
+     : m_buffer(buffer)
+ {
+-    onPreBufferInsert = buffer.sigPreInsert.connect([=](ZepBuffer& buffer, const GlyphIterator& itrStart, const std::string& str) {
++    onPreBufferInsert = buffer.sigPreInsert.connect([=, this](ZepBuffer& buffer, const GlyphIterator& itrStart, const std::string& str) {
+         HandleBufferInsert(buffer, itrStart, str);
+     });
+-    onPreBufferDelete = buffer.sigPreDelete.connect([=](ZepBuffer& buffer, const GlyphIterator& itrStart, const GlyphIterator itrEnd) {
++    onPreBufferDelete = buffer.sigPreDelete.connect([=, this](ZepBuffer& buffer, const GlyphIterator& itrStart, const GlyphIterator itrEnd) {
+         HandleBufferDelete(buffer, itrStart, itrEnd);
+     });
+ }
 -- 
 2.44.0
 

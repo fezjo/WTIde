@@ -1,4 +1,4 @@
-From 6a62b2c323d3da2f8cf655ac45744236ab6aea29 Mon Sep 17 00:00:00 2001
+From f6218fd400c08af27105d56462dbb71d29ff0594 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
 Date: Sun, 25 Feb 2024 23:59:04 +0100
 Subject: [PATCH] Fix missing include in stringutils
