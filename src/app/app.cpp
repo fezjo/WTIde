@@ -89,7 +89,12 @@ IEditorPlugin* App::getLastFocusedEditor(bool updateFocus) {
     return res.second;
 }
 
-void App::openEditor(fs::path path, bool dockAsLastFocused, PluginType type) {
+void App::openEditor(fs::path path, bool dockAsLastFocused, PluginType type,
+                     bool force_large_file) {
+    if (!force_large_file && fs::exists(path) && fs::file_size(path) > 1024 * 1024) {
+        pending_large_file = std::make_tuple(path, dockAsLastFocused, type);
+        return;
+    }
     if (type == PluginType::Unknown)
         type = default_editor_plugin_type;
     IEditorPlugin* ep = nullptr;

@@ -103,6 +103,8 @@ void App::show(bool* p_open) {
         ImGui::EndPopup();
     }
 
+    showPendingLargeFile();
+
     showNotifications();
 
     ImGui::PopStyleColor();
@@ -160,6 +162,31 @@ void App::showMainMenuBar() {
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
+    }
+}
+
+void App::showPendingLargeFile() {
+    if (!pending_large_file.has_value())
+        return;
+    ImGui::OpenPopup("Large file");
+    if (ImGui::BeginPopupModal("Large file", nullptr,
+                               ImGuiWindowFlags_AlwaysAutoResize |
+                                   ImGuiWindowFlags_NoSavedSettings)) {
+        auto [path, dockAsLastFocused, type] = pending_large_file.value();
+        ImGui::Text("File '%s' is pretty large.\nAre you sure you want to open it?\n",
+                    path.c_str());
+        ImGui::Separator();
+        if (ImGui::Button("Open", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+            openEditor(path, dockAsLastFocused, type, true);
+            pending_large_file.reset();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+            pending_large_file.reset();
+        }
+        ImGui::EndPopup();
     }
 }
 

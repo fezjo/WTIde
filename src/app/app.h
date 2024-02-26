@@ -40,6 +40,7 @@ protected:
 
     bool initialized = false;
     int untitled_counter = 0;
+    std::optional<std::tuple<fs::path, bool, PluginType>> pending_large_file;
     std::vector<IEditorPlugin*> unsaved_dialog_editors;
     timepoint execution_halted_when = timepoint::min();
     ImGuiWindowFlags flags;
@@ -77,6 +78,7 @@ protected:
 
     void showDebugWindow();
     void showMainMenuBar();
+    void showPendingLargeFile();
     void showNotifications();
 
     void handleInput();
@@ -88,7 +90,7 @@ protected:
     IEditorPlugin* getLastFocusedEditor(bool updateFocus = false);
     // dockAsLastFocused: if true, the new editor will be opened in the same dockspace as the last
     void openEditor(fs::path path = "", bool dockAsLastFocused = true,
-                    PluginType type = PluginType::Unknown);
+                    PluginType type = PluginType::Unknown, bool force_large_file = false);
     void closeEditor();
 
     std::vector<fs::path> openMultipleFilesDialog();
