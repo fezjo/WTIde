@@ -60,7 +60,7 @@ void EditorIctePlugin::show() {
         return;
     }
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
-        ImGui::SetTooltip("%s", fs::canonical(editor.GetPath()).c_str());
+        ImGui::SetTooltip("%s", normalize_path(editor.GetPath()).c_str());
     dockId = ImGui::GetWindowDockID();
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
         lastFocusedTime = get_time();
@@ -133,7 +133,7 @@ void EditorIctePlugin::show() {
 }
 
 void EditorIctePlugin::setFile(const std::string& filename) {
-    fn = normalize_path(filename);
+    fn = normalize_path(filename, true);
     editor.SetPath(fn);
 }
 

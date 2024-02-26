@@ -40,7 +40,7 @@ timepoint get_time();
 
 bool ends_with(const std::string& str, const std::string& suffix);
 
-fs::path normalize_path(const fs::path& path);
+fs::path normalize_path(const fs::path& path, bool absolute = false);
 
 #define DEBUG
 #ifdef DEBUG

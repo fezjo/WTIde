@@ -91,7 +91,7 @@ void FileTreePlugin::handleItem(bool is_dir, fs::path path) {
     if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
         menu_node = path;
     if (ImGui::IsItemHovered(0, 0.5f))
-        ImGui::SetTooltip("%s", fs::canonical(path).c_str());
+        ImGui::SetTooltip("%s", normalize_path(path, true).c_str());
     showFileMenu();
     if (path == popup_location)
         handlePopupActions();
