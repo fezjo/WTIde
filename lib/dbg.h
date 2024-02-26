@@ -82,7 +82,11 @@ using DFL_RANK_T = rank<1>;
 using DBG_RANK_T = rank<0>;
 constexpr auto MAX_RANK = MAX_RANK_T{};
 
-#ifdef DBG_MACRO_UNIX
+#ifdef DBG_MACRO_FORCE_NO_COLOR
+inline bool isColorizedOutputEnabled() {
+  return false;
+}
+#elif defined(DBG_MACRO_UNIX)
 inline bool isColorizedOutputEnabled() {
   return isatty(fileno(stderr));
 }

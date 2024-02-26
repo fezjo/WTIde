@@ -32,7 +32,7 @@ cmake --build .
 # for web
 mkdir build_web
 cd build_web
-emcmake cmake ..
+emcmake cmake .. -DCMAKE_C_COMPILER=$(which clang) -DCMAKE_CXX_COMPILER=$(which clang++) -DCMAKE_BUILD_TYPE=Release -DEMSCRIPTEN=on
 cmake --build .
 emrun ./WTIde.html
 ```

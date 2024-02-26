@@ -23,6 +23,9 @@
 #include <vector>
 
 #define DBG_MACRO_NO_WARNING
+#if defined(__EMSCRIPTEN__)
+#define DBG_MACRO_FORCE_NO_COLOR
+#endif
 #include "dbg.h"
 
 namespace fs = std::filesystem;

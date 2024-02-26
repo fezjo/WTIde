@@ -183,9 +183,13 @@ int main(int, char**) {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
 
+#if not defined(__EMSCRIPTEN__)
+        // TODO Emscripten doesn't like this, will wait even with many events in the queue
+        constexpr int min_fps = 10;
         auto end_frame = SDL_GetTicks64();
         auto delta_time = static_cast<int>(end_frame - start_frame);
-        SDL_WaitEventTimeout(nullptr, std::max(0, 1000 / 10 - delta_time));
+        SDL_WaitEventTimeout(nullptr, std::max(0, 1000 / min_fps - delta_time));
+#endif
     }
 #if defined(__EMSCRIPTEN__)
     EMSCRIPTEN_MAINLOOP_END;
