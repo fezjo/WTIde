@@ -12,13 +12,14 @@ EditorIctePlugin::EditorIctePlugin() {
         [this](const Breakpoint& bp) {
             if (bp.file != editor.GetPath())
                 return false;
-            editor.AddBreakpoint(bp.line, !bp.condition.empty(), bp.condition, bp.enabled);
+            editor.AddBreakpoint(static_cast<int>(bp.line), !bp.condition.empty(), bp.condition,
+                                 bp.enabled);
             return true;
         },
         [this](const Breakpoint& bp) {
             if (bp.file != editor.GetPath())
                 return false;
-            editor.RemoveBreakpoint(bp.line);
+            editor.RemoveBreakpoint(static_cast<int>(bp.line));
             return true;
         },
         [this]() {

@@ -35,10 +35,6 @@ struct SourcePosition {
 
 SourcePosition findSourcePosition(WTStar::virtual_machine_t* env, int instruction_number);
 
-extern "C" {
-void error_handler_callback(WTStar::error_t* error, void* data);
-}
-
 class Debugger {
 public:
     Debugger();

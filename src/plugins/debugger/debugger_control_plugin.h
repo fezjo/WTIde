@@ -9,7 +9,6 @@ class DebuggerControlPlugin : public IPlugin {
 public:
     DebuggerControlPlugin(Debugger* debugger);
     virtual ~DebuggerControlPlugin() = default;
-    virtual void show() = 0;
 
     virtual bool setSource(const std::string& source);
     virtual void setInput(const std::string& input);

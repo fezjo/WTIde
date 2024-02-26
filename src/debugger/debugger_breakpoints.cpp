@@ -8,7 +8,9 @@ SourcePosition findSourcePosition(WTStar::virtual_machine_t* env, int instructio
     auto debug_info = WTStar::getDebugInfo(env);
     if (!debug_info)
         return SourcePosition();
-    int i = WTStar::code_map_find(debug_info->source_items_map, env->stored_pc);
+    assert(env->stored_pc >= 0);
+    int i =
+        WTStar::code_map_find(debug_info->source_items_map, static_cast<uint32_t>(env->stored_pc));
     if (i < 0)
         return SourcePosition();
     int it = debug_info->source_items_map->val[i];
@@ -109,7 +111,7 @@ std::pair<code_t, std::string> compileConditionInAst(WTStar::ast_t* ast,
     WTStar::driver_set_file(ip, cond_fn.c_str(), condition.c_str());
 
     WTStar::ast_node_t* bp_scope_node =
-        WTStar::ast_node_t_new(NULL, WTStar::AST_NODE_SCOPE, pos_scope_node->val.sc);
+        WTStar::ast_node_t_new(nullptr, WTStar::AST_NODE_SCOPE, pos_scope_node->val.sc);
 
     auto original_error_handler = ast->error_handler;
     auto original_error_handler_data = ast->error_handler_data;
@@ -180,7 +182,7 @@ VM_Breakpoint* Debugger::findBreakpoint(const std::string& file, uint line) {
 }
 
 bool Debugger::addBreakpointToVm(VM_Breakpoint& bp) {
-    if (WTStar::add_breakpoint(env, bp.bp_pos, bp.code.empty() ? NULL : bp.code.data(),
+    if (WTStar::add_breakpoint(env, bp.bp_pos, bp.code.empty() ? nullptr : bp.code.data(),
                                static_cast<uint>(bp.code.size())) == -1) {
         std::cerr << "setBreakpointWithCondition failed" << std::endl;
         return false;
@@ -207,7 +209,7 @@ VM_Breakpoint& Debugger::_setBreakpoint(const std::string file, uint line, bool 
         it = std::upper_bound(breakpoints.begin(), breakpoints.end(), bp_pos,
                               [](uint pos, const VM_Breakpoint& bp) { return pos < bp.bp_pos; });
     VM_Breakpoint& bp = *breakpoints.insert(
-        it, {{file, line, enabled, condition}, false, bp_pos, "not compiled", {}, NULL});
+        it, {{file, line, enabled, condition}, false, bp_pos, "not compiled", {}, nullptr});
 
     std::cerr << "setBreakpointWithCondition " << file << ":" << line << " " << bp.bp_pos
               << std::endl;

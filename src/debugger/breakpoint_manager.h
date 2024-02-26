@@ -14,7 +14,7 @@ public:
 
 public:
     BreakpointManager() = default;
-    BreakpointManager(Debugger* debugger) : debugger(debugger){};
+    BreakpointManager(Debugger* debugger) : debugger(debugger) {}
     ~BreakpointManager() = default;
 
     void addHandler(const BreakpointCallbacks& handler);

@@ -105,8 +105,8 @@ int main(int, char**) {
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+    //IM_ASSERT(font != nullptr);
 
     {
         // io.Fonts->AddFontDefault();
@@ -118,14 +118,14 @@ int main(int, char**) {
         ImWchar glyph_ranges_roboto[] = {1, 0x10FFFF, 0};
         auto fontPath = fontDirPath / "Roboto Mono Nerd Font Complete Mono.ttf";
         [[maybe_unused]] auto success =
-            io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize, NULL, glyph_ranges_roboto);
-        assert(success != NULL);
+            io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize, nullptr, glyph_ranges_roboto);
+        assert(success != nullptr);
 
         ImWchar glyph_ranges_codicon[] = {0xEA60, 0xEC10, 0};
         fontPath = fontDirPath / "codicon" / "codicon.ttf";
         success =
             io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize, &config, glyph_ranges_codicon);
-        assert(success != NULL);
+        assert(success != nullptr);
 
         io.Fonts->Build();
     }
@@ -139,7 +139,7 @@ int main(int, char**) {
 #if defined(__EMSCRIPTEN__)
     // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
     // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    // io.IniFilename = NULL;
+    // io.IniFilename = nullptr;
     EMSCRIPTEN_MAINLOOP_BEGIN
 #else
     while (alive)
@@ -185,7 +185,7 @@ int main(int, char**) {
 
         auto end_frame = SDL_GetTicks64();
         auto delta_time = static_cast<int>(end_frame - start_frame);
-        SDL_WaitEventTimeout(NULL, std::max(0, 1000 / 10 - delta_time));
+        SDL_WaitEventTimeout(nullptr, std::max(0, 1000 / 10 - delta_time));
     }
 #if defined(__EMSCRIPTEN__)
     EMSCRIPTEN_MAINLOOP_END;

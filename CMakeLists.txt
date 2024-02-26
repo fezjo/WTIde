@@ -15,6 +15,13 @@ set(CMAKE_RELWITHDEBINFO_POSTFIX "-reldbg")
 
 option(BUILD_SHARED_LIBS "Build shared libraries (.dll/.so) instead of static ones (.lib/.a)" ON)
 
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    message(STATUS "ccache found, using it")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 # Set all compiler flags 
 include(cmake/compiler.cmake)
 
@@ -53,12 +60,27 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 )
 target_compile_options(
     ${TARGET_NAME} PRIVATE
-        -Wall -Wextra -Wpedantic
-        -Wshadow -Wformat=2 -Wfloat-equal -Wconversion
-        # -Wlogical-op -Wduplicated-cond
-        -Wcast-qual -Wcast-align
-        -Wno-unused-parameter -Wno-shadow
-        # -Weverything -Wno-c++98-compat-pedantic
+        # common warnings
+        -Wall -Wextra -Wpedantic -pedantic
+        -Wformat=2 -Wextra-semi -Wredundant-decls -Wimplicit-fallthrough
+        -Wnon-virtual-dtor -Wctor-dtor-privacy -Woverloaded-virtual -Wsuggest-override
+        -Wfloat-equal -Wconversion -Wsign-conversion -Wcast-qual # -Wcast-align
+        -Wzero-as-null-pointer-constant
+        -Wno-unused-parameter
+
+        # gcc warnings
+        $<$<CXX_COMPILER_ID:GNU>:
+            -Wmisleading-indentation -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wuseless-cast
+            -Wsuggest-final-types -Wsuggest-final-methods
+            -Wnull-dereference -Wstrict-null-sentinel
+        >
+        # clang warnings
+        $<$<CXX_COMPILER_ID:Clang>:
+            -Wshadow
+        >
+
+        ## extreme warnings
+        # -Weverything -Wno-c++98-compat-pedantic -Wold-style-cast
 )
 
 if (EMSCRIPTEN)

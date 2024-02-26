@@ -20,7 +20,7 @@ void TextPlugin::show() {
             if (*it == '\n') {
                 float line_width =
                     ImGui::GetFont()
-                        ->CalcTextSizeA(font_size, FLT_MAX, 0, &*line_begin, &*it, NULL)
+                        ->CalcTextSizeA(font_size, FLT_MAX, 0, &*line_begin, &*it, nullptr)
                         .x;
                 max_width = std::max(max_width, line_width);
                 line_begin = it;

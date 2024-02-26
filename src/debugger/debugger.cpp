@@ -72,7 +72,7 @@ bool Debugger::setSource(const std::string& file) {
     return true;
 }
 
-void Debugger::setInput(const std::string& input) { this->input = input; }
+void Debugger::setInput(const std::string& inp) { input = inp; }
 
 bool Debugger::readInput() {
     if (input.empty()) {
@@ -96,7 +96,7 @@ std::string Debugger::getOutput() const {
         return "";
     Writer wout;
     for (uint i = 0; i < env->n_out_vars; i++)
-        WTStar::write_output(wout.w, env, i);
+        WTStar::write_output(wout.w, env, static_cast<int>(i));
     WTStar::out_text(wout.w, "-----\nwork: %10d\ntime: %10d\nratio: %9.3f\n", env->W, env->T,
                      env->W / (double)env->T);
     return wout.read();

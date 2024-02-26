@@ -195,13 +195,14 @@ void ProgramAnalyzerPlugin::show() {
             ImGui::BeginChild("##child");
             ImGui::SetNextItemOpen(true, ImGuiCond_Once);
             if (ImGui::TreeNodeEx("Input", default_treenode_flags)) {
-                WTStar::print_io_vars(outw.w, env, env->n_in_vars, env->in_vars);
+                WTStar::print_io_vars(outw.w, env, static_cast<int>(env->n_in_vars), env->in_vars);
                 writeTextWrappedAndClear(outw);
                 ImGui::TreePop();
             }
             ImGui::SetNextItemOpen(true, ImGuiCond_Once);
             if (ImGui::TreeNodeEx("Output", default_treenode_flags)) {
-                WTStar::print_io_vars(outw.w, env, env->n_out_vars, env->out_vars);
+                WTStar::print_io_vars(outw.w, env, static_cast<int>(env->n_out_vars),
+                                      env->out_vars);
                 writeTextWrappedAndClear(outw);
                 ImGui::TreePop();
             }
@@ -232,7 +233,7 @@ void ProgramAnalyzerPlugin::show() {
         if (ImGui::BeginTabItem("Code")) {
             ImGui::BeginChild("##child", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
             ImGui::TextWrapped("Code size: %d", env->code_size);
-            print_code(outw.w, env->code, env->code_size);
+            print_code(outw.w, env->code, static_cast<int>(env->code_size));
             ImGui::TextUnformatted(outw.read().c_str());
             outw.clear();
             ImGui::EndChild();

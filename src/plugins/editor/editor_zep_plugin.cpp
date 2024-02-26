@@ -140,7 +140,7 @@ void EditorZepPlugin::show() {
                 auto window = editor.GetActiveWindow();
                 auto currentWindowFlags = window->GetWindowFlags();
                 for (size_t i = 0; i < windowOptions.size(); ++i) {
-                    int flag = 1 << i;
+                    uint32_t flag = 1 << i;
                     if (ImGui::MenuItem(windowOptions[i].c_str(), nullptr,
                                         currentWindowFlags & flag)) {
                         window->ToggleFlag(flag);

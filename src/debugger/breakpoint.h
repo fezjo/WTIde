@@ -14,7 +14,7 @@ struct Breakpoint {
         : file(file), line(line), enabled(enabled), condition(condition) {}
 
     std::weak_ordering operator<=>(const Breakpoint& other) const {
-        if (auto cmp = file.compare(other.file) <=> 0; cmp != 0)
+        if (auto cmp = file.compare(other.file) <=> 0; cmp != std::strong_ordering::equal)
             return cmp;
         return line <=> other.line;
     }
@@ -40,7 +40,7 @@ struct BreakpointCallbacks {
     std::string info;
     size_t id;
 
-    BreakpointCallbacks() : info("emptydefault"), id(0){};
+    BreakpointCallbacks() : info("emptydefault"), id(0) {}
     BreakpointCallbacks(bp_change_callback_t update, bp_change_callback_t remove,
                         bp_gather_callback_t gather, const std::string& info = "noinfo",
                         size_t id = -1ul)

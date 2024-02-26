@@ -42,7 +42,7 @@ Variable& Variable::fillThreadInfo(WTStar::virtual_machine_t* env, WTStar::threa
     if (this->n_dims > 0) {
         this->dims.resize(this->n_dims);
         for (uint d = 0; d < this->n_dims; d++)
-            this->dims[d] = WTStar::get_nth_dimension_size(thr, this->raddr, d);
+            this->dims[d] = static_cast<int>(WTStar::get_nth_dimension_size(thr, this->raddr, d));
     }
 
     Writer out;
@@ -58,8 +58,8 @@ Variable& Variable::fillThreadInfo(WTStar::virtual_machine_t* env, WTStar::threa
         out.write("]");
         this->sdims = out.read();
         out.clear();
-        WTStar::print_array(out.w, env, &this->layout, this->n_dims, this->dims.data(),
-                            lval(addr_data, uint32_t), 0, 0);
+        WTStar::print_array(out.w, env, &this->layout, static_cast<int>(this->n_dims),
+                            this->dims.data(), lval(addr_data, uint32_t), 0, 0);
     }
     this->svalue = out.read();
     return *this;
@@ -77,7 +77,7 @@ int64_t DebuggerVariableViewerPlugin::getThreadParent(uint64_t tid) {
         return -1;
     if (!t->parent)
         return 0;
-    return t->parent->tid;
+    return static_cast<int64_t>(t->parent->tid);
 }
 
 // return active thread ids
@@ -86,7 +86,7 @@ std::vector<uint64_t> DebuggerVariableViewerPlugin::getThreadIds() {
         return {};
     auto* env = debugger->env;
     std::vector<uint64_t> tids;
-    tids.reserve(env->a_thr);
+    tids.reserve(static_cast<size_t>(env->a_thr));
     for (int t = 0; t < env->n_thr; t++)
         if (!env->thr[t]->returned)
             tids.push_back(env->thr[t]->tid);
@@ -102,11 +102,13 @@ std::string DebuggerVariableViewerPlugin::getThreadIndexVariableName() {
         return "";
     if (!debug_info)
         return not_found_name;
-    int s = WTStar::code_map_find(debug_info->scope_map, env->stored_pc); // current scope
+    assert(env->stored_pc);
+    int s = WTStar::code_map_find(debug_info->scope_map,
+                                  static_cast<uint32_t>(env->stored_pc)); // current scope
     if (s < 0)
         return not_found_name;
     // go through all parent scopes
-    for (uint sid = debug_info->scope_map->val[s]; sid != MAP_SENTINEL;
+    for (uint sid = static_cast<uint>(debug_info->scope_map->val[s]); sid != MAP_SENTINEL;
          sid = debug_info->scopes[sid].parent) {
         WTStar::scope_info_t* scope = &debug_info->scopes[sid];
         for (uint i = 0; i < scope->n_vars; i++)
@@ -150,11 +152,12 @@ std::vector<std::vector<Variable>> DebuggerVariableViewerPlugin::getVisibleVaria
         return var_layers;
 
     pc = pc == -1 ? env->stored_pc : pc;
-    int s = code_map_find(env->debug_info->scope_map, pc);
+    assert(pc >= 0);
+    int s = code_map_find(env->debug_info->scope_map, static_cast<uint32_t>(pc));
     if (s == -1)
         return var_layers;
 
-    for (uint sid = env->debug_info->scope_map->val[s]; sid != MAP_SENTINEL;
+    for (uint sid = static_cast<uint>(env->debug_info->scope_map->val[s]); sid != MAP_SENTINEL;
          sid = env->debug_info->scopes[sid].parent) {
         var_layers.push_back({});
         auto* scope_info = &env->debug_info->scopes[sid];
@@ -239,7 +242,7 @@ void showTableVariableLayer(std::vector<std::vector<Variable>>& var_layers, uint
         //                    var.svalue.c_str());
     }
     showTableVariableLayer(var_layers, layer_i + 1, actionRow);
-};
+}
 
 void DebuggerVariableViewerPlugin::show() {
     if (!shown)
@@ -303,7 +306,7 @@ void DebuggerVariableViewerPlugin::show() {
                         ImGui::EndTable();
                     }
                 }
-                pc = frame->ret_addr;
+                pc = static_cast<int>(frame->ret_addr);
             }
         }
     }

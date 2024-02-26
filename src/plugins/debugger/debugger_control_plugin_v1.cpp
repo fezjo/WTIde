@@ -112,7 +112,8 @@ return bn;";
             ImGui::InputTextMultiline("Condition", &condition, ImVec2(0, 0),
                                       ImGuiInputTextFlags_AllowTabInput);
             if (ImGui::Button("Add")) {
-                auto res = debugger->setBreakpoint(file_buffer, line_buffer, true, condition);
+                auto res = debugger->setBreakpoint(file_buffer, static_cast<uint>(line_buffer),
+                                                   true, condition);
                 if (!res.first) {
                     ImGui::InsertNotification(
                         {ImGuiToastType_Error, 5000,
@@ -129,7 +130,7 @@ return bn;";
             ImGui::InputText("File", &file_buffer);
             ImGui::InputInt("Line", &line_buffer);
             if (ImGui::Button("Remove"))
-                debugger->removeBreakpoint(file_buffer, line_buffer);
+                debugger->removeBreakpoint(file_buffer, static_cast<uint>(line_buffer));
             ImGui::EndPopup();
         }
         ImGui::SameLine();

@@ -68,7 +68,7 @@ void App::show(bool* p_open) {
 
     if (!unsaved_dialog_editors.empty())
         ImGui::OpenPopup("Unsaved changes");
-    if (ImGui::BeginPopupModal("Unsaved changes", NULL,
+    if (ImGui::BeginPopupModal("Unsaved changes", nullptr,
                                ImGuiWindowFlags_AlwaysAutoResize |
                                    ImGuiWindowFlags_NoSavedSettings)) {
         ImGui::Text("You have %zu unsaved change%s\nDo you want to save them?\n\n",

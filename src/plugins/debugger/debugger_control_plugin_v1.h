@@ -4,7 +4,7 @@
 
 class DebuggerControlPluginV1 : public DebuggerControlPlugin {
 public:
-    DebuggerControlPluginV1(Debugger* debugger) : DebuggerControlPlugin(debugger){};
+    DebuggerControlPluginV1(Debugger* debugger) : DebuggerControlPlugin(debugger) {}
     void show() override;
     bool setSourceAction() override;
     bool setSourceAction(const std::string& source) override;
