@@ -39,6 +39,7 @@ protected:
 #endif
 
     bool initialized = false;
+    int untitled_counter = 0;
     std::vector<IEditorPlugin*> unsaved_dialog_editors;
     timepoint execution_halted_when = timepoint::min();
     ImGuiWindowFlags flags;

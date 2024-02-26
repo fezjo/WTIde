@@ -100,6 +100,15 @@ void App::openEditor(fs::path path, bool dockAsLastFocused, PluginType type) {
 
     if (!ep->loadFile(path))
         ep->setFile(path); // set anyway
+    if (ep->getFileName().empty()) {
+        while (true) {
+            fs::path untitled_path = fs::path("untitled-" + std::to_string(untitled_counter++));
+            if (fs::exists(untitled_path))
+                continue;
+            ep->title = untitled_path;
+            break;
+        }
+    }
 
     // we can do this only after loadFile which initializes a zep window
     if (type == PluginType::EditorZep)

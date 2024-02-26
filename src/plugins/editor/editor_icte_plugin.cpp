@@ -48,9 +48,9 @@ void EditorIctePlugin::show() {
     windowClass.DockingAlwaysTabBar = true;
     ImGui::SetNextWindowClass(&windowClass);
 
-    title = fs::path(editor.GetPath()).filename();
-    if (title.empty())
-        title = "Untitled";
+    auto filename = fs::path(editor.GetPath()).filename();
+    if (!filename.empty())
+        title = filename;
     ImGuiWindowFlags flags =
         ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_MenuBar |
         ImGuiWindowFlags_UnsavedDocument * isDirty(); // TODO | ImGuiWindowFlags_NoSavedSettings

@@ -95,9 +95,10 @@ void EditorZepPlugin::show() {
     ImGui::SetNextWindowClass(&windowClass);
 
     auto& zepBuffer = editor.GetActiveTabWindow()->GetActiveWindow()->GetBuffer();
-    title = zepBuffer.GetFilePath().filename();
-    if (title.empty())
-        title = "Untitled";
+
+    auto filename = zepBuffer.GetFilePath().filename();
+    if (!filename.empty())
+        title = filename;
     ImGuiWindowFlags flags =
         ImGuiWindowFlags_UnsavedDocument * isDirty(); // TODO | ImGuiWindowFlags_NoSavedSettings
 
