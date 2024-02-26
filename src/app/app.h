@@ -18,6 +18,7 @@
 #include "../plugins/editor/editor_zep_plugin.h"
 #include "../plugins/ide/filetree_plugin.h"
 #include "../plugins/ide/plugin_control_plugin.h"
+#include "../plugins/text/compiler_output_plugin.h"
 #include "../plugins/text/input_plugin.h"
 #include "../plugins/text/output_plugin.h"
 #include "../plugins/text/text_plugin.h"
@@ -53,7 +54,7 @@ protected:
     PluginControlPlugin* plugin_control_plugin;
     InputPlugin* input_plugin;
     OutputPlugin* output_plugin;
-    OutputPlugin* compiler_output_plugin;
+    CompilerOutputPlugin* compiler_output_plugin;
     DebuggerControlPluginV1* debugger_control_plugin_v1;
     DebuggerControlPluginV2* debugger_control_plugin_v2;
     ProgramAnalyzerPlugin* program_analyzer_plugin;

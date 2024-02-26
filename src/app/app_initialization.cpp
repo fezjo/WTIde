@@ -50,7 +50,7 @@ void App::_initializePlugins() {
     output_plugin = new OutputPlugin();
     add_plugin(output_plugin, "Output");
 
-    compiler_output_plugin = new OutputPlugin();
+    compiler_output_plugin = new CompilerOutputPlugin();
     add_plugin(compiler_output_plugin, "Compiler output");
 
     debugger_control_plugin_v1 = new DebuggerControlPluginV1(debugger);
@@ -74,9 +74,10 @@ void App::_initializePlugins() {
          }},
         {"set_compilation_output",
          [&](CallbackData data) {
-             compiler_output_plugin->write(std::get<std::string>(data));
-             compiler_output_plugin->write("\n\n-----\n\n");
+             auto [type, output] = std::get<std::pair<int, std::string>>(data);
+             compiler_output_plugin->append(CompilerOutputType(type), output);
              compiler_output_plugin->bringToFront();
+             compiler_output_plugin->scrollToBottom = true;
              return true;
          }},
         {"refresh_analyzer",

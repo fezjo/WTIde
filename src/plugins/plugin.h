@@ -32,7 +32,7 @@ extern std::map<PluginType, std::string> pluginTypeNames;
 
 inline bool isPluginEditor(PluginType type) { return (int)type & (int)PluginType::Editor; }
 
-using CallbackData = std::variant<bool, int, std::string>;
+using CallbackData = std::variant<bool, int, std::string, std::pair<int, std::string>>;
 using CallbackFunction = std::function<CallbackData(CallbackData)>;
 
 class IPlugin {
