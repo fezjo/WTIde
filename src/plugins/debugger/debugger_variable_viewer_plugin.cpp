@@ -329,7 +329,7 @@ void DebuggerVariableViewerPlugin::show() {
             }
             ImGui::SameLine();
             bool open = ImGui::TreeNodeEx(("##thr_treenode" + std::to_string(tid)).c_str(),
-                                          default_treenode_flags, "tid=%lu | par=%lu", tid,
+                                          default_treenode_flags, "tid=%lu | par=%ld", tid,
                                           getThreadParent(tid));
             if (!index_name.empty()) {
                 ImGui::SameLine();

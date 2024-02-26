@@ -92,7 +92,7 @@ inline void theme_EmbraceTheDarkness(ImGuiStyle* dst = nullptr) {
     style.TabRounding                       = 4;
 }
 
-inline void theme_VSCode(ImGuiStyle* dst = NULL) {
+inline void theme_VSCode(ImGuiStyle* dst = nullptr) {
     auto & style = dst ? *dst : ImGui::GetStyle();
     ImVec4* colors = style.Colors;
 
@@ -165,7 +165,7 @@ inline void theme_VSCode(ImGuiStyle* dst = NULL) {
     style.TabRounding       = 0.0f;
 }
 
-inline void theme_YetAnotherDarkTheme(ImGuiStyle* dst = NULL) {
+inline void theme_YetAnotherDarkTheme(ImGuiStyle* dst = nullptr) {
     auto & style = dst ? *dst : ImGui::GetStyle();
     ImVec4* colors = style.Colors;
 
@@ -227,7 +227,7 @@ inline void theme_YetAnotherDarkTheme(ImGuiStyle* dst = NULL) {
     colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
 
-inline void theme_YetAnotherDarkerTheme(ImGuiStyle* dst = NULL) {
+inline void theme_YetAnotherDarkerTheme(ImGuiStyle* dst = nullptr) {
     auto & style = dst ? *dst : ImGui::GetStyle();
     ImVec4* colors = style.Colors;
 
