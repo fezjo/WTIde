@@ -92,7 +92,7 @@ void App::_initializePlugins() {
          }},
         {"execution_progress",
          [&](CallbackData data) {
-             execution_halted_now = true;
+             execution_halted_when = get_time();
              return true;
          }},
     };

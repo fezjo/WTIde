@@ -13,12 +13,17 @@ void App::update() {
     breakpoint_storage.synchronizeHandlers();
 
     auto [pc, sp] = debugger->getSourcePosition();
+
+    auto halt_millis =
+        std::chrono::duration_cast<std::chrono::milliseconds>(get_time() - execution_halted_when);
+    if (halt_millis.count() > 500)
+        execution_halted_when = timepoint::min();
+    bool execution_halted_now = execution_halted_when != timepoint::min();
     for (auto p : editor_plugins)
         if (p->getFileName() == sp.file)
             p->setDebuggerLine(sp.line, execution_halted_now);
         else
             p->setDebuggerLine(0);
-    execution_halted_now = false;
 
     getLastFocusedEditor(true);
 }

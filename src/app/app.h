@@ -40,7 +40,7 @@ protected:
 
     bool initialized = false;
     std::vector<IEditorPlugin*> unsaved_dialog_editors;
-    bool execution_halted_now = false;
+    timepoint execution_halted_when = timepoint::min();
     ImGuiWindowFlags flags;
     PluginType default_editor_plugin_type = PluginType::EditorIcte;
 
