@@ -57,8 +57,13 @@ void App::saveFileAs(std::string path, bool rename, bool dialog) {
         return;
     if (path.empty())
         path = editor->getFileName();
-    if (dialog)
+    if (dialog || path.empty())
         path = openSaveFileDialog(path);
-    if (!path.empty())
-        editor->saveFile(path, rename);
+    if (path.empty())
+        return;
+    if (!editor->saveFile(path, rename)) {
+        std::cerr << "Error saving file " << path << std::endl;
+        ImGui::InsertNotification(
+            {ImGuiToastType_Error, 5000, ("Error saving file '" + path + "'").data()});
+    }
 }
