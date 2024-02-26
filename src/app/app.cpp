@@ -63,7 +63,7 @@ void App::quit(bool force) {
 void App::add_plugin(IPlugin* plugin, const std::string& title, const ImVec2& size) {
     plugin->title = title;
     plugin->displaySize = size;
-    plugins.push_back(plugin);
+    plugins_to_add.push_back(plugin);
 }
 
 void App::delete_plugin(IPlugin* plugin) {

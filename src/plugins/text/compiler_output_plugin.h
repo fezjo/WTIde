@@ -29,7 +29,7 @@ protected:
     std::string getHeader();
 
 public:
-    bool scrollToBottom;
+    bool scrollToBottom = false;
 
 private:
     std::vector<std::tuple<CompilerOutputType, std::string, std::string>> items;

@@ -65,6 +65,9 @@ void App::show(bool* p_open) {
     }
     for (auto p : plugins_to_delete)
         delete_plugin(p);
+    for (auto p : plugins_to_add)
+        plugins.push_back(p);
+    plugins_to_add.clear();
 
     if (!unsaved_dialog_editors.empty())
         ImGui::OpenPopup("Unsaved changes");

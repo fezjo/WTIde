@@ -50,6 +50,7 @@ protected:
     BreakpointCallbacks breakpoint_callbacks;
 
     std::vector<IPlugin*> plugins;
+    std::vector<IPlugin*> plugins_to_add;
     std::vector<IEditorPlugin*> editor_plugins;
     FileTreePlugin* filetree_plugin;
     PluginControlPlugin* plugin_control_plugin;
