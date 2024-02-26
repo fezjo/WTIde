@@ -1,0 +1,105 @@
+From c2575396a80f45edc1e055c6c82dfa25b9658b6e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jozef=20=C4=8C=C3=AD=C5=BE?= <jozef.ciz.ml@gmail.com>
+Date: Mon, 26 Feb 2024 16:46:12 +0100
+Subject: [PATCH] Handle mouse input only when mouse hovers over window
+
+---
+ include/zep/imgui/editor_imgui.h | 67 +++++++++++++++++---------------
+ 1 file changed, 35 insertions(+), 32 deletions(-)
+
+diff --git a/include/zep/imgui/editor_imgui.h b/include/zep/imgui/editor_imgui.h
+index f484af6f..cd74effc 100644
+--- a/include/zep/imgui/editor_imgui.h
++++ b/include/zep/imgui/editor_imgui.h
+@@ -73,53 +73,56 @@ public:
+             { ImGuiKey_GraveAccent, '`' }
+         };
+ 
+-        if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
++        if (ImGui::IsWindowHovered())
+         {
+-            OnMouseMove(toNVec2f(io.MousePos));
+-        }
++            if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
++            {
++                OnMouseMove(toNVec2f(io.MousePos));
++            }
+ 
+-        if (io.MouseClicked[0])
+-        {
+-            if (OnMouseDown(toNVec2f(io.MousePos), ZepMouseButton::Left))
++            if (io.MouseClicked[0])
+             {
+-                // Hide the mouse click from imgui if we handled it
+-                io.MouseClicked[0] = false;
++                if (OnMouseDown(toNVec2f(io.MousePos), ZepMouseButton::Left))
++                {
++                    // Hide the mouse click from imgui if we handled it
++                    io.MouseClicked[0] = false;
++                }
+             }
+-        }
+ 
+-        if (io.MouseClicked[1])
+-        {
+-            if (OnMouseDown(toNVec2f(io.MousePos), ZepMouseButton::Right))
++            if (io.MouseClicked[1])
+             {
+-                // Hide the mouse click from imgui if we handled it
+-                io.MouseClicked[0] = false;
++                if (OnMouseDown(toNVec2f(io.MousePos), ZepMouseButton::Right))
++                {
++                    // Hide the mouse click from imgui if we handled it
++                    io.MouseClicked[0] = false;
++                }
+             }
+-        }
+ 
+-        if (io.MouseReleased[0])
+-        {
+-            if (OnMouseUp(toNVec2f(io.MousePos), ZepMouseButton::Left))
++            if (io.MouseReleased[0])
+             {
+-                // Hide the mouse click from imgui if we handled it
+-                io.MouseClicked[0] = false;
++                if (OnMouseUp(toNVec2f(io.MousePos), ZepMouseButton::Left))
++                {
++                    // Hide the mouse click from imgui if we handled it
++                    io.MouseClicked[0] = false;
++                }
+             }
+-        }
+ 
+-        if (io.MouseReleased[1])
+-        {
+-            if (OnMouseUp(toNVec2f(io.MousePos), ZepMouseButton::Right))
++            if (io.MouseReleased[1])
+             {
+-                // Hide the mouse click from imgui if we handled it
+-                io.MouseClicked[0] = false;
++                if (OnMouseUp(toNVec2f(io.MousePos), ZepMouseButton::Right))
++                {
++                    // Hide the mouse click from imgui if we handled it
++                    io.MouseClicked[0] = false;
++                }
+             }
+-        }
+ 
+-        if (io.MouseWheel)
+-        {
+-            if (OnMouseWheel(toNVec2f(io.MousePos), io.MouseWheel))
++            if (io.MouseWheel)
+             {
+-                // Hide the mouse scroll from imgui if we handled it
+-                io.MouseWheel = 0;
++                if (OnMouseWheel(toNVec2f(io.MousePos), io.MouseWheel))
++                {
++                    // Hide the mouse scroll from imgui if we handled it
++                    io.MouseWheel = 0;
++                }
+             }
+         }
+ 
+-- 
+2.44.0
+

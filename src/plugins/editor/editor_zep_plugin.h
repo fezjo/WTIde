@@ -21,7 +21,6 @@ public:
 
 protected:
     virtual void Notify(std::shared_ptr<Zep::ZepMessage> message) override;
-    virtual void HandleInput();
 
 protected:
     Zep::ZepEditor_ImGui editor;

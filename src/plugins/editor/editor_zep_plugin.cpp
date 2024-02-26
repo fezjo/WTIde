@@ -62,8 +62,6 @@ void EditorZepPlugin::Notify(std::shared_ptr<Zep::ZepMessage> message) {
         Callback(message);
 }
 
-void EditorZepPlugin::HandleInput() { editor.HandleInput(); }
-
 EditorZepPlugin* EditorZepPlugin::init(const Zep::NVec2f& pixelScale, std::string rootPath) {
     EditorZepPlugin* ep = new EditorZepPlugin(rootPath.empty() ? "." : rootPath,
                                               Zep::NVec2f(pixelScale.x, pixelScale.y),
@@ -110,13 +108,11 @@ void EditorZepPlugin::show() {
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
         ImGui::SetTooltip("%s", zepBuffer.GetFilePath().c_str());
     dockId = ImGui::GetWindowDockID();
-    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
-        lastFocusedTime = get_time();
-    editor.isFocused = focused;
-    if (focused) {
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows)) {
         lastFocusedTime = get_time();
         editor.HandleInput();
     }
+    editor.isFocused = focused;
 
     auto min = ImGui::GetCursorScreenPos();
     auto max = ImGui::GetContentRegionAvail();
