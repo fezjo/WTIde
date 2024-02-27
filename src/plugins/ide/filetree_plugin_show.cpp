@@ -37,6 +37,10 @@ void FileTreePlugin::showTree(FileTreeNode& node, ImGuiTreeNodeFlags base_flags,
 }
 
 void FileTreePlugin::showMenuBar() {
+    auto tooltip = [](const std::string_view text) {
+        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+            ImGui::SetTooltip("%s", text.data());
+    };
     if (ImGui::BeginMenuBar()) {
         ImGui::BeginDisabled(selection.size() > 1);
         {
@@ -44,10 +48,14 @@ void FileTreePlugin::showMenuBar() {
                 ImGui::OpenPopup("filetree_name_action_popup");
                 popup_type = PopupType::NewFile;
             }
+            tooltip("New file");
+
             if (ImGui::MenuItem("")) {
                 ImGui::OpenPopup("filetree_name_action_popup");
                 popup_type = PopupType::NewDirectory;
             }
+            tooltip("New directory");
+
             ImGui::BeginDisabled(selection.size() != 1);
             {
                 if (ImGui::MenuItem("Rename")) {
@@ -55,6 +63,8 @@ void FileTreePlugin::showMenuBar() {
                     popup_type = PopupType::Rename;
                 }
             }
+            tooltip("Rename");
+
             ImGui::EndDisabled();
         }
         ImGui::EndDisabled();
@@ -66,14 +76,18 @@ void FileTreePlugin::showMenuBar() {
         {
             if (ImGui::MenuItem(""))
                 popup_type = PopupType::Delete;
+            tooltip("Delete");
         }
         ImGui::EndDisabled();
+
         if (ImGui::MenuItem(""))
             files_changed = true;
+        tooltip("Refresh");
 
         std::string editor_icon = std::get<std::string>(callbacks["get_editor_icon"](0));
         if (ImGui::MenuItem(editor_icon.c_str()))
             callbacks["switch_default_editor_type"](0);
+        tooltip("Switch default editor");
 
         ImGui::EndMenuBar();
     }
