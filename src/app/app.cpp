@@ -20,7 +20,7 @@ void App::update() {
         execution_halted_when = timepoint::min();
     bool execution_halted_now = execution_halted_when != timepoint::min();
     for (auto p : editor_plugins)
-        if (p->getFileName() == sp.file)
+        if (fs::equivalent(p->getFileName(), sp.file))
             p->setDebuggerLine(sp.line, execution_halted_now);
         else
             p->setDebuggerLine(0);
